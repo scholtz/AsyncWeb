@@ -1,4 +1,8 @@
 <?php
+/** 
+* Loading index file for apache or nginx
+/**/
+
 use AsyncWeb\Frontend\BlockManagement;
 
 require '../vendor/autoload.php';
