@@ -8,5 +8,4 @@ if(file_exists("settings.php")){
 }
 
 BlockManagement::renderWeb();
-
 ?>
