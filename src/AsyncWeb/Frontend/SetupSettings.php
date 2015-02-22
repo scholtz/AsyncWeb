@@ -49,29 +49,29 @@ class SetupSettings{
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-		<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+		<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
 		<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
-        <script async type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+        <script async type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 	</head>
 	<body>
 		<div class="container">
 			<div class="panel panel-primary">
-				<div class="penel-heading">Setup your website</div>
+				<div class="panel-heading">Setup your website</div>
 				<div class="panel-body">';
 					if($err) echo '<div class="alert alert-danger">'.$err.'</div>';
 					echo '<form action="/?setup=1">
 						<div>
 							<label for="pathblocks">Path to blocks</label>
-							<input class="form-control" value="../blocks" name="blockspath" id="blockspath" />
+							<input class="form-control" value="../blocks/" name="blockspath" id="blockspath" />
 						</div>
 						<div>
 							<label for="templatespath">Path to templates</label>
-							<input class="form-control" value="../templates" name="templatespath" id="templatespath" />
+							<input class="form-control" value="../templates/" name="templatespath" id="templatespath" />
 						</div>
 						<div>
 							<label for="dbtype">DB type</label>
-							<select id="dbtype"><option value="mysql">MySQL</option><option value="oracle">Oracle</option><option value="postgresql">PostgreSQL</option></select>
+							<select class="form-control" id="dbtype"><option value="mysql">MySQL</option><option value="oracle">Oracle</option><option value="postgresql">PostgreSQL</option></select>
 						</div>
 						<div>
 							<label for="dbserver">DB server</label>
@@ -90,7 +90,7 @@ class SetupSettings{
 							<input class="form-control" type="password" name="dbdb" id="dbdb" />
 						</div>
 						<div>
-							<input class="form-control" type="submit" value="Check configuration" />
+							<input class="form-control col-md-2" type="submit" value="Check and setup configuration" />
 						</div>
 					</form>
 				</div>
