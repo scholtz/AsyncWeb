@@ -2,7 +2,8 @@
 use AsyncWeb\Frontend\Block;
 namespace AsyncWeb\Frontend;
 
-Class BlockManagement{
+class BlockManagement{
+	public static $BLOCK_PATH = "../blocks/";
 	protected static $defaultBlock = null;
 	public static function setDefaultBlock(Block $default){
 		BlockManagement::$defaultBlock = $default;
@@ -25,7 +26,7 @@ Class BlockManagement{
 			//var_dump("BlockManagement::get:$name;$tid");
 		try{
 			//require_once("modules/File.php");
-			if(file_exists($f= WEB_PATH."/php/".$name.".php")){
+			if(file_exists($f= BlockManagement::$BLOCK_PATH.$name.".php")){
 				//echo "getting $name\n";
 				require_once($f);
 			}else{
@@ -47,15 +48,6 @@ Class BlockManagement{
 		}catch(\Exception $exc){
 			throw $exc; 
 		}
-		/*
-		
-		if(\File::exists($f = "templates/".$name.".html")){
-			$uses = array();
-			if($template == "profile"){
-				$uses[] = "c";
-			}
-			return array("msg"=>"result","id"=>$id,"result"=>array("template"=>file_get_contents($f,true),"vars"=>$uses));
-		}/**/
 	}
 	public static function subscribe(Block $block,Bool $personalized){
 		BlockManagement::$blocks[$block->name()] = $block;

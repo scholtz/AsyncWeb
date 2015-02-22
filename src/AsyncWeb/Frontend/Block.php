@@ -2,6 +2,7 @@
 namespace AsyncWeb\Frontend;
 
 class Block{
+	public static $TEMPLATES_PATH = "../templates/";
 	protected static $i = 1;
 	protected static $MustacheEngine = null;
 	protected $template = "";
@@ -19,12 +20,12 @@ class Block{
 		$this->data = array(""=>array());
 		if(!$template){ 
 		require_once("modules/File.php");
-		if(!\File::exists($f = "templates/".$name.".html")){
+		if(!\File::exists($f = $TEMPLATES_PATH."/".$name.".html")){
 			echo "Template ".$name." not found!\n";
 			throw new \Exception("Template ".$name." not found!");
 		}
 		
-		$this->template = file_get_contents("templates/".$name.".html",true);}
+		$this->template = file_get_contents($f,true);}
 		$this->tid = $tid;
 		
 		$this->init();
