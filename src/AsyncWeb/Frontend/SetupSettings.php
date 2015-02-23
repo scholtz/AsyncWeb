@@ -92,7 +92,7 @@ class SetupSettings{
 							<label for="dbtype">DB type</label>
 							<select class="form-control" id="dbtype">';
 							foreach($dbtypes as $k=>$v){echo '<option value="'.$k.'"';if($dbtype==$k) echo ' selected="selected"';echo '>'.$v.'</option>';}
-							echo'
+							echo'</select>
 						</div>
 						<div>
 							<label for="dbserver">DB server</label>
