@@ -42,6 +42,7 @@ class SetupSettings{
 				$file = "";
 				$use[] = "\AsyncWeb\Frontend\BlockManagement";
 				$use[] = "\AsyncWeb\Frontend\Block";
+				$file.="#templates setup\n";
 				$file.= "\AsyncWeb\Frontend\BlockManagement::\$BLOCK_PATH='".$_REQUEST["blockspath"]."';\n";
 				$file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='".$_REQUEST["templatespath"]."';\n\n";
 				switch($_REQUEST["dbtype"]){
@@ -60,6 +61,7 @@ class SetupSettings{
 				$file = "<?php\n".$file;
 				
 				file_put_contents("settings.php",$file);
+				header("Location: /");exit;
 				return;
 			}
 			

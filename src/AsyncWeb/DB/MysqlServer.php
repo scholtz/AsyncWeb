@@ -63,17 +63,17 @@ class MysqlServer extends AsyncWeb\DB\DBServer {
 
 			if(MysqlServer::$PERSISTENT_CONNECTION){
 				if(!function_exists("mysql_pconnect")){
-					throw new Exception(Language::get("Mysql not configured properly"));
+					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Mysql not configured properly"));
 				}
 				if(!$this->link = @mysql_pconnect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
-					throw new Exception(Language::get("Failed to connect to the database"));
+					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
 				}
 			}else{
 				if(!function_exists("mysql_connect")){
-					throw new Exception(Language::get("Mysql not configured properly"));
+					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Mysql not configured properly"));
 				}
 				if(!$this->link = @mysql_connect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
-					throw new Exception(Language::get("Failed to connect to the database"));
+					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
 				}
 			}
 			
@@ -84,17 +84,17 @@ class MysqlServer extends AsyncWeb\DB\DBServer {
 			$this->defaultDB = $db;
 			// do not try to do persistent on second connecitons MysqlServer::$PERSISTENT_CONNECTION
 			if(!function_exists("mysql_connect")){
-				throw new Exception(Language::get("Mysql not configured properly"));
+				throw new \AsyncWeb\Exceptions\FatalException(Language::get("Mysql not configured properly"));
 			}
 			if(!$this->link = @mysql_connect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
-				throw new Exception(Language::get("Failed to connect to the database"));
+				throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
 			}
 		}
 		if(!@mysql_select_db($this->defaultDB, $this->link)){
-			throw new Exception(Language::get("Failed to connect to the database"));
+			throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
 		}
 		if(!@mysql_query("SET NAMES utf8")){
-			throw new Exception(Language::get("Failed to connect to set up charset"));
+			throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to set up charset"));
 		}
 	}
 	/**
@@ -108,7 +108,7 @@ class MysqlServer extends AsyncWeb\DB\DBServer {
 	protected static $instance;
 	public static function getInstance(){
 
-		if(MysqlServer::$working) throw new Exception("MYSQL server loop");
+		if(MysqlServer::$working) throw new \AsyncWeb\Exceptions\FatalException("MYSQL server loop");
 		MysqlServer::$working = true;
 
 		if($instance == NULL){
