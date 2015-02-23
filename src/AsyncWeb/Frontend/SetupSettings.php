@@ -4,6 +4,25 @@ namespace AsyncWeb\Frontend;
 class SetupSettings{
 	public static function show(){
 		$err = '';
+		
+		$blockspath = "../blocks/";
+		$templatespath = "../templates/";
+		$dbtype = "mysql";
+		$dbtypes=  array("mysql"=>"MySQL","oracle"=>"Oracle","postgresql"=>"PostgreSQL");
+		$dbserver = "localhost";
+		$dbuser = "";
+		$dbpass = "";
+		$dbdb = "";
+		
+		if(isset($_REQUEST["blockspath"])) $blockspath = $_REQUEST["blockspath"];
+		if(isset($_REQUEST["templatespath"])) $templatespath = $_REQUEST["templatespath"];
+		if(isset($_REQUEST["dbtype"])) $dbtype = $_REQUEST["dbtype"];
+		if(isset($_REQUEST["dbserver"])) $dbserver = $_REQUEST["dbserver"];
+		if(isset($_REQUEST["dbuser"])) $dbuser = $_REQUEST["dbuser"];
+		if(isset($_REQUEST["dbpass"])) $dbpass = $_REQUEST["dbpass"];
+		if(isset($_REQUEST["dbdb"])) $dbdb = $_REQUEST["dbdb"];
+		
+		
 		if(isset($_REQUEST["setup"])){
 			if(!is_dir($_REQUEST["blockspath"])){
 				$err = "Blocks path does not exists!<br/>";
@@ -60,37 +79,39 @@ class SetupSettings{
 				<div class="panel-heading">Setup your website</div>
 				<div class="panel-body">';
 					if($err) echo '<div class="alert alert-danger">'.$err.'</div>';
-					echo '<form action="/?setup=1">
+					echo '<form method="post" action="/?setup=1">
 						<div>
 							<label for="pathblocks">Path to blocks</label>
-							<input class="form-control" value="../blocks/" name="blockspath" id="blockspath" />
+							<input class="form-control" value="'.$blockspath.'" name="blockspath" id="blockspath" />
 						</div>
 						<div>
 							<label for="templatespath">Path to templates</label>
-							<input class="form-control" value="../templates/" name="templatespath" id="templatespath" />
+							<input class="form-control" value="'.$templatespath.'" name="templatespath" id="templatespath" />
 						</div>
 						<div>
 							<label for="dbtype">DB type</label>
-							<select class="form-control" id="dbtype"><option value="mysql">MySQL</option><option value="oracle">Oracle</option><option value="postgresql">PostgreSQL</option></select>
+							<select class="form-control" id="dbtype">';
+							foreach($dbtypes as $k=>$v){echo '<option value="'.$k.'"';if($dbtype==$k) echo ' selected="selected"';echo '>'.$v.'</option>';}
+							echo'
 						</div>
 						<div>
 							<label for="dbserver">DB server</label>
-							<input class="form-control" value="localhost" name="dbserver" id="dbserver" />
+							<input class="form-control" value="'.$dbserver.'" name="dbserver" id="dbserver" />
 						</div>
 						<div>
 							<label for="dbuser">DB user</label>
-							<input class="form-control" name="dbuser" id="dbuser" />
+							<input class="form-control" value="'.$dbuser.'" name="dbuser" id="dbuser" />
 						</div>
 						<div>
 							<label for="dbpass">DB password</label>
-							<input class="form-control" type="password" name="dbpass" id="dbpass" />
+							<input class="form-control" value="'.$dbpass.'" type="password" name="dbpass" id="dbpass" />
 						</div>
 						<div>
 							<label for="dbdb">Database name</label>
-							<input class="form-control" type="password" name="dbdb" id="dbdb" />
+							<input class="form-control" value="'.$dbdb.'" name="dbdb" id="dbdb" />
 						</div>
-						<div>
-							<input class="form-control col-md-2" type="submit" value="Check and setup configuration" />
+						<div><br/>
+							<input class="form-control col-md-2 btn btn-primary" type="submit" value="Check and setup configuration" />
 						</div>
 					</form>
 				</div>
