@@ -204,7 +204,7 @@ class DB{
   $offset=0;
   $time=null;
   
-  if(!$table) throw new Exception("DB Error, Table name required! (0x0019249149)");
+  if(!$table) throw new \AsyncWeb\Exceptions\DBException("DB Error, Table name required! (0x0019249149)");
   if(isset($mixed["where"])) $where = $mixed["where"];
   if(isset($mixed["order"])) $order = $mixed["order"];
   if(isset($mixed["cols"])) $cols = $mixed["cols"];

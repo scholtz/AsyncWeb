@@ -23,7 +23,7 @@ require_once("modules/Time.php");
  * 28.3.2014	MysqlServer::$showlastquery 
  */
 
-class MysqlServer extends AsyncWeb\DB\DBServer {
+class MysqlServer extends \AsyncWeb\DB\DBServer {
 	protected $debug = false;
 	public static $debug2 = false;
 	public static $SERVER = "localhost";
