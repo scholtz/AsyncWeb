@@ -22,20 +22,30 @@ class Block{
 		}
 		return \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html") || $blockready;
 	}
-	
+	public static function create($name = "", $tid = "", $template=""){
+		if(Block::exists($name)){
+			require_once($f = Block::$BLOCK_PATH."/".$name.".php");
+			return new $name($name,$tid,$template);
+		}
+		
+		return new Block($name,$tid,$tmplate);
+	}
 	public function __construct($name = "", $tid = "", $template=""){
+		
 		$this->template = $template;
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
 		$this->data = array(""=>array());
-		if(!$template){ 
-		require_once("modules/File.php");
-		if(!\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html")){
-			echo "Template ".$name." not found!\n";
-			throw new \Exception("Template ".$name." not found!");
+		if($template){
+			$this->template = $template;
+		}else{
+			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html")){
+				echo "Template ".$name." not found!\n";
+				throw new \Exception("Template ".$name." not found!");
+			}
+			
+			$this->template = file_get_contents($f,true);
 		}
-		
-		$this->template = file_get_contents($f,true);}
 		$this->tid = $tid;
 		
 		$this->init();

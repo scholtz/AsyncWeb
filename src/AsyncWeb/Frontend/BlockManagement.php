@@ -9,8 +9,8 @@ class BlockManagement{
 	}
 	public static function renderWeb(){
 		if(BlockManagement::$defaultBlock == null){
-			if(\AsyncWeb\Frontend\Block::exists("index")){
-				$def = new \AsyncWeb\Frontend\Block("index");
+			if(Block::exists("index")){
+				$def = Block::create("index");
 				BlockManagement::setDefaultBlock($def);
 			}else{
 				echo "Please set up the default block in the settings file or create index block!";exit;
@@ -29,20 +29,10 @@ class BlockManagement{
 	public static function get($name,$tid){
 		//var_dump("BlockManagement::get:$name;$tid");
 		try{
-			if(\AsyncWeb\Frontend\Block::exists($name,true)){
-				require_once($f);
-			}else{
-				//echo "file $f neexistuje\n";
-			}
-		
 			if(isset(BlockManagement::$instances[$name][$tid])){
 				return BlockManagement::$instances[$name][$tid];
-			}else if(class_exists($name)){
-				if(BlockManagement::$instances[$name][$tid] = new $name($name,$tid)){
-					return BlockManagement::$instances[$name][$tid];
-				}
 			}else{
-				if(BlockManagement::$instances[$name][$tid] = new Block($name,$tid)){
+				if(BlockManagement::$instances[$name][$tid] = Block::create($name,$tid)){
 					return BlockManagement::$instances[$name][$tid];
 				}
 			}
