@@ -3,6 +3,7 @@ namespace AsyncWeb\Frontend;
 
 class Block{
 	public static $TEMPLATES_PATH = "../templates/";
+	public static $BLOCK_PATH = "../templates/";
 	protected static $i = 1;
 	protected static $MustacheEngine = null;
 	protected $template = "";
@@ -14,8 +15,12 @@ class Block{
 		return $this->usesparams;
 	}
 	
-	public static function exists($name){
-		return \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html");
+	public static function exists($name,$checkBlockOnly=false){
+		$blockready = \AsyncWeb\IO\File::exists($f = Block::$BLOCK_PATH."/".$name.".php");
+		if($checkBlockOnly){
+			return $blockready;
+		}
+		return \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html") || $blockready;
 	}
 	
 	public function __construct($name = "", $tid = "", $template=""){

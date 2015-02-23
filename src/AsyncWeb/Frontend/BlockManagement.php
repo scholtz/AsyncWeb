@@ -3,7 +3,6 @@ use AsyncWeb\Frontend\Block;
 namespace AsyncWeb\Frontend;
 
 class BlockManagement{
-	public static $BLOCK_PATH = "../blocks/";
 	protected static $defaultBlock = null;
 	public static function setDefaultBlock(Block $default){
 		BlockManagement::$defaultBlock = $default;
@@ -28,11 +27,9 @@ class BlockManagement{
 		return $tid = URLParser::selectParameters($block->getUsesParams());
 	}
 	public static function get($name,$tid){
-			//var_dump("BlockManagement::get:$name;$tid");
+		//var_dump("BlockManagement::get:$name;$tid");
 		try{
-			//require_once("modules/File.php");
-			if(file_exists($f= BlockManagement::$BLOCK_PATH.$name.".php")){
-				//echo "getting $name\n";
+			if(\AsyncWeb\Frontend\Block::exists($name,true)){
 				require_once($f);
 			}else{
 				//echo "file $f neexistuje\n";

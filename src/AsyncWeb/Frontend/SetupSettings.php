@@ -43,7 +43,7 @@ class SetupSettings{
 				$use[] = "\AsyncWeb\Frontend\BlockManagement";
 				$use[] = "\AsyncWeb\Frontend\Block";
 				$file.="#templates setup\n";
-				$file.= "\AsyncWeb\Frontend\BlockManagement::\$BLOCK_PATH='".$_REQUEST["blockspath"]."';\n";
+				$file.= "\AsyncWeb\Frontend\Block::\$BLOCK_PATH='".$_REQUEST["blockspath"]."';\n";
 				$file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='".$_REQUEST["templatespath"]."';\n\n";
 				switch($_REQUEST["dbtype"]){
 					case "mysql":
