@@ -9,8 +9,13 @@ class BlockManagement{
 		BlockManagement::$defaultBlock = $default;
 	}
 	public static function renderWeb(){
-		if($defaultBlock == null){
-			echo "Please set up the default block in the settings file!";exit;
+		if(BlockManagement::$defaultBlock == null){
+			if(\AsyncWeb\Frontend\Block::exists("index")){
+				$def = new \AsyncWeb\Frontend\Block("index");
+				BlockManagement::setDefaultBlock($def);
+			}else{
+				echo "Please set up the default block in the settings file or create index block!";exit;
+			}
 		}
 		echo BlockManagement::$defaultBlock->get();exit;
 	}

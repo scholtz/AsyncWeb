@@ -13,6 +13,11 @@ class Block{
 	public function getUsesParams(){
 		return $this->usesparams;
 	}
+	
+	public static function exists($name){
+		return \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html");
+	}
+	
 	public function __construct($name = "", $tid = "", $template=""){
 		$this->template = $template;
 		if(!$name) $name = get_class($this);
@@ -20,7 +25,7 @@ class Block{
 		$this->data = array(""=>array());
 		if(!$template){ 
 		require_once("modules/File.php");
-		if(!\File::exists($f = $TEMPLATES_PATH."/".$name.".html")){
+		if(!\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html")){
 			echo "Template ".$name." not found!\n";
 			throw new \Exception("Template ".$name." not found!");
 		}
