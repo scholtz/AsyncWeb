@@ -75,7 +75,7 @@ class SetupSettings{
         <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 	</head>
 	<body>
-		<div class="container" style="margin:1em">
+		<div class="container" style="margin:1em auto">
 			<div class="panel panel-primary">
 				<div class="panel-heading">Setup your website</div>
 				<div class="panel-body">';
