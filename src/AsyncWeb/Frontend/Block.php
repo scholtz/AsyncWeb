@@ -16,14 +16,19 @@ class Block{
 	}
 	
 	public static function exists($name,$checkBlockOnly=false){
-		$blockready = \AsyncWeb\IO\File::exists($f = Block::$BLOCK_PATH."/".$name.".php");
+		$BLOCK_PATH = Block::$BLOCK_PATH;
+		if(substr($BLOCK_PATH,-1)!="/") $BLOCK_PATH.="/";
+		
+		$blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH.$name.".php");
 		if($checkBlockOnly){
 			return $blockready;
 		}
-		return \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html") || $blockready;
+		$TEMPLATES_PATH = Block::$TEMPLATES_PATH;
+		if(substr($TEMPLATES_PATH,-1)!="/") $TEMPLATES_PATH.="/";
+		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$name.".html") || $blockready;
 	}
 	public static function create($name = "", $tid = "", $template=""){
-		if(Block::exists($name)){
+		if(Block::exists($name,true)){
 			require_once($f = Block::$BLOCK_PATH."/".$name.".php");
 			return new $name($name,$tid,$template);
 		}
