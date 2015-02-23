@@ -173,7 +173,7 @@ class DB{
   $having=array();
   $distinct=false;
   $time=null;
-  if(!$table) throw new DBException("DB Error: Table name required! (0x0019249148)");
+  if(!$table) throw new \AsyncWeb\Exceptions\DBException("DB Error: Table name required! (0x0019249148)");
   if(isset($mixed["where"])) $where = $mixed["where"];
   if(isset($mixed["offset"])) $offset = $mixed["offset"];
   if(isset($mixed["count"])) $count = $mixed["count"];
@@ -193,7 +193,7 @@ class DB{
  */
  public static function qbr($table,$mixed=array()){
   DB::connect();
-  if(!$table) throw new DBException("DB Error: Table name required! (0x0019249149)");
+  if(!$table) throw new \AsyncWeb\Exceptions\DBException("DB Error: Table name required! (0x0019249149)");
   
   
   $where=array();
@@ -223,7 +223,4 @@ class DB{
  }
 }
 
-class DBException extends Exception{
-
-}
 ?>
