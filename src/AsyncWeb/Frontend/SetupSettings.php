@@ -43,9 +43,10 @@ class SetupSettings{
 				$use[] = "\AsyncWeb\Frontend\BlockManagement";
 				$use[] = "\AsyncWeb\Frontend\Block";
 				$file.= "\AsyncWeb\Frontend\BlockManagement::\$BLOCK_PATH='".$_REQUEST["blockspath"]."';\n";
-				$file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='".$_REQUEST["templatespath"]."';\n\n#DB setup\n";
+				$file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='".$_REQUEST["templatespath"]."';\n\n";
 				switch($_REQUEST["dbtype"]){
 					case "mysql":
+						$file.="#DB setup\n";
 						$use[] = "\AsyncWeb\DB\DB";
 						$use[] = "\AsyncWeb\DB\MysqlServer";
 						$file.= "\AsyncWeb\DB\DB::\$DB_TYPE='\AsyncWeb\DB\MysqlServer';\n";
@@ -55,7 +56,7 @@ class SetupSettings{
 						$file.= "\AsyncWeb\DB\MysqlServer::\$DB='".$_REQUEST["dbdb"]."';\n";
 					break;
 				}
-				foreach($use as $u) $file = "use $u\n".$file;
+				foreach($use as $u) $file = "use $u;\n".$file;
 				$file = "<?php\n".$file;
 				
 				file_put_contents("settings.php",$file);
@@ -90,7 +91,7 @@ class SetupSettings{
 						</div>
 						<div>
 							<label for="dbtype">DB type</label>
-							<select class="form-control" id="dbtype">';
+							<select class="form-control" id="dbtype" name="dbtype">';
 							foreach($dbtypes as $k=>$v){echo '<option value="'.$k.'"';if($dbtype==$k) echo ' selected="selected"';echo '>'.$v.'</option>';}
 							echo'</select>
 						</div>
