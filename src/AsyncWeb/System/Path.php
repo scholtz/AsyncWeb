@@ -135,7 +135,7 @@ class Path{
  public static function makeAW($params=array(),$moveparams=true,$uri=null,$paramsAreSafe=false,$getIsSafe=false,$js=false){
   //if(!$uri){$uria = explode("/",$_SERVER["REQUEST_URI"]);$uri = $uria[0];}
   if(class_exists("AsyncWeb\Frontend\URLParser")){
-	$ret= AsyncWeb\Frontend\URLParser::addVariables($params);
+	$ret= \AsyncWeb\Frontend\URLParser::addVariables($params);
 	return $ret;
   }
   throw new Exception("URLParser is missing");

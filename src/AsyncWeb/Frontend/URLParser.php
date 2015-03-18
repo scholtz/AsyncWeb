@@ -24,8 +24,12 @@ class URLParser{
 	public static function getCurrent(){
 		return @$_SERVER["REQUEST_URI"];
 	}
+	protected static $parseCache = array();
 	public static function parse($url=""){
 		if(!$url) $url = URLParser::getCurrent();
+		if(isset(URLParser::$parseCache[$url])){
+			return URLParser::$parseCache[$url];
+		}
 		$arr = explode("/",$url);
 		$ret = array();
 		foreach($arr as $item){
@@ -44,7 +48,7 @@ class URLParser{
 			$_GET[$k] = $v;
 			$_REQUEST[$k] = $v;
 		}
-		
+		URLParser::$parseCache[$url] = $ret;
 		return $ret;
 	}
 	public static function merge(Array $arr){

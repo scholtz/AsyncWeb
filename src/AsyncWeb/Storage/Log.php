@@ -1,6 +1,6 @@
 <?php
-namespace AsyncWeb\System;
-use \AsyncWeb\System\LogInterface;
+namespace AsyncWeb\Storage;
+use \AsyncWeb\Storage\LogInterface;
 
 /**
  Tato trieda vznikla za ucelom logovania.
@@ -19,20 +19,17 @@ use \AsyncWeb\System\LogInterface;
  version 1.1 .. 20120819 Added functionality to send automated emails on hacking attempts. It is required to preconfigure in the configuration of the project:
 
   
- require_once("modules/MyLog.php");
- MyLog::$alerts = array(
+ \AsyncWeb\Storage\Log::$alerts = array(
   ML__TOP_PRIORITY=>array(
    array("email"=>"sekretariat@kbb.sk","from"=>"admin@kbb.sk"),
   )
  );
 
  Priklad::
- require_once("modules/MyLog.php");
- MyLog::log("Module1","Hacking attempt",ML__TOP_PRIORITY);
+ \AsyncWeb\Storage\Log::log("Module1","Hacking attempt",ML__TOP_PRIORITY);
 
  Priklad::
-require_once("modules/MysqlLog.php");
-  $my_log = MysqlLog::getInstance();
+  $my_log = \AsyncWeb\Storage\MysqlLog::getInstance();
   $my_log->set_security_level(ML__MEDIUM_SEC_LEVEL); // defaultne je nast. na low (loguje vsetko)
   $my_log->log(
    "Program vykonal nepovolenu operaciu",
@@ -96,19 +93,20 @@ class Log{
 	  $text,
 	  $priority = ML__NORMAL_PRIORITY
 	 ){
-		MyLog::$recurs++;
+		log::$recurs++;
 		
-		if(MyLog::$recurs > 10){
+		if(log::$recurs > 10){
 		   throw new Exception(Language::get("Failed to log"));
 		}
-		foreach($loggers as $logger){
+		
+		foreach(Log::$loggers as $logger){
 			try{
 				$logger->log($name,$text,$priority);
 			}catch(Exception $exc){
 				
 			}
 		}
-		MyLog::$recurs--;
+		log::$recurs--;
 	}
 }
 

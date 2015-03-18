@@ -16,7 +16,14 @@ class BlockManagement{
 				echo "Please set up the default block in the settings file or create index block!";exit;
 			}
 		}
-		echo BlockManagement::$defaultBlock->get();exit;
+		
+		$namespace = "";
+		\AsyncWeb\Security\Auth::check();
+		if($usr = \AsyncWeb\Security\Auth::userId()){
+			$namespace = $usr;
+		}
+		
+		echo BlockManagement::$defaultBlock->get($namespace);exit;
 	}
 	
 	protected static $blocks = array();

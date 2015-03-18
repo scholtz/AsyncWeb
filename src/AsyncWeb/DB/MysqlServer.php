@@ -2,10 +2,10 @@
 
 namespace AsyncWeb\DB;
 use AsyncWeb\DB\DBServer;
-
-require_once("modules/MyLog.php");
-require_once("modules/DBServer.php");
-require_once("modules/Time.php");
+use AsyncWeb\Storage\Log;
+use AsyncWeb\Date\Time;
+use AsyncWeb\System\Language;
+use AsyncWeb\DB\DB;
 
 /**
  * Táto trieda sa stará o databázu mysql
@@ -44,8 +44,10 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	protected $logqueries = false;
 	protected $logfile = "d:/mysql.log";
 	protected $tryrepair = true;
-	public function MysqlServer($defaultsettings = true, $server="",$login="",$pass="",$db=""){
+	public function __construct($defaultsettings = true, $server="",$login="",$pass="",$db=""){
 
+		
+		
 		if($defaultsettings){
 			$this->defaultServer = MysqlServer::$SERVER;
 			$this->defaultLogin = MysqlServer::$LOGIN;
@@ -124,6 +126,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	public function query($query,$link = null,$params = array()){
 		if($link == null) $link = $this->link;
 		$this->lastquery = $query;
+		
 		if($this->logqueries) $start = microtime(true);
 		$ret = @mysql_query($query,$link);
 		$this->afrows = @mysql_affected_rows($link);
@@ -157,7 +160,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			$mes .= $this->lastquery;
 		}
 		if(isset($mes) && $mes != ""){
-			MyLog::log(
+			\AsyncWeb\Storage\Log::log(
    "MysqlServerError","Bola zobrazena chybova hlaska: ".addslashes($mes),ML__LOW_PRIORITY
 			);
 			//var_dump(MysqlServer::$showlastquery);
@@ -420,9 +423,8 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			}
 			if($key == "edited_by"){
 				$cols .= "`edited_by`";
-				require_once("modules/Login.php");
-				if(Login::getUserId()){
-					$rows .= "'".DB::myAddSlashes(Login::getUserId())."'";
+				if(\AsyncWeb\Security\Auth::userId()){
+					$rows .= "'".DB::myAddSlashes(\AsyncWeb\Security\Auth::userId())."'";
 				}else{
 					if($value === null){
 						$rows .= "NULL";
@@ -471,8 +473,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		$rows = $this->affected_rows();
 
 		if($err = $this->error()){
-			require_once("modules/MyLog.php");
-			MyLog::log("MYSQL ERR","vyskytla sa chyba pri pridavani dotazu.. (".addslashes($query).")");
+			\AsyncWeb\Storage\Log::log("MYSQL ERR","vyskytla sa chyba pri pridavani dotazu.. (".addslashes($query).")");
 			// zachrana polozky
 
 	  $table = str_replace("`","",$table);
@@ -546,7 +547,6 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 				$res = $this->query("select column_name from information_schema.columns where table_schema = '".$schema."' and table_name = '$tab'");
 				$indb = array();
 				$i=0;
-
 				if(!array_key_exists("od",$data)){$data["od"] = Time::get();}
 				if(!array_key_exists("do",$data)) $data["do"] = 0;
 				
@@ -624,8 +624,8 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			}
 		}
 		if($useOdDoSystem){
-			require_once("modules/Login.php");
-			$u = Login::getUserId();
+			
+			$u = \AsyncWeb\Security\Auth::userId();
 			if($u) $data["edited_by"] = $u;
 			
 			if(!array_key_exists("do",$data)) $data["do"] = 0;
@@ -989,8 +989,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		foreach($cols as $name => $col){
 			if($qcols) $qcols.=",";
 			if(is_array($col)){
-				require_once("modules/MyLog.php");
-				MyLog::log("HCK","ARRAY in SQL:table=$table:where=".print_r($where,true).":name=$name:col=".print_r($col,true),ML__TOP_SEC_LEVEL);
+				\AsyncWeb\Storage\Log::log("HCK","ARRAY in SQL:table=$table:where=".print_r($where,true).":name=$name:col=".print_r($col,true),ML__TOP_SEC_LEVEL);
 				echo "Security issue has been raised! Action has been logged.";
 				exit;
 			}

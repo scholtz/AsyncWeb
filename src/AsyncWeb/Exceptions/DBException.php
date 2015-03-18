@@ -1,5 +1,5 @@
 <?php
-namespace AsyncWeb\Exception;
+namespace AsyncWeb\Exceptions;
 
 class DBException extends \Exception{
 }

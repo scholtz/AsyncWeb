@@ -17,13 +17,18 @@ namespace AsyncWeb\DB;
 
 class DB{
  private static $connection = null;
+ public static $CONNECTED = false;
+ public static $CONNECTING = false;
  public static $repairIndexesImmidiently = false; // repairs indexes if needed
  public static $DB_TYPE = '\AsyncWeb\DB\MysqlServer';
  private static function connect(){
 	if(!DB::$connection){
 		$db = '\AsyncWeb\DB\MysqlServer';
+		DB::$CONNECTING = true;
 		if(DB::$DB_TYPE) $db = DB::$DB_TYPE;
 		DB::$connection = new $db();
+		DB::$CONNECTED = true;
+		DB::$CONNECTING = false;
 	}
  }
  
