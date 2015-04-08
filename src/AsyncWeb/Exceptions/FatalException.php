@@ -22,7 +22,7 @@ class FatalException extends \Exception{
 
 	  $error = error_get_last();
 
-	    
+	   
 	  
 	  
 	  if( $error !== NULL) {
@@ -33,15 +33,33 @@ class FatalException extends \Exception{
 			$error["type"] == E_COMPILE_ERROR || 
 			$error["type"] == E_USER_ERROR
 		){
+			
+
+		  if(function_exists("xdebug_is_enabled") && xdebug_is_enabled()){
+			  echo "<div>XDEBUG:";
+			  echo " Called @ ".
+				xdebug_call_file().
+				":".
+				xdebug_call_line().
+				" from ".
+				xdebug_call_function()."</div>\n";
+				var_dump(ini_get("xdebug.show_exception_trace"));
+		  }else{
+			  echo "<div>X-Debug is not enabled</div>";
+		  }			
+			
 			$errno   = $error["type"];
 			$errfile = $error["file"];
 			$errline = $error["line"];
 			$errstr  = $error["message"];
 
+			
+			
 			echo \AsyncWeb\Exceptions\FatalException::format_error( $errno, $errstr, $errfile, $errline);exit;
 		}
 	  }
 	}
+	
 	function FriendlyErrorType($type)
 	{
 		switch($type)
@@ -79,6 +97,15 @@ class FatalException extends \Exception{
 		}
 		return "";
 	} 
+	public static function showTrace(){
+	  $trace = print_r( debug_backtrace( false ), true );
+
+	  $content  = "<table><thead bgcolor='#c8c8c8'><th>Item</th><th>Description</th></thead><tbody>";
+	  $content .= "<tr valign='top'><td><b>Trace</b></td><td><pre>$trace</pre></td></tr>";
+	  $content .= '</tbody></table>';
+	  return $content;
+		
+	}
 	public static function format_error( $errno, $errstr, $errfile, $errline ) {
     
 	  $trace = print_r( debug_backtrace( false ), true );

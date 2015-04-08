@@ -16,15 +16,10 @@ class CategoryArticle{
 			$cat = MainMenu::getCurrent();
 		}
 		if($cat === "0"){
-			// menu not installed;
+			
 			$data = \AsyncWeb\Frontend\URLParser::parse();
 			if($data && $data["var"]["installmenu"]=="1"){
-				MainMenu::installDefaultValues();
-				\AsyncWeb\HTTP\Header::s("reload",array("installmenu"=>null));
-				$cat = MainMenu::getCurrent();
-				if(!$cat){
-					return 'menu installation has failed!';
-				}
+				MainMenu::installMenu();
 			}else{
 				return 'menu not installed! <a href="'.\AsyncWeb\System\Path::make(array("installmenu"=>1)).'">Install</a>';
 			}
@@ -44,7 +39,8 @@ class CategoryArticle{
 				\AsyncWeb\HTTP\Header::s("location","/");
 				exit;
 			}else{
-				throw new \Exception("requires auth user!");
+				//throw new \Exception("requires auth user!");
+				return \AsyncWeb\Security\Auth::loginForm();
 				Login::requiredLoggedIn2();
 				exit;
 			}
@@ -57,7 +53,7 @@ class CategoryArticle{
 		CategoryArticle::check();
 		
 		$catId = $cat["id2"];
-		$res = DB::g("articles",array("category"=>$catId),$offset=null,$count=null,$order=array("order"=>"desc","created"=>"desc"));
+		$res = DB::g("articles",array("category"=>$catId),$offset=null,$count=null,$order=array("published"=>"desc","created"=>"desc"));
 		$ret = "";
 		if(isset($_REQUEST["RSS"]) && $_REQUEST["RSS"] = 1){
 			$name = rawurldecode(str_replace("RSS=1","",$_SERVER["REQUEST_URI"]));
@@ -92,6 +88,7 @@ class CategoryArticle{
 			$ret.= '<div><a href="?finishArticleEditing=1">'.Language::get('Koniec úpravy článkov').'</a></div>';
 		}else{
 			while($articlerow=DB::f($res)){
+		
 				$ret.=CategoryArticle::makeArticle($articlerow);
 			}
 		}

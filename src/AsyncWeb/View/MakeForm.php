@@ -140,7 +140,7 @@ Validate::check_input
 */
 namespace AsyncWeb\View;
 use AsyncWeb\DB\DB;
-use AsyncWeb\Security\Group;
+use AsyncWeb\Objects\Group;
 use AsyncWeb\Storage\Log;
 use AsyncWeb\Text\Messages;
 use AsyncWeb\Text\Validate;
@@ -148,6 +148,7 @@ use AsyncWeb\Text\Texts;
 use AsyncWeb\System\Language;
 use AsyncWeb\System\Path;
 use AsyncWeb\HTTP\Header;
+use AsyncWeb\Frontend\URLParser;
 
 class MakeForm{
  public static $redirectAfterSuccess = "?";
@@ -320,7 +321,7 @@ class MakeForm{
 			DB::delete(MakeForm::$N2NData["table"],$row["id2"]);
 		}
 		//do not process with delete
-		header("Location: ?");exit;
+		\AsyncWeb\HTTP\Header::s("location",array("REMOVE_VARIABLES"=>"1"));exit;
 		return false;
 	}
  }
@@ -345,7 +346,7 @@ class MakeForm{
 	   $doo = $doo || $this->checkUpdate();
 	   $doo = $doo || $this->checkDelete();
 	   return $doo;
-	}catch(Exception $e){
+	}catch(\Exception $e){
 		$this->exception = $e;
 	}
 	return false;
@@ -357,7 +358,7 @@ class MakeForm{
 		$doo = $doo || $this->doUpdate();
 		$doo = $doo || $this->doDelete();
 		return $doo;
-	}catch(Exception $e){
+	}catch(\Exception $e){
 		$this->exception = $e;
 	}
 	return false;
@@ -481,96 +482,97 @@ class MakeForm{
 		if (!$response->isValid()) {
             $error = $resp->error;
 			\AsyncWeb\Storage\Log::log("CaptchaError",$error);
-			throw new Exception($this->getExceptionText($item,"captchaTypeException"));
+			throw new \Exception($this->getExceptionText($item,"captchaTypeException"));
         }
 	}
 	if(!$data_type) return;
     // zkontroluj ci ma spravny format
     if($data_type == "date"){
-	 if($_REQUEST[$name1]){
-	  if($_REQUEST[$name1] == -1){
+	 if(URLParser::v($name1)){
+	  if(URLParser::v($name1) == -1){
        $this->item = $item;
-	   throw new Exception($this->getExceptionText($item,"dataTypeException"));
+	   throw new \Exception($this->getExceptionText($item,"dataTypeException"));
 	  }
 	 }
     }elseif($data_type == "date_string"){
-	  if($_REQUEST[$name1] == -1){
+	  if(URLParser::v($name1) == -1){
        $this->item = $item;
- 	   throw new Exception($this->getExceptionText($item,"dataTypeException"));
+ 	   throw new \Exception($this->getExceptionText($item,"dataTypeException"));
 	  }
-      if(!Validate::check_input(@$_REQUEST[$name1],"number")){
+      if(!Validate::check_input(@URLParser::v($name1),"number")){
        $this->item = $item;
-       throw new Exception($this->getExceptionText($item,"dataTypeException"));
+       throw new \Exception($this->getExceptionText($item,"dataTypeException"));
       }
     }elseif($data_type == "number"){
-	  
-      $_REQUEST[$name1] = str_replace(",",".",$_REQUEST[$name1]);
-      $_REQUEST[$name1] = str_replace(" ","",$_REQUEST[$name1]);
-	  if(isset($item["data"]["allowNull"]) && !$_REQUEST[$name1]){
+		var_dump($name1);
+	  var_dump(URLParser::v($name1));
+      $name1val = str_replace(",",".",URLParser::v($name1));
+      $name1val = str_replace(" ","",$name1val);
+	  if(isset($item["data"]["allowNull"]) && !$name1val){
 		return;
 	  }
-	  $var = $_REQUEST[$name1];
+	  $var = $name1val;
 	  if(!Validate::check_input($var,"number")){
 	   $this->item = $item;
-       throw new Exception($this->getExceptionText($item,"dataTypeException"));
+       throw new \Exception($this->getExceptionText($item,"dataTypeException"));
       }
-      if(!@$_REQUEST[$name1]) $_REQUEST[$name1] = 0;
+      if(!$name1val) $name1val = 0;
 	  
 	  
 	  // over velkost cisla
 	  if(isset($item["data"]["minnum"])){
-	   if($_REQUEST[$name1] < (double) $item["data"]["minnum"]){
+	   if($name1val < (double) $item["data"]["minnum"]){
         $this->item = $item;
-        throw new Exception($this->getExceptionText($item,"minNumException"));
+        throw new \Exception($this->getExceptionText($item,"minNumException"));
        }
 	  }
      
       if(isset($item["data"]["maxnum"])){
-       if($_REQUEST[$name1] > (double)$item["data"]["maxnum"]){
+       if($name1val > (double)$item["data"]["maxnum"]){
         $this->item = $item;
-        throw new Exception($this->getExceptionText($item,"maxNumException"));
+        throw new \Exception($this->getExceptionText($item,"maxNumException"));
        }
 	  }
      }elseif($data_type=="enum"){
 		
-		if(!isset($item["filter"]["option"][$_REQUEST[$name1]])){
-		 if($_REQUEST[$name1] == "0" && isset($item["data"]["allowNull"]) && $item["data"]["allowNull"]){
+		if(!isset($item["filter"]["option"][URLParser::v($name1)])){
+		 if(URLParser::v($name1) == "0" && isset($item["data"]["allowNull"]) && $item["data"]["allowNull"]){
 		  // allow null
 		 }else{
  		  $this->item = $item;
-		  throw new Exception($this->getExceptionText($item,"enumTypeException"));
+		  throw new \Exception($this->getExceptionText($item,"enumTypeException"));
 		 }
 		}
 	 }else{
-	  $var = @$_REQUEST[$name1];
+	  $var = @URLParser::v($name1);
 	  if(!Validate::check_input($var,$data_type)){
 		$this->item = $item;
-       throw new Exception($this->getExceptionText($item,"dataTypeException"));
+       throw new \Exception($this->getExceptionText($item,"dataTypeException"));
       }
      }
 	
     if(isset($item["data"]["minlength"])){
-     if(mb_strlen($_REQUEST[$name1]) < (int)$item["data"]["minlength"]){
+     if(mb_strlen(URLParser::v($name1)) < (int)$item["data"]["minlength"]){
       $this->item = $item;
-      throw new Exception($this->getExceptionText($item,"minLengthException"));
+      throw new \Exception($this->getExceptionText($item,"minLengthException"));
      }
 	}
 	
     // zkontroluj ci ma spravnu dlzku
     if(isset($item["data"]["maxlength"])){
-     if(mb_strlen($_REQUEST[$name1],'UTF-8') > (int)$item["data"]["maxlength"]){
+     if(mb_strlen(URLParser::v($name1),'UTF-8') > (int)$item["data"]["maxlength"]){
       $this->item = $item;
-      throw new Exception($this->getExceptionText($item,"maxLengthException"));
+      throw new \Exception($this->getExceptionText($item,"maxLengthException"));
      }
 	}
 	
     // skontroluj ci ma byt unikatny
     if(isset($item["data"]["unique"]) && $item["data"]["unique"]){
-	 $row = DB::gr($this->data["table"],array($item["data"]["col"]=>$_REQUEST[$item]));
+	 $row = DB::gr($this->data["table"],array($item["data"]["col"]=>URLParser::v($item)));
 	 if($row){
-	  if(!isset($_REQUEST[$form_name."___ID"]) || ($row["id"] != $_REQUEST[$form_name."___ID"]) || ($row["id"] == $_REQUEST[$form_name."___ID"] && $update_ignore==false)){
+	  if(!(null!==URLParser::v($form_name."___ID")) || ($row["id"] != URLParser::v($form_name."___ID")) || ($row["id"] == URLParser::v($form_name."___ID") && $update_ignore==false)){
        $this->item = $item;
-       throw new Exception($this->getExceptionText($item,"uniqueException"));
+       throw new \Exception($this->getExceptionText($item,"uniqueException"));
 	  }
 	 }
     }
@@ -643,7 +645,7 @@ class MakeForm{
  
   
   if(!isset($this->data["allowInsert"])) return false;
-  if(!isset($_REQUEST[$this->data["uid"]."___CANCEL"])) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___CANCEL"))) return false;
 
   
   if(!isset($this->data["table"])) return $this->merged;
@@ -669,7 +671,7 @@ class MakeForm{
  
  private function checkInsert(){
   if(!isset($this->data["allowInsert"])) return false;
-  if(!isset($_REQUEST[$this->data["uid"]."___INSERT"])) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___INSERT"))) return false;
   
   if(!isset($this->data["table"])) return $this->merged;
   if(isset($this->data["rights"])){
@@ -697,7 +699,7 @@ class MakeForm{
 	 if(!$this->execute($this->data["execute"]["beforeInsert"])){
 	  return false;
 	 }
-	}catch(Exception $exc){
+	}catch(\Exception $exc){
 	 $this->exception = $exc;
 	 return false;
 	}
@@ -708,28 +710,28 @@ class MakeForm{
   $includedCols = array();
 
   foreach($this->data["col"] as $colname=>$item){
-   
    if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
    $usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
   
 	if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
 	$n = $formName."_".$colname;
+	$colValue = URLParser::v($n);
 	
 	if(isset($item["data"]["var"])) $n = $item["data"]["var"];
 
     if($in=$this->inWhere($colname)){
-	 $_REQUEST[$n] = $in["value"];
+	 $colValue = $in["value"];
  	 $item["editable"] = false;
     }
 	
-	$name1 = $n."__MF_";
+	$name1 = $n;//."__MF_";
 	if(isset($item["data"]["datatype"])){
 		$datatype = $item["data"]["datatype"];
 	}else{
 		$datatype = "string";
 	}
 	
-  	if(!isset($_REQUEST[$name1]) && isset($_REQUEST[$n])) $_REQUEST[$name1] = $_REQUEST[$n];
+  	if(!(null!==URLParser::v($name1)) && (null!==URLParser::v($n))) $colValue = URLParser::v($n);
 
 	if($item["form"]["type"] == "part") continue;
 	if(isset($item["function"])) continue;
@@ -756,8 +758,8 @@ class MakeForm{
 		}else{
 			$value = $this->getText($item["texts"]["text"]);
 		}
-		if(@$_REQUEST[$name1]) {//isset($item["allowChange"]) && $item["allowChange"] && 
-			$value = $this->filters(@$_REQUEST[$name1],$datatype,true);	
+		if(@URLParser::v($name1)) {//isset($item["allowChange"]) && $item["allowChange"] && 
+			$value = $this->filters(@URLParser::v($name1),$datatype,true);	
 		}
      	
      	$data[$colname] = $value;
@@ -765,14 +767,14 @@ class MakeForm{
      case 'password':
       $hashing=Config::getInstance()->getValue("//bezpecnostne/hashing");
       if($hashing=="SHA256"){
-      	$_REQUEST[$name1] = Message::calcHash('SHA256',$_REQUEST[$name1]);
+      	$data[$colname] = Message::calcHash('SHA256',URLParser::v($name1));
       }else{
-       $_REQUEST[$name1] = md5($_REQUEST[$name1]);
+		$data[$colname] = md5(URLParser::v($name1));
       }
      case 'htmlText':
      case 'tinyMCE':
 	  
-	  $data[$colname] = $value = $this->filters(@$_REQUEST[$name1],$datatype,true);
+	  $data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
 		if($value){
 		 if(class_exists("DetectIntrusion")){
@@ -785,7 +787,7 @@ class MakeForm{
 		}
 	  }
 	 
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1]){
+	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
 		$data[$colname] = null;
 	  }
 
@@ -794,7 +796,7 @@ class MakeForm{
      case 'textbox':
      case 'hidden':
      case 'textarea':
-      $data[$colname] = $value = $this->filters(@$_REQUEST[$name1],$datatype,true);
+      $data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
 
 	  
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
@@ -806,7 +808,7 @@ class MakeForm{
 		}
 	  }
 	 
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1]){
+	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
 			$data[$colname] = null;
 	  }
 
@@ -815,22 +817,22 @@ class MakeForm{
      case 'radio':
      case 'select':
      case 'selectDB':
-      $data[$colname] = $value = $this->filters(@$_REQUEST[$name1],$datatype,true);
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1]){
+      $data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
+	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
 			$data[$colname] = null;
 	  }
      break;
      case 'set':
-	  $data[$colname] = $value = implode(";",$_REQUEST[$name1]);
-      //$data[$colname] = $value = $this->filters(@$_REQUEST[$name1],$datatype,true);
+	  $data[$colname] = $value = implode(";",URLParser::v($name1));
+      //$data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
 	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$data[$colname]){
 			$data[$colname] = null;
 	  }
      break;
      case 'checkbox':
-      $_REQUEST[$name1] = @$_REQUEST[$name1] || @$_REQUEST[$name1];
-      $data[$colname] = $value =$this->filters($_REQUEST[$name1],$datatype,true);
-      if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1]){
+      $val = @URLParser::v($name1) || @URLParser::v($name1);
+      $data[$colname] = $value =$this->filters($val,$datatype,true);
+      if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
 			$data[$colname] = null;
 	  }
      break;
@@ -843,7 +845,7 @@ class MakeForm{
 	  $info = pathinfo($_FILES[$name]['name']);
 	  $ext = $info["extension"];
 	  if(!in_array($ext,$allowedExt)){
-		throw new Exception($this->getText("fileNotAllowed"));
+		throw new \Exception($this->getText("fileNotAllowed"));
 	  }
 	  if(!is_dir($item["data"]["dir"])){
 		mkdir($item["data"]["dir"],true);
@@ -861,13 +863,13 @@ class MakeForm{
        if($item["data"]["overwrite"]){
         //DB::query("delete from `$table` where (name = '$newFilename' and ".$this->aditional_where.")");
        }else{
-        throw new Exception($this->getText("fileExistsException"));
+        throw new \Exception($this->getText("fileExistsException"));
        }
       }
 	  
       $uploadfile = $item["data"]["dir"].$newFilename;
       if(!move_uploaded_file($_FILES[$name]['tmp_name'], $uploadfile)){
-        throw new Exception($this->getText("errorWhileMovingFile"));
+        throw new \Exception($this->getText("errorWhileMovingFile"));
       }	  
       DB::u($table,$pid = md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$name]['type'],"name"=>$_FILES[$name]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
       $data[$colname] = $value = $pid;
@@ -875,12 +877,12 @@ class MakeForm{
      break;
     }
 	  	  
-    $_REQUEST[$name1] = $value;
+    //URLParser::v($name1) = $value;
 	
 
     try{
      $this->checkRightDataFormat($item,$name1);
-    }catch(Exception $e){
+    }catch(\Exception $e){
      throw $e;
     }
   }
@@ -904,7 +906,7 @@ class MakeForm{
  private $insertData = array();
  private function doInsert(){
   if(!isset($this->data["allowInsert"])) return false;
-  if(!isset($_REQUEST[$this->data["uid"]."___INSERT"]) || !$_REQUEST[$this->data["uid"]."___INSERT"]) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___INSERT")) || !URLParser::v($this->data["uid"]."___INSERT")) return false;
   if(!isset($this->data["table"])) return $this->merged;
   
   if(isset($this->data["rights"])){
@@ -952,7 +954,7 @@ class MakeForm{
  }
  private function checkUpdate(){
   if(!isset($this->data["allowUpdate"])) return false;
-  if(!isset($_REQUEST[$this->data["uid"]."___UPDATE2"]) || !$_REQUEST[$this->data["uid"]."___UPDATE2"]) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___UPDATE2")) || !URLParser::v($this->data["uid"]."___UPDATE2")) return false;
   if(!isset($this->data["table"])) return $this->merged;
 
   if(isset($this->data["rights"])){
@@ -976,13 +978,13 @@ class MakeForm{
    if(isset($this->data["execute"]["beforeUpdate"])){
 	try{
 	 $where = $this->where;
-	 $where["id"]=$_REQUEST[$formName."___ID"];
+	 $where["id"]=URLParser::v($formName."___ID");
 	 
    	 $row = DB::gr($table,$where);
 	 if(!$this->execute($this->data["execute"]["beforeUpdate"],array("r"=>$row))){
 	  return false;
 	 }
-	}catch(Exception $exc){
+	}catch(\Exception $exc){
 	 $this->exception = $exc;
 	 return false;
 	}
@@ -996,9 +998,10 @@ class MakeForm{
    if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
    $name = $colname;
    $n = $formName."_".$name;
+   $colValue = URLParser::v($n);
    if(isset($item["data"]["var"])) $n = $item["data"]["var"];
    if($in=$this->inWhere($colname)){
-	 $_REQUEST[$n] = $in["value"];
+	 $colValue = $in["value"];
 	 $item["editable"] = false;
    }
 
@@ -1007,14 +1010,13 @@ class MakeForm{
    // nepokracuj ak je item typu part, ak nieje editovatelny, alebo sa nezmenil	
    if($item["form"]["type"] == "part") continue;
    if(isset($item["editable"]) && !$item["editable"]) continue;
-   if(!isset($_REQUEST[$n."_CHANGED"]) || (isset($_REQUEST[$n."_CHANGED"]) && !$_REQUEST[$n."_CHANGED"])){
+   if(!(null!==URLParser::v($n."_CHANGED")) || ((null!==URLParser::v($n."_CHANGED")) && !URLParser::v($n."_CHANGED"))){
      if(isset($item["alwaysUpdate"]) && $item["alwaysUpdate"]){ // ked je nastavene na alwaysUpdate, tak to aktualizuj stale
      }else{
     	continue;
      }
     }
-	$name1 = $n."__MF_";
-    $_REQUEST[$name1] = @$_REQUEST[$n];
+	$name1 = $n;//."__MF_";
 	
     switch($item["form"]["type"]){
      case 'value':
@@ -1023,18 +1025,18 @@ class MakeForm{
 	  }else{
 	   $value = $this->getText($item["texts"]["text"]);
 	  }
-	  if(isset($item["allowChange"]) && $item["allowChange"] && @$_REQUEST[$name1]) $value = $_REQUEST[$name1];
+	  if(isset($item["allowChange"]) && $item["allowChange"] && @$colValue) $value = $colValue;
 	  $cols[$colname] = $this->filters($value,@$item["data"]["datatype"],true);
      break;
 	 case 'password':
       $hashing=Config::getInstance()->getValue("//bezpecnostne/hashing");
       if($hashing=="SHA256"){
-      	$_REQUEST[$name1]= Message::calcHash('SHA256',$_REQUEST[$name1]);
+      	$colValue= Message::calcHash('SHA256',$colValue);
       }else{
-       $_REQUEST[$name1]= md5($_REQUEST[$name1]);
+       $colValue= md5($colValue);
       }
 	 case 'tinyMCE':
-	  $value = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"],true);
+	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
 	   if(class_exists("DetectIntrusion")){
 	    $langupdates[$colname] = DetectIntrusion::XSSDecode($value);
@@ -1042,49 +1044,49 @@ class MakeForm{
 		$langupdates[$colname] = $value;
 	   }
 	  }else{
-	   $cols[$colname] = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"],true);
-	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$_REQUEST[$name1]) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1])){
+	   $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"],true);
+	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
 	    $cols[$colname] = null;
 	   }
 	  }
 	 break;
      case 'textbox':
      case 'textarea':
-	  $value = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"],true);
+	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
 		$langupdates[$colname] = $value;
 	  }else{
-	   $cols[$colname] = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"],true);
-	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$_REQUEST[$name1]) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1])){
+	   $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"],true);
+	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
 	    $cols[$colname] = null;
 	   }
 	  }
      break;
      case 'select':
      case 'selectDB':
-	  $value = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"]);
-	   $cols[$colname] = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"]);
-	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$_REQUEST[$name1]) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1])){
+	  $value = $this->filters($colValue,@$item["data"]["datatype"]);
+	   $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"]);
+	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
 	    $cols[$colname] = null;
 	   }
      break;
      case 'set':
-	  $cols[$colname] = $value = implode(";",$_REQUEST[$name1]);
-      //$data[$colname] = $value = $this->filters(@$_REQUEST[$name1],$datatype,true);
+	  $cols[$colname] = $value = implode(";",$colValue);
+      //$data[$colname] = $value = $this->filters(@$colValue,$datatype,true);
 	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$data[$colname]){
 			$cols[$colname] = null;
 	  }
      break;
      case 'checkbox':
-      $_REQUEST[$name1] = $_REQUEST[$name1] || $_REQUEST[$name1];
-      $cols[$colname] = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"]);
+      $colValue = $colValue || $colValue;
+      $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"]);
 	  
-	  if((isset($item["allowNull"]) && $item["allowNull"] && !@$_REQUEST[$name1]) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$_REQUEST[$name1])){
+	  if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
 	   $cols[$colname] = null;
 	  }
      break;
      case 'htmlText':
-	  $value = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"],true);
+	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
 	   if(class_exists("DetectIntrusion")){
 	    $langupdates[$colname] = DetectIntrusion::XSSDecode($value);
@@ -1092,7 +1094,7 @@ class MakeForm{
 		$langupdates[$colname] = $value;
 	   }
 	  }else{
-       $cols[$colname] = $this->filters($_REQUEST[$name1],@$item["data"]["datatype"],true);
+       $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  }
      break;
      case 'file':
@@ -1115,7 +1117,7 @@ class MakeForm{
 	  
 	  $ext = $info["extension"];
 	  if(!in_array($ext,$allowedExt)){
-		throw new Exception($this->getText("fileNotAllowed"));
+		throw new \Exception($this->getText("fileNotAllowed"));
 	  }
 
       $newFilename = $_FILES[$n]['name'];
@@ -1128,27 +1130,27 @@ class MakeForm{
 	  
 	  $info = pathinfo($newFilename);
 	  if(!in_array($info["extension"],$allowedExt)){
-	   throw new Exception($this->getText("fileNotAllowed"));
+	   throw new \Exception($this->getText("fileNotAllowed"));
 	  }
 	  
 	  if(is_file($item["data"]["dir"].$newFilename)){
        if($item["data"]["overwrite"]){
         //DB::query("delete from `$table` where (name = '$newFilename' and ".$this->aditional_where.")");
        }else{
-        throw new Exception($this->getText("fileExistsException"));
+        throw new \Exception($this->getText("fileExistsException"));
        }
       }
 	  
       // najdi cestu k staremu suboru
       $tableF = $item["data"]["tableForFiles"];
 	  $where = $this->where;
-	  $where["id"] = $_REQUEST[$formName."___ID"];
+	  $where["id"] = URLParser::v($formName."___ID");
 	  $row = DB::gr($table,$where);
       $row2 = DB::gr($tableF,$row[$n]);
 	  
       // vymaz stary subor
       /*if(!unlink($row2["path"])){
-       throw new Exception($this->getText("errorWhileDeletingFile"));
+       throw new \Exception($this->getText("errorWhileDeletingFile"));
       }
       // vymaz stary subor z db
       DB::delete($tableF,$row2["id2"]);
@@ -1157,19 +1159,19 @@ class MakeForm{
 	  
 	  $uploadfile = $item["data"]["dir"].$newFilename;
 	  if(!move_uploaded_file($_FILES[$n]['tmp_name'], $uploadfile)){
-        throw new Exception($this->getText("errorWhileMovingFile"));
+        throw new \Exception($this->getText("errorWhileMovingFile"));
       }
       // vloz novy subor do db
 	  
 	  
       DB::u($tableF,$id2=md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$n]['type'],"name"=>$_FILES[$n]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
-      $cols[$colname] = $_REQUEST[$name1] = $id2;
+      $cols[$colname] = $colValue = $id2;
 	 break;
     }
    
     try{
      $this->checkRightDataFormat($item,$name1, true,$formName);
-    }catch(Exception $e){
+    }catch(\Exception $e){
      throw $e;
     }
    }
@@ -1187,7 +1189,7 @@ class MakeForm{
  private $updateLangs = array();
  private function doUpdate(){
   if(!isset($this->data["allowUpdate"])) return false;
-  if(!isset($_REQUEST[$this->data["uid"]."___UPDATE2"])) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___UPDATE2"))) return false;
   if(!isset($this->data["table"])) return $this->merged;
   
   if(isset($this->data["rights"])){
@@ -1205,14 +1207,14 @@ class MakeForm{
   $formName = $this->data["uid"];
   
    $where = $this->where;
-   $where["id"] = @$_REQUEST[$this->data["uid"]."___ID"];
+   $where["id"] = @URLParser::v($this->data["uid"]."___ID");
 
    $row = DB::gr($this->data["table"],$where);
 
    $old_row = $row;
    if(!DB::u($this->data["table"],$row["id2"],$this->updateData)){
    	 \AsyncWeb\Storage\Log::log("MakeForm","Update oddo failed".DB::error(),ML__HIGH_PRIORITY);
-	 $this->exception = new Exception("Chyba pri upravovaní záznamu!");
+	 $this->exception = new \Exception("Chyba pri upravovaní záznamu!");
 	 throw $this->exception;
 	 return false;
    }
@@ -1233,7 +1235,7 @@ class MakeForm{
    
    $new_row = $row;
    $table  = $this->data["table"];
-   $id = DB::myAddSlashes(@$_REQUEST[$formName."___ID"]);
+   $id = DB::myAddSlashes(@URLParser::v($formName."___ID"));
    \AsyncWeb\Storage\Log::log("UPDATE","update $table where (id = '$id')");
    
    
@@ -1256,7 +1258,7 @@ class MakeForm{
  private function checkDelete(){
   if(!isset($this->data["allowDelete"])) return false;
   
-  if(!isset($_REQUEST[$this->data["uid"]."___DELETE"]) || !$_REQUEST[$this->data["uid"]."___DELETE"]) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___DELETE")) || !URLParser::v($this->data["uid"]."___DELETE")) return false;
   if(!isset($this->data["table"])) return $this->merged;
 
   if(isset($this->data["rights"])){
@@ -1274,7 +1276,7 @@ class MakeForm{
    $params = array();
    
    $where = $this->where;
-   $where["id"] = $_REQUEST[$this->data["uid"]."___ID"];
+   $where["id"] = URLParser::v($this->data["uid"]."___ID");
    $row = DB::gr($this->data["table"],$where);
    $params["row"] = $row;
    $params["old"] = $row;
@@ -1284,7 +1286,7 @@ class MakeForm{
 	 if(!$this->execute($this->data["execute"]["beforeDelete"],array("r"=>$row))){
 	  return false;
 	 }
-	}catch(Exception $exc){
+	}catch(\Exception $exc){
 	 $this->exception = $exc;
 	 throw $this->exception;
 	 return false;
@@ -1304,7 +1306,7 @@ class MakeForm{
   if(!isset($this->data["allowDelete"])) return false;
   
   
-  if(!isset($_REQUEST[$this->data["uid"]."___DELETE"])) return false;
+  if(!(null!==URLParser::v($this->data["uid"]."___DELETE"))) return false;
   if(!isset($this->data["table"])) return $this->merged;
   $table = $this->data["table"];
   
@@ -1323,13 +1325,13 @@ class MakeForm{
 	
   
    $where = $this->where;
-   $where["id"] = $_REQUEST[$this->data["uid"]."___ID"];
+   $where["id"] = URLParser::v($this->data["uid"]."___ID");
    $row = DB::gr($this->data["table"],$where);
    
    DB::delete($this->data["table"],$where);
    if(DB::affected_rows() > 0){
    
-	   \AsyncWeb\Storage\Log::log("DELETE","delete $table where id = ".$_REQUEST[$this->data["uid"]."___ID"]);
+	   \AsyncWeb\Storage\Log::log("DELETE","delete $table where id = ".URLParser::v($this->data["uid"]."___ID"));
 		 
 	   //execute
 	   if(isset($this->data["execute"])){
@@ -1411,10 +1413,10 @@ class MakeForm{
     $ret .= $this->makeCoverFront();
     if(
         // ak bol odoslany formular na zobrazenie update2	
-        $_REQUEST[$formName."___UPDATE1"]
+        URLParser::v($formName."___UPDATE1")
          ||
         // ak bol odoslany update2, a nastala chyba
-        $_REQUEST[$formName."___UPDATE2"]
+        URLParser::v($formName."___UPDATE2")
         ){
      $ret .= $this->show("UPDATE2");
     }else{
@@ -1428,10 +1430,10 @@ class MakeForm{
    
     if(
         // ak bol odoslany formular na zobrazenie update2	
-        @$_REQUEST[$formName."___UPDATE1"]
+        @URLParser::v($formName."___UPDATE1")
          ||
         // ak bol odoslany update2, a nastala chyba
-        @$_REQUEST[$formName."___UPDATE2"]
+        @URLParser::v($formName."___UPDATE2")
         ){
      $ret .= $this->show("UPDATE2");
     }else{
@@ -1604,7 +1606,7 @@ class MakeForm{
   $ret .= "<table>";
   }
   
-  $form_submitted = isset($_REQUEST[$this->data["uid"]."___INSERT"]);
+  $form_submitted = (null!==URLParser::v($this->data["uid"]."___INSERT"));
   
   foreach($this->data["col"] as $colname=>$item){
    $usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
@@ -1612,9 +1614,10 @@ class MakeForm{
    if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
    $name = $formName."_".$colname;
    if(isset($item["data"]["var"])) $name = $item["data"]["var"];
+   $colValue = URLParser::v($name);
    
    if($in=$this->inWhere($colname)){
-	 $_REQUEST[$name] = $in["value"];
+	 $colValue = $in["value"];
 	 $item["editable"] = false;
    }
   
@@ -1655,12 +1658,12 @@ class MakeForm{
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
 	 $ret.= ' <input class="MFInput form-control'.$addclass.'" type="'.$type.'" id="'.$name.'" name="'.$name.'"';
      if($form_submitted){
-      $ret.=' value="'.stripslashes(@$_REQUEST[$name]).'"';
+      $ret.=' value="'.stripslashes(@$colValue).'"';
      }else{
 	  if(isset($item["texts"]["default"]) && ($t=$this->getText($item["texts"]["default"])) !== null){
 	   $ret.=' value="'.$t.'"';
 	  }else{
-	   $ret.=' value="'.stripslashes(@$_REQUEST[$name]).'"';
+	   $ret.=' value="'.stripslashes(@$colValue).'"';
 	  }
 	 }
      if(isset($maxl)) $ret .= ' maxlength="'.$maxl.'"';
@@ -1826,7 +1829,7 @@ class MakeForm{
 	  $v = Language::get($v);
       $ret .= '<option value="'.$k.'"';
       if($form_submitted){
-       if(@$_REQUEST[$name] == $k){
+       if(@$colValue == $k){
         $ret .= ' selected="selected"';
        }
       }else{
@@ -1869,7 +1872,7 @@ class MakeForm{
 	  $v = Language::get($v);
       $ret .= '<option value="'.$k.'"';
       if($form_submitted){
-       if(in_array($k,$_REQUEST[$name])){
+       if(in_array($k,$colValue)){
         $ret .= ' selected="selected"';
        }
       }else{
@@ -1934,7 +1937,7 @@ class MakeForm{
 	  $k = "".$k;
       $reto .= '<option value="'.$k.'"';
       if($form_submitted){
-       if(@$_REQUEST[$name] == $k){
+       if(@$colValue == $k){
         $reto .= ' selected="selected"';
        }
       }else{
@@ -1982,7 +1985,7 @@ class MakeForm{
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
      if($form_submitted){
-      $ret.=$_REQUEST[$name];
+      $ret.=$colValue;
      }else{
       if(isset($item["texts"]["default"])) $ret .= $this->getText($item["texts"]["default"]);
      }
@@ -2008,7 +2011,7 @@ class MakeForm{
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
      if($form_submitted){
-      $ret.=$_REQUEST[$name];
+      $ret.=$colValue;
      }else{
       if(isset($item["texts"]["default"])) $ret .= $this->getText($item["texts"]["default"]);
      }
@@ -2131,7 +2134,7 @@ $theme = "simple";
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'"';
      if($form_submitted){
-      if(isset($_REQUEST[$name]) && $_REQUEST[$name]=="on"){
+      if((null!==$colValue) && $colValue=="on"){
        $ret.= ' checked="checked"';
       }
      }else{
@@ -2168,7 +2171,7 @@ $theme = "simple";
 	  foreach($item["filter"]["option"] as $k=>$v){
 	   $ret.="<label for=\"${name}_${k}\">".' <input value="'.$k.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'_'.$k.'" name="'.$name.'"';
         if($form_submitted){
-         if($_REQUEST[$name]==$k){
+         if($colValue==$k){
           $ret.= ' checked="checked"';
          }
         }else{
@@ -2182,7 +2185,7 @@ $theme = "simple";
 	 }else{
       $ret.=' <input value="'.$value.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'" name="'.$name.'"';
       if($form_submitted){
-       if($_REQUEST[$name]==$value){
+       if($colValue==$value){
         $ret.= ' checked="checked"';
        }
       }else{
@@ -2474,7 +2477,7 @@ $theme = "simple";
   $ret.='<span class="MFCheckColumn">';
   }
   $ret.='<input class="MFUpdateCheckBox"';
-  if(@$_REQUEST[$name.'_CHANGED'] || $def){
+  if(@URLParser::v($name.'_CHANGED') || $def){
    $ret.=' checked="checked"';
   }
   $txt = "Pri zmenení položky sa automaticky zaškrtne. Znamená to, že položka sa pri odoslaní formuláru zmení.";
@@ -2507,7 +2510,7 @@ $theme = "simple";
  
   $name = $this->data["uid"];
   $where=$this->where;
-  $where["id"] = (int) $_REQUEST[$name."___ID"];
+  $where["id"] = (int) URLParser::v($name."___ID");
   $formName = $name;
   $row = DB::gr($this->data["table"],$where);
   
@@ -2532,7 +2535,7 @@ $theme = "simple";
   }
   if(@$this->data["showUp"]){
   if(!isset($this->data["bootstrap"])){
-   $ret .= "<tr><td></td><td colspan=\"3\" class=\"MFSubHead\"><a href=\"?\">".$this->get("Zobraziť data")."</a></td></tr>\n";
+   $ret .= "<tr><td></td><td colspan=\"3\" class=\"MFSubHead\"><a href=\"".Path::make(array("REMOVE_VARIABLES"=>"1"))."\">".$this->get("Zobraziť data")."</a></td></tr>\n";
   }
   }
   if(!isset($this->data["bootstrap"])){
@@ -2548,7 +2551,7 @@ $theme = "simple";
    }
    $ret .= ">\n";
   }
-  $ret .= '<input type="hidden" value="'.((int)$_REQUEST[$name."___ID"]).'" name="'.$name."___ID".'" />';
+  $ret .= '<input type="hidden" value="'.((int)URLParser::v($name."___ID")).'" name="'.$name."___ID".'" />';
   
   if(!isset($this->data["bootstrap"])){
   $ret .= "<table>";
@@ -2557,7 +2560,7 @@ $theme = "simple";
   }
   
   foreach($this->data["col"] as $colname => $item){
-      $usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
+	  $usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
 
 
    if(isset($item["data"]["col"])) $colname = $col = $item["data"]["col"];
@@ -2565,13 +2568,13 @@ $theme = "simple";
    $col = $colname;
    $name = $formName."_".$col;
    if(isset($item["data"]["var"])) $name = $item["data"]["var"];
-   
+   $colValue = URLParser::v($name);
    if($in=$this->inWhere($col)){
-	 $_REQUEST[$name] = $in["value"];
+	 $colValue = $in["value"];
 	 $item["editable"] = false;
    }
    
-   $form_submitted = isset($_REQUEST[$this->data["uid"]."___UPDATE2"]);
+   $form_submitted = (null!==URLParser::v($this->data["uid"]."___UPDATE2"));
 
 	 $minl = @$item["data"]["minlength"];
 	 $maxl = @$item["data"]["maxlength"];
@@ -2674,9 +2677,9 @@ $theme = "simple";
      $ret.=' <input class="MFInput form-control'.$addclass.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true" type="text" id="'.$name.'" name="'.$name.'"';
      if($form_submitted){
 	  if(array_key_exists("date_".$name,$_REQUEST)){
-       $ret.=' value="'.stripslashes($_REQUEST["date_".$name]).'"';
+       $ret.=' value="'.stripslashes(URLParser::v("date_".$name)).'"';
 	  }else{
-	   $ret.=' value="'.stripslashes($_REQUEST[$name]).'"';
+	   $ret.=' value="'.stripslashes($colValue).'"';
 	  }
      }else{
 	  
@@ -2754,8 +2757,8 @@ $theme = "simple";
 	 $ret .= '<param name="CSS" value="'.(string)$item->settings->cssSubor.'" />';
 	 $ret .= '<param name="Styles" value="'.(string)$item->settings->styleXMLSubor.'" />';
 	 $ret .= '<param name="Lang" value="sk"/>';
-     if(isset($_REQUEST[$name])){
-      $ret .= '<param name="Value" value="'.htmlspecialchars(stripslashes($_REQUEST[$name]), ENT_COMPAT,'UTF-8').'" />';
+     if((null!==$colValue)){
+      $ret .= '<param name="Value" value="'.htmlspecialchars(stripslashes($colValue), ENT_COMPAT,'UTF-8').'" />';
      }else{
 	   $value = $row[$col];
 	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
@@ -2797,7 +2800,7 @@ $theme = "simple";
      foreach($item["filter"]["option"] as $k=>$v){
       $ret .= '<option value="'.$k.'"';
       if($form_submitted){
-       if($_REQUEST[$name] == $k){
+       if($colValue == $k){
         $ret .= ' selected="selected"';
        }
       }else{
@@ -2845,7 +2848,7 @@ $theme = "simple";
      foreach($item["filter"]["option"] as $k=>$v){
       $ret .= '<option value="'.$k.'"';
       if($form_submitted){
-       if($_REQUEST[$name] == $k){
+       if($colValue == $k){
         $ret .= ' selected="selected"';
        }
       }else{
@@ -2913,7 +2916,7 @@ $theme = "simple";
 		$k = "".$k;
 	 $reto .= '<option value="'.$k.'"';
 	  if($form_submitted){
-       if($_REQUEST[$name] == $k){
+       if($colValue == $k){
         $reto .= ' selected="selected"';
        }       
       }else{
@@ -2964,7 +2967,7 @@ $theme = "simple";
      }
      $ret.=' cols="50" rows="15">';
      if($form_submitted){
-      $ret .= $_REQUEST[$name];
+      $ret .= $colValue;
      }else{
 	   $value = $row[$col];
 	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
@@ -2999,7 +3002,7 @@ $theme = "simple";
      }
      $ret.=' cols="50" rows="15">';
      if($form_submitted){
-      $ret .= $_REQUEST[$name];
+      $ret .= $colValue;
      }else{
 	   $value = $row[$col];
 	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
@@ -3129,7 +3132,7 @@ $theme = "simple";
      $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
      if($form_submitted){
       if(array_key_exists($name,$_REQUEST))
-      if($_REQUEST[$name]=="on"){
+      if($colValue=="on"){
        $ret.= ' checked="checked"';
       }
      }else{
@@ -3166,7 +3169,7 @@ $theme = "simple";
      $value = $this->getText($item["texts"]["value"]);
      $ret.=' <input class="MFRadio form-control'.$addclass.'" value="$value" type="radio" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
      if($form_submitted){
-      if($_REQUEST[$name]==$value){
+      if($colValue==$value){
        $ret.= ' checked="checked"';
       }
      }else{
@@ -3350,11 +3353,11 @@ $theme = "simple";
    }
    $this->exception = null;
   }else{
-   if(@$_SESSION["mes"][$_REQUEST["mes"]]){
-    $ret .= '<div class="MFMessage">'.$_SESSION["mes"][$_REQUEST["mes"]].'</div>';
+   if(@$_SESSION["mes"][URLParser::v("mes")]){
+    $ret .= '<div class="MFMessage">'.$_SESSION["mes"][URLParser::v("mes")].'</div>';
    }
   }
   return $ret;
  }
 } // endof class
-?>
+

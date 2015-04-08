@@ -42,6 +42,7 @@ class Header{
 				Header::send("Location: $url");
 			break;
 			case "location":
+				if($value == "?") return Header::s("reload",array("REMOVE_VARIABLES"=>"1"));
 				if(substr($value,0,4)!="http"){
 					if(@$_SERVER["SERVER_PORT"]==443){
 						$prot = "https://";

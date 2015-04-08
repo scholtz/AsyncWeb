@@ -49,7 +49,7 @@ class Iterator{
 	 */
 	private function set_object_variables($id,$per_page,$zero){
 		if(!$per_page || !is_numeric($per_page)){
-			\AsyncWeb\Text\Messages::getInstance()->warning(\AsyncWeb\System\\AsyncWeb\System\Language::get("error_iterator_per_page_wrong"),false);
+			\AsyncWeb\Text\Messages::getInstance()->warning(\AsyncWeb\System\Language::get("error_iterator_per_page_wrong"),false);
 			$per_page = 10;
 		}
 		if($this->typ == "old" || $this->typ == "jquery"){

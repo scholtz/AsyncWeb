@@ -16,13 +16,29 @@ class Block{
 		return $this->usesparams;
 	}
 	
+	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>true);
+	public static function registerBlockPath($namespace){
+		Block::$BLOCKS_PATHS[$namespace] = true;
+	}
+	public static function removeBlockPath($namespace){
+		if(isset(Block::$BLOCKS_PATHS[$namespace])) unset(Block::$BLOCKS_PATHS[$namespace]);
+	}
 	public static function exists($name,$checkBlockOnly=false){
+		
 		$BLOCK_PATH = Block::$BLOCK_PATH;
 		if(substr($BLOCK_PATH,-1)!="/") $BLOCK_PATH.="/";
 		
 		if($blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH.$name.".php")){
 			return $blockready;
 		}
+		foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
+			if (class_exists($n=$namespace.$name)){
+				return true;
+			}
+			
+		}
+		/*
+		
 		
 		if(\AsyncWeb\DefaultBlocks\Settings::$USE_DEFAULT_BLOCKS){
 			if (class_exists($n="\\AsyncWeb\\DefaultBlocks\\".$name)){
@@ -31,7 +47,7 @@ class Block{
 				}
 			}
 		}
-		
+		/**/
 		if($checkBlockOnly){
 			return false;
 		}
@@ -42,9 +58,10 @@ class Block{
 	public static function create($name = "", $tid = "", $template=""){
 		if($file = Block::exists($name,true)){
 			if($file === true){
-				if (class_exists($n="\\AsyncWeb\\DefaultBlocks\\".$name)){
-					if(\AsyncWeb\DefaultBlocks\Settings::$USE_DEFAULT_BLOCKS && $n::$USE_BLOCK){
+				foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
+					if (class_exists($n=$namespace.$name)){
 						$name = $n;
+						break;
 					}
 				}
 			}else{
@@ -57,6 +74,8 @@ class Block{
 	public function __construct($name = "", $tid = "", $template=""){
 		
 		$this->template = $template;
+		$this->tid = $tid;
+		
 		$this->initTemplate();
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
@@ -69,7 +88,6 @@ class Block{
 			
 			$this->template = file_get_contents($f,true);
 		}
-		$this->tid = $tid;
 		
 		$this->init();
 	}
@@ -83,9 +101,9 @@ class Block{
 	public function name(){
 		return $this->name;
 	}
-	public function setTemplate(String $template){
+	public function setTemplate($template){
 		$this->template = $template;
-		$this->notify();
+		//$this->notify();
 	}
 	public function getTemplate(){
 		return $this->template;	
@@ -138,22 +156,19 @@ class Block{
 				
 				
 				$templateid = URLParser::get($item);
-				if($templateid == "LOGIN_FORM" && !Block::exists("LOGIN_FORM")){
-					$this->data[$namespace]["LOGIN_FORM"] = \AsyncWeb\Security\Auth::loginForm();
-				}else{
-					try{
-						$tid = BlockManagement::getTid($templateid);
-						if($itemcl = BlockManagement::get($templateid,$tid)){
-							$itemid = $item;
-							if($p = strpos($item,":")){
-								$itemid = substr($item,0,$p);
-							}
-							$this->data[$namespace][$item] = '<span id="T_'.$itemid.'">'.$itemcl->get().'</span>';
+				try{
+					$tid = BlockManagement::getTid($templateid);
+					if($itemcl = BlockManagement::get($templateid,$tid)){
+						$itemid = $item;
+						if($p = strpos($item,":")){
+							$itemid = substr($item,0,$p);
 						}
-					}catch(Exception $exc){
-						
+						$this->data[$namespace][$item] = '<span id="T_'.$itemid.'">'.$itemcl->get().'</span>';
 					}
+				}catch(Exception $exc){
+					
 				}
+				
 			}
 		}
 		

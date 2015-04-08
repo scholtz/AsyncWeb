@@ -28,10 +28,13 @@
  *
  * 
  */
+namespace AsyncWeb\View;
 use AsyncWeb\System\Path;
 use AsyncWeb\View\TableView;
 use AsyncWeb\DB\DB;
-namespace AsyncWeb\View;
+use AsyncWeb\System\Language;
+use AsyncWeb\Frontend\URLParser;
+
 
 class MakeDBView{
 	private static $form = array();
@@ -45,7 +48,7 @@ class MakeDBView{
 	public static function make($data,$form=null){
 		if(!$data) return;
 		if(isset($data["rights_display"]) && $data["rights_display"]){
-		 if(!\AsyncWeb\Security\Group::isInGroupId($data["rights_display"])) return false;
+		 if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights_display"])) return false;
 		}
 		$data["uid"] = \AsyncWeb\Text\Texts::clear_($data["uid"]);
 		if($form){
@@ -57,7 +60,7 @@ class MakeDBView{
 			MakeDBView::$form[$data["uid"]] = new \AsyncWeb\View\MakeForm($data);
 		}
 		
-		if(@$data["useForms"] && @$data["allowInsert"] && @$_REQUEST["insert_data_".$data["uid"]]){
+		if(@$data["useForms"] && @$data["allowInsert"] && URLParser::v("insert_data_".$data["uid"])){
 			
 			$r = "";
 			  $r.= MakeDBView::$form[$data["uid"]]->show_results();
@@ -65,7 +68,7 @@ class MakeDBView{
 			  return $r;
 
 		}
-		if(@$data["useForms"] && @$data["allowUpdate"] && @$_REQUEST[$data["uid"]."___UPDATE1"]){
+		if(@$data["useForms"] && @$data["allowUpdate"] && URLParser::v($data["uid"]."___UPDATE1")){
 			
 			$r = "";
 			  $r.= MakeDBView::$form[$data["uid"]]->show_results();
@@ -149,6 +152,7 @@ class MakeDBView{
 			$datatype = @$info["data"]["type"];
 			if(!$datatype) $datatype = @$info["data"]["datatype"];
 			$dvc = null;
+			TableView::$INIT = true;//init TableView
 			
 			if($info["form"]["type"] == "checkbox"){
 				$dvc = new CheckBoxDataViewCell($info["filter"]["option"]);
@@ -188,10 +192,10 @@ class MakeDBView{
 		if(isset($data["rights"])){
 					  if(isset($data["rights"]["update"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
 					   if($data["rights"]["update"] == "") $update=true; // kazdy moze upravit udaje ak je nastaveny insert, ale ak ma praznu hodnotu
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["update"])){// ak existuje dane id skupiny
-						if(\AsyncWeb\Security\Group::isInGroupId($data["rights"]["update"])) $update = true;
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["update"])){// ak existuje dane id skupiny
+						if(\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["update"])) $update = true;
 					   }else{// inak existuje nazov skupiny
-					    if(\AsyncWeb\Security\Group::userInGroup($data["rights"]["update"]))  $update = true;
+					    if(\AsyncWeb\Objects\Group::userInGroup($data["rights"]["update"]))  $update = true;
 					   }
 					  }else{
 					    //$update = true;
@@ -200,10 +204,10 @@ class MakeDBView{
 					if(isset($data["rights"])){
 					  if(isset($data["rights"]["delete"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
 					   if($data["rights"]["delete"] == "") $delete=true; // kazdy moze upravit udaje ak je nastaveny insert, ale ak ma praznu hodnotu
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["delete"])){// ak existuje dane id skupiny
-						if(\AsyncWeb\Security\Group::isInGroupId($data["rights"]["delete"])) $delete = true;
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["delete"])){// ak existuje dane id skupiny
+						if(\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["delete"])) $delete = true;
 					   }else{// inak existuje nazov skupiny
-						if(\AsyncWeb\Security\Group::userInGroup($data["rights"]["delete"]))  $delete = true;
+						if(\AsyncWeb\Objects\Group::userInGroup($data["rights"]["delete"]))  $delete = true;
 					   }
 					  }else{
 					    //$delete = true;
@@ -219,7 +223,6 @@ class MakeDBView{
 		$thr = new THDataViewRow($cols);
 		$c = array("id"=>$data["uid"]);
 		if(@$data["iter"]["per_page"]) $c["rows"] = $data["iter"]["per_page"];
-		
 		$config = new ViewConfig($c);
 		$sort = new DataSort();
 		if(@$data["order"]){
@@ -321,10 +324,10 @@ class MakeDBView{
 		if(isset($data["rights"])){
 			if(isset($data["rights"]["insert"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
 				if($data["rights"]["insert"] == "") $showinsert=true; // kazdy moze upravit udaje ak je nastaveny insert, ale ak ma praznu hodnotu
-				if(\AsyncWeb\Security\Group::exists($data["rights"]["insert"])){// ak existuje dane id skupiny
-					if(\AsyncWeb\Security\Group::isInGroupId($data["rights"]["insert"])){$showinsert=true;}
+				if(\AsyncWeb\Objects\Group::exists($data["rights"]["insert"])){// ak existuje dane id skupiny
+					if(\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["insert"])){$showinsert=true;}
 				}else{// inak existuje nazov skupiny
-					if(\AsyncWeb\Security\Group::userInGroup($data["rights"]["insert"])) $showinsert=true;
+					if(\AsyncWeb\Objects\Group::userInGroup($data["rights"]["insert"])) $showinsert=true;
 				}
 			}
 		}
@@ -344,7 +347,7 @@ class MakeDBView{
 		$datasource = new ArrayDataSource($mydata);
 		if(isset($data["distinct"])) $datasource->setDistinct($data["distinct"]);
 		
-		
+
 		$tv = new TableView($datasource,$config,$thr,$sort,$menuitems);
 		$ret.=$tv->show();
 		}catch(Exception $exc){
@@ -421,9 +424,41 @@ class MakeDBView{
 				$ret.= number_format($data,$filter["decimal"],$filter["desat_oddelocac"],$filter["oddelovac_tisicov"]);
 				break;
 			case 'path':
-				if(!$data)$data = "-";
-				$ret.= '<a href="'.$filter["src"].'">'.$data.'</a>';
+
+				if(!$data) $data = "-";
+				$path = $filter["src"];
+				if(is_array($filter["src"])){
+					$move = array();
+					foreach($filter["src"] as $k=>$v){
+						if(isset($row[$k])){
+							$move[$v] = $row[$k];
+						}if(isset($row[$v])){
+							$move[$v] = $row[$v];
+						}
+					}
+					$path = \AsyncWeb\System\Path::make($move);
+				}
+				$ret.= '<a href="'.$path.'">'.$data.'</a>';
 				break;
+			case "urlparser":
+				if(!$data) $data = "-";
+				$path = $filter["src"];
+				if(is_array($filter["src"])){
+					$move = array();
+					if(isset($filter["src"]["var"]))
+					foreach($filter["src"]["var"] as $k=>$v){
+						if(isset($row[$k])){
+							$move[$v] = $row[$k];
+						}if(isset($row[$v])){
+							$move[$v] = $row[$v];
+						}
+					}
+					$filter["src"]["var"] = $move;
+					$path = \AsyncWeb\Frontend\URLParser::merge2($filter["src"],\AsyncWeb\Frontend\URLParser::parse());
+				}
+				$ret.= '<a href="'.$path.'">'.$data.'</a>';
+				
+			break;
 			case 'href':
 				if(!$data)$data = "-";
 				$ret.= '<a href="'.$filter["src"].$row["id"].'">'.$data.'</a>';
@@ -504,4 +539,3 @@ class MakeDBView{
 	}
 }
 
-?>

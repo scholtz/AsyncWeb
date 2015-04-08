@@ -148,7 +148,7 @@ class MakeDBViewDirect{
 			}
 		}
 		if(isset($data["rights_display"]) && $data["rights_display"]){
-		 if(!\AsyncWeb\Security\Group::isInGroupId($data["rights_display"])) return false;
+		 if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights_display"])) return false;
 		}
 		if($form){
 			MakeDBViewDirect::$form[$data["uid"]] = $form;
@@ -492,7 +492,7 @@ echo '">';
 				unset($filter[$key]);
 				\AsyncWeb\Storage\Session::set("MDBV_filter_".$data["uid"],$filter);
 			}
-			\AsyncWeb\HTTP\Header::s("location","?show_filter_form_".$data["uid"]."=1");
+			\AsyncWeb\HTTP\Header::s("location",array("show_filter_form_".$data["uid"]=>"1"));
 			exit;
 		}
 		
@@ -512,7 +512,7 @@ echo '">';
 			}
 			\AsyncWeb\Storage\Session::set("MDBV_filter_".$data["uid"],$filter);
 			if(@$_REQUEST["closeFilter"] != "on"){
-			 \AsyncWeb\HTTP\Header::s("location","?show_filter_form_".$data["uid"]."=1");
+			 \AsyncWeb\HTTP\Header::s("location",array("show_filter_form_".$data["uid"]=>"1"));
 			}else{
 			 echo '
 			<html><head>
@@ -709,11 +709,11 @@ echo '">';
 		if(isset($data["rights"])){
 		
 					  if(isset($data["rights"]["insert"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["insert"])){// ak existuje dane id skupiny
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["insert"])){// ak existuje dane id skupiny
 						
-						if(!\AsyncWeb\Security\Group::isInGroupId($data["rights"]["insert"])){$showinsert=false;}
+						if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["insert"])){$showinsert=false;}
 					   }else{// inak existuje nazov skupiny
-						if(!\AsyncWeb\Security\Group::userInGroup($data["rights"]["insert"])) $showinsert=false;
+						if(!\AsyncWeb\Objects\Group::userInGroup($data["rights"]["insert"])) $showinsert=false;
 					   }
 					  }else{
 					   $showinsert=false;
@@ -847,10 +847,10 @@ echo '">';
 
 			if(isset($data["rights"])){
 					  if(isset($data["rights"]["update"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["update"])){// ak existuje dane id skupiny
-						if(!\AsyncWeb\Security\Group::isInGroupId($data["rights"]["update"])) continue;
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["update"])){// ak existuje dane id skupiny
+						if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["update"])) continue;
 					   }else{// inak existuje nazov skupiny
-						if(!\AsyncWeb\Security\Group::userInGroup($data["rights"]["update"])) continue;
+						if(!\AsyncWeb\Objects\Group::userInGroup($data["rights"]["update"])) continue;
 					   }
 					  }else{
 					   continue;
@@ -866,10 +866,10 @@ echo '">';
 
 					if(isset($data["rights"])){
 					  if(isset($data["rights"]["delete"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["delete"])){// ak existuje dane id skupiny
-						if(!\AsyncWeb\Security\Group::isInGroupId($data["rights"]["delete"])) continue;
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["delete"])){// ak existuje dane id skupiny
+						if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["delete"])) continue;
 					   }else{// inak existuje nazov skupiny
-						if(!\AsyncWeb\Security\Group::userInGroup($data["rights"]["delete"])) continue;
+						if(!\AsyncWeb\Objects\Group::userInGroup($data["rights"]["delete"])) continue;
 					   }
 					  }else{
 					   continue;
@@ -924,10 +924,10 @@ echo '">';
 			
 					if(isset($data["rights"])){
 					  if(isset($data["rights"]["update"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["update"])){// ak existuje dane id skupiny
-						if(!\AsyncWeb\Security\Group::isInGroupId($data["rights"]["update"])) $update = true;
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["update"])){// ak existuje dane id skupiny
+						if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["update"])) $update = true;
 					   }else{// inak existuje nazov skupiny
-						if(!\AsyncWeb\Security\Group::userInGroup($data["rights"]["update"]))  $update = true;
+						if(!\AsyncWeb\Objects\Group::userInGroup($data["rights"]["update"]))  $update = true;
 					   }
 					  }else{
 					    $update = true;
@@ -935,10 +935,10 @@ echo '">';
 					  }
 					if(isset($data["rights"])){
 					  if(isset($data["rights"]["delete"])){                 // ak sa vyzaduju prava na vkladanie, tak ich over
-					   if(\AsyncWeb\Security\Group::exists($data["rights"]["delete"])){// ak existuje dane id skupiny
-						if(!\AsyncWeb\Security\Group::isInGroupId($data["rights"]["delete"])) $delete = true;
+					   if(\AsyncWeb\Objects\Group::exists($data["rights"]["delete"])){// ak existuje dane id skupiny
+						if(!\AsyncWeb\Objects\Group::isInGroupId($data["rights"]["delete"])) $delete = true;
 					   }else{// inak existuje nazov skupiny
-						if(!\AsyncWeb\Security\Group::userInGroup($data["rights"]["delete"]))  $delete = true;
+						if(!\AsyncWeb\Objects\Group::userInGroup($data["rights"]["delete"]))  $delete = true;
 					   }
 					  }else{
 					    $delete = true;
@@ -1172,4 +1172,3 @@ echo '">';
 	}
 }
 
-?>

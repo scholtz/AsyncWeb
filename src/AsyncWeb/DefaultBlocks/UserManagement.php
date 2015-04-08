@@ -6,10 +6,10 @@ use \BT\Base;$load = new \BT\Base;
 class UserManagement extends \AsyncWeb\Frontend\Block{
 	public static $USE_BLOCK = true;
 	public static $DICTIONARY = array(
-		"sk"=>array(
+		"sk-SK"=>array(
 			"Text"=>"TextSK",
 		),
-		"en"=>array(
+		"en-US"=>array(
 			"Text"=>"TextEN",
 		),
 	);

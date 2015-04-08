@@ -1,13 +1,15 @@
 <?php
-
+namespace AsyncWeb\Objects;
 class User{
 	public static function get($id2=null){
 		if($id2==null){
-			require_once("modules/Login.php");
-			$id2=Login::getUserId();
+			$id2=\AsyncWeb\Security\Auth::userId();
 		}
-		require_once("modules/DB.php");
-		return DB::gr("users",$id2);
+		$usr = \AsyncWeb\DB\DB::gr("users",array("id2"=>$id2));
+		if($usr) return $usr;
+		$usr = \AsyncWeb\DB\DB::gr("outer_user_access",array("id2"=>$id2));
+		if($usr) return $usr;
+		return false;
 	}
 	public static function getDPH($id2){
 		$ret = User::getUserSetting($id2,"VAT");
@@ -30,8 +32,8 @@ class User{
 	}
 	public static function getDPHId($id2=null){
 		if(!$id2){
-			require_once("modules/Login.php");
-			$id2=Login::getUserId();
+			
+			$id2=\AsyncWeb\Security\Auth::userId();
 		}
 		$row = DB::gr("obchodnik_ht",array("users"=>$id2));
 		if($row){
@@ -48,7 +50,7 @@ class User{
 		return "f";
 	}
 	public static function getFullName($id2=null){
-		if(!$id2){require_once("modules/Login.php");$id2 = Login::getUserId();}
+		if(!$id2){$id2 = \AsyncWeb\Security\Auth::userId();}
 		if(is_array($id2)){
 			$row = $id2;
 		}else{
@@ -65,7 +67,7 @@ class User{
 		return $ret;
 	}
 	public static function getCompanyOrName($id2=null){
-		if(!$id2){require_once("modules/Login.php");$id2 = Login::getUserId();}
+		if(!$id2){$id2 = \AsyncWeb\Security\Auth::userId();}
 		$pc = DB::gr("pohoda_contacts",array("users"=>$id2));
 		if($pc && $pc["company"]) return $pc["company"];
 		$obch = DB::gr("obchodnik_eua",array("users"=>$id2));
@@ -76,7 +78,7 @@ class User{
 	}
 	public static function getEmails($usr=null){
 	  $ret = array();
-	  if(!$usr) $usr = Login::getUserId();
+	  if(!$usr) $usr = \AsyncWeb\Security\Auth::userId();
 	  $row=DB::gr("users",array("id2"=>$usr));
 	  if($row) $ret[$row["email"]] = $row["email"];
 	  $row=DB::gr("outer_user_access",array("id2"=>$usr));
@@ -130,7 +132,7 @@ class User{
 		return Group::userInGroup($user,$group);
 	}
 	public static function isCarbonTrader($user = null){
-		if($user == null){require_once("modules/Login.php");$user = Login::getUserId();}
+		if($user == null){$user = \AsyncWeb\Security\Auth::userId();}
 		$row = DB::gr("obchodnik_eua",array("users"=>$user));
 		if(!$row) return false;
 		return true;
@@ -167,7 +169,7 @@ class User{
 		return null;
 	}
 	public static function getLang($user=null){
-		if(!$user){require_once("modules/Login.php"); $user = Login::getUserId();}
+		if(!$user){ $user = \AsyncWeb\Security\Auth::userId();}
 		$row = DB::gr("users_adv_settings",array("users"=>$user));
 		if($row && @$row["language"]) return $row["language"];
 		
@@ -182,7 +184,7 @@ class User{
 		return Language::getLang();
 	}
 	public static function getAddress($usr=null,$row=null){
-		if(!$usr) {require_once("modules/Login.php");$usr = Login::getUserId();}
+		if(!$usr) {$usr = \AsyncWeb\Security\Auth::userId();}
 		if(!$row) $row=DB::gr("pohoda_contacts",array("users"=>$usr));
 		
 		$ret = "";
@@ -194,30 +196,6 @@ class User{
 		if($ret) $ret.=", ";
 		if(isset($row["state"]) && $row["state"]) $ret.=$row["state"];
 		
-		return $ret;
-	}
-	public static function getTexts($params=array()){
-		$ret= array();
-		if(!$params["entity"]) return $ret;
-		$usr = User::get($params["entity"]);
-		foreach($usr as $k=>$v){
-			$ret["%u.$k%"] = $v;
-		}
-		
-		$row = DB::qbr("users_settings_advanced",array("where"=>array("users"=>$params["entity"])));
-		$files = array("kyc","orsr","demrequest","podpisovyvzorkonatel","podpisovyvzorobchodnik","opkonatela","opobchodnika","demdelegdoc","accountsstatement","monagreement");
-		foreach($files as $file){
-			if(isset($row[$file])){
-				$filerow = DB::qbr("files",array("where"=>array("id2"=>$file)));
-				if($filerow){
-					$ret["%u.$file.a%"] = '<a href="'.$filerow["path"].'">'.$filerow["name"].'</a>';
-				}else{
-					$ret["%u.$file.a%"] = "";
-				}
-			}else{
-				 $ret["%u.$file.a%"] = "";
-			}
-		}
 		return $ret;
 	}
 }

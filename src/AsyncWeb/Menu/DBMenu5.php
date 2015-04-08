@@ -10,6 +10,7 @@ use AsyncWeb\DB\DB;
 use AsyncWeb\Menu\MenuBuilder;
 use AsyncWeb\System\Language;
 use AsyncWeb\Security\Auth;
+use AsyncWeb\Frontend\URLParser;
 
 /*
 
@@ -81,15 +82,15 @@ class DBMenu5 extends MenuBuilder{
 			
 				if($showeditor){
 					if(!$row["submenu"]){
-						$row["submenu"][1] = MenuItemBuilder::get(md5(uniqid()),Language::get('Vytvoriť podmenu'),Path::make(array("insert_data_DBMenu5_edit"=>"1","addmenuitemsub"=>$row["id2"]),false,"?"));
+						$row["submenu"][1] = MenuItemBuilder::get(md5(uniqid()),Language::get('Vytvoriť podmenu'),Path::make(array("insert_data_dbmenu5_edit"=>"1","addmenuitemsub"=>$row["id2"]),false,"?"));
 					}
 					
-					//$menu2[$order*100-2] = MenuItemBuilder::get(md5(uniqid()),"&lt;*",Path::make(array("insert_data_DBMenu5_edit"=>"1","addmenuitembefore"=>$row["id2"]),false,"?"));
-					if(!$row["path"] || !$row["text"]) $menu2[$order*100-1] = MenuItemBuilder::get(md5(uniqid())," !! ",Path::make(array("DBMenu5_edit___ID"=>$row["id"],"DBMenu5_edit___UPDATE1"=>"1")));
+					//$menu2[$order*100-2] = MenuItemBuilder::get(md5(uniqid()),"&lt;*",Path::make(array("insert_data_dbmenu5_edit"=>"1","addmenuitembefore"=>$row["id2"]),false,"?"));
+					if(!$row["path"] || !$row["text"]) $menu2[$order*100-1] = MenuItemBuilder::get(md5(uniqid())," !! ",Path::make(array("dbmenu5_edit___ID"=>$row["id"],"dbmenu5_edit___UPDATE1"=>"1")));
 				}		
 				$menu2[$order*100] = $row;
 			//
-				if($showeditor){ $menu2[$order*100+1] = MenuItemBuilder::get(md5(uniqid()),'<i class="fa fa-plus-circle"></i>',Path::make(array("insert_data_DBMenu5_edit"=>"1","addmenuitemafter"=>$row["id2"]),false,"?"));}
+				if($showeditor){ $menu2[$order*100+1] = MenuItemBuilder::get(md5(uniqid()),'<i class="fa fa-plus-circle"></i>',Path::make(array("insert_data_dbmenu5_edit"=>"1","addmenuitemafter"=>$row["id2"]),false,"?"));}
 				
 			
 		}
@@ -100,8 +101,8 @@ class DBMenu5 extends MenuBuilder{
 		return $menu2;
 	}
 	private function showMenuItem(&$row){
-		if(isset($row["visible"]) && !$row["visible"]) return false;
 		if(Group::is_in_group("MenuEditor") && MainMenu::$editingmenu) return true;
+		if(isset($row["visible"]) && !$row["visible"]) return false;
 		
 		switch($row["logintype"]){
 				case "logged": 
@@ -231,7 +232,7 @@ class DBMenu5 extends MenuBuilder{
 				global $menurecurs;
 				if(!$menurecurs){
 					$menurecurs ++;
-					Login::requiredLoggedIn2();
+					//TODO Login::requiredLoggedIn2();
 				}
 			}
 		}
@@ -264,27 +265,29 @@ class DBMenu5 extends MenuBuilder{
 
 		if(!Group::is_in_group("MenuEditor")) return;
 
-		if(@$_REQUEST["closeMenuEditor"]){
+		if(URLParser::v("closeMenuEditor") == "1"){
 			Session::set("menuEditing","0");
+			\AsyncWeb\HTTP\Header::s("reload",array("closeMenuEditor"=>null,"addmenuitemsub"=>null,"addmenuitembefore"=>null,"addmenuitemafter"=>null,"insert_data_dbmenu5_edit"=>null,"editmenu"=>null));
+			exit;
 		}
 		
-		if(@$_REQUEST["addmenuitemsub"] || @$_REQUEST["addmenuitembefore"] || @$_REQUEST["addmenuitemafter"] || @$_REQUEST["editmenu"] || @$_REQUEST["deletemenu"] ||Session::get("menuEditing")){
+		if((@URLParser::v("addmenuitemsub") || @URLParser::v("addmenuitembefore") || @URLParser::v("addmenuitemafter") || @URLParser::v("editmenu") || @URLParser::v("deletemenu")) || Session::get("menuEditing")){
 			$addmenutype = false;
 			
-			if(@$_REQUEST["addmenuitemsub"]){
+			if(@URLParser::v("addmenuitemsub")){
 				$addmenutype = "addmenuitemsub";
 			}
-			if(@$_REQUEST["addmenuitembefore"]){
+			if(@URLParser::v("addmenuitembefore")){
 				$addmenutype = "addmenuitembefore";
 			}
-			if(@$_REQUEST["addmenuitemafter"]){
+			if(@URLParser::v("addmenuitemafter")){
 				$addmenutype = "addmenuitemafter";
 			}
 			Session::set("menuEditing","1");
 			
 			if($addmenutype){
 				Session::set("addmenutype",$addmenutype);
-				Session::set("addmenuvalue",$_REQUEST[$addmenutype]);
+				Session::set("addmenuvalue",URLParser::v($addmenutype));
 			}
 			
 				$form = array(
@@ -306,11 +309,11 @@ class DBMenu5 extends MenuBuilder{
 							"where"=>array("page"=>MainMenu::$PAGE),
 						),
 						"texts"=>array(
-							"nullValue"=>"Vyber","default"=>"PHP::DBMenu5::getUpperCategory()"
+							"nullValue"=>"Vyber","default"=>"PHP::\AsyncWeb\Menu\DBMenu5::getUpperCategory()"
 						),
 						"usage"=>array("MFi","MFu","MFd")),
 
-					array("name"=>"Poradie","form"=>array("type"=>"textbox"),"texts"=>array("default"=>"PHP::DBMenu5::getInsertDefaultOrder()"),"data"=>array("col"=>"order","datatype"=>"number","minnum"=>-100000,"maxnum"=>10000000),"filter"=>array("type"=>"number_format","decimal"=>"0","desat_oddelocac"=>",","oddelovac_tisicov"=>"."),"usage"=>array("MFi","MFu","MFd")),
+					array("name"=>"Poradie","form"=>array("type"=>"textbox"),"texts"=>array("default"=>"PHP::\AsyncWeb\Menu\DBMenu5::getInsertDefaultOrder()"),"data"=>array("col"=>"order","datatype"=>"number","minnum"=>-100000,"maxnum"=>10000000),"filter"=>array("type"=>"number_format","decimal"=>"0","desat_oddelocac"=>",","oddelovac_tisicov"=>"."),"usage"=>array("MFi","MFu","MFd")),
 					array("name"=>"Visible","form"=>array("type"=>"checkbox"),"texts"=>array("default"=>"1"),"data"=>array("col"=>"visible","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
 					array("name"=>"Style","form"=>array("type"=>"textbox"),"texts"=>array("default"=>"standard"),"data"=>array("col"=>"style"),"usage"=>array("MFu","MFd")),
 					array("name"=>"Title","form"=>array("type"=>"textbox"),"data"=>array("col"=>"title","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
@@ -327,7 +330,7 @@ class DBMenu5 extends MenuBuilder{
 					array("name"=>"Výška obr.","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgheight"),"usage"=>array("MFu","MFd")),
 					array("name"=>"Šírka obr.","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgwidth"),"usage"=>array("MFu","MFd")),
 					array("name"=>"Class","form"=>array("type"=>"textbox"),"data"=>array("col"=>"class"),"usage"=>array("MFu","MFd")),
-					array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Všetci vidia obsah","notlogged"=>"Iba neprihlásení","logged"=>"Prihlásení")),"usage"=>array("MFi","MFu","MFd")),
+					array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Všetci vidia obsah","notlogged"=>"Iba neprihlásení","logged"=>"Iba prihlásení")),"usage"=>array("MFi","MFu","MFd")),
 					array(
 						"name"=>"Group",
 						"form"=>array("type"=>"selectDB"),
@@ -342,7 +345,7 @@ class DBMenu5 extends MenuBuilder{
 							"nullValue"=>"Vyber",
 						),
 						"usage"=>array("MFi","MFu","MFd")),
-					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"page"),"texts"=>array("text"=>"PHP::DBMenu5::getPage()"),"usage"=>array("MFi","MFu","MFd")),
+					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"page"),"texts"=>array("text"=>"PHP::\AsyncWeb\Menu\DBMenu5::getPage()"),"usage"=>array("MFi","MFu","MFd")),
 					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"type"),"texts"=>array("value"=>"category"),"usage"=>array("MFi",)),
 					 
 					),
@@ -351,7 +354,7 @@ class DBMenu5 extends MenuBuilder{
 					 "od"=>"asc",
 					 ),
 					
-					 "uid"=>"DBMenu5_edit",
+					 "uid"=>"dbmenu5_edit",
 
 					 "show_export"=>true,"show_filter"=>true,
 
@@ -360,25 +363,30 @@ class DBMenu5 extends MenuBuilder{
 					 "rights"=>array("insert"=>"MenuEditor","update"=>"MenuEditor","delete"=>"MenuEditor",),
 					 
 					 "execute"=>array(
-					  "onInsert"=>"PHP::DBMenu5::onInsert",
-					  "onUpdate"=>"PHP::DBMenu5::onUpdate",
-					  "onDelete"=>"PHP::DBMenu5::onDelete",
+					  "onInsert"=>"PHP::\AsyncWeb\Menu\DBMenu5::onInsert",
+					  "onUpdate"=>"PHP::\AsyncWeb\Menu\DBMenu5::onUpdate",
+					  "onDelete"=>"PHP::\AsyncWeb\Menu\DBMenu5::onDelete",
 					 ),
 					 
 					 "iter"=>array("per_page"=>"20"),
 					 
 				);
-				
+			
 			$form = new \AsyncWeb\View\MakeForm($form);
+			
 
-
-			$ret = '<h1>'.Language::get("Menu editor").'</h1><div><a href="?closeMenuEditor=1">'.Language::get("Koniec upravovania menu").'</a></div>';
+			$ret = '<h1>'.Language::get("Menu editor").'</h1><div><a href="'.Path::make(array("closeMenuEditor"=>"1")).'">'.Language::get("Koniec upravovania menu").'</a></div>';
 			
 			$ret .=$form->show_results();
 			$ret .=$form->show("ALL");
-
+			/*
 			require_once("modules/Template.php");
-			echo Template::setTemplate(array("body"=>$ret));exit;
+			echo Template::setTemplate(array("body"=>$ret));exit;/**/
+			
+			if($block = \AsyncWeb\Frontend\BlockManagement::get("Cat")){
+				$block->setTemplate($ret);
+			}
+			
 		}
 	}
 	public static function getPage(){
@@ -423,6 +431,8 @@ class DBMenu5 extends MenuBuilder{
 		DB::query($q="update menu set `order` = `order` + 10 where $p and `order` >= '$order' and do = 0 and id != '$id'");
 		
 		Cache::invalidate("menu");
+		\AsyncWeb\HTTP\Header::s("reload",array("closeMenuEditor"=>null,"addmenuitemsub"=>null,"addmenuitembefore"=>null,"addmenuitemafter"=>null,"insert_data_dbmenu5_edit"=>null,"dbmenu5_edit___INSERT"=>null));
+		exit;
 	}
 	public static function onUpdate($r){
 		Session::set("menuEditing","0");
@@ -430,13 +440,14 @@ class DBMenu5 extends MenuBuilder{
 		$path = Language::get($r["new"]["path"]);
 		if(substr($path,0,1) != "/") $path = "/".$path;
 		if(substr($path,-1) != "/") $path = $path."/";
-
-		Header("Location: ".$path);
+		\AsyncWeb\HTTP\Header::s("reload",array("closeMenuEditor"=>null,"addmenuitemsub"=>null,"addmenuitembefore"=>null,"addmenuitemafter"=>null,"dbmenu5_edit___ID"=>null,"dbmenu5_edit___UPDATE1"=>null,"dbmenu5_edit___UPDATE2"=>null,"editmenu"=>null));
 		exit;
 	}
 	public static function onDelete($r){
 		Cache::invalidate("menu");
 		Session::set("menuEditing","0");
+		\AsyncWeb\HTTP\Header::s("reload",array("closeMenuEditor"=>null,"addmenuitemsub"=>null,"addmenuitembefore"=>null,"addmenuitemafter"=>null,"deletemenu"=>null));
+		exit;
 	}
 	public function export($item = null){
 		if($item == null){
@@ -534,6 +545,19 @@ class DBMenu5 extends MenuBuilder{
 				DB::u("menu",md5(uniqid()),$upd);
 			}
 		}
+	}
+
+	public function installDefaultValues(){
+			$path = "Main";$id2 = md5(MainMenu::$PAGE."-".$path);Language::set($k=md5(uniqid()),$path);$path=$k;
+			Language::set($kt=md5(uniqid()),"Main page");
+			Language::set($kd=md5(uniqid()),"");
+			Language::set($kk=md5(uniqid()),"");
+			Language::set($kv=md5(uniqid()),"1");
+			Language::set($ktext=md5(uniqid()),"Main page");
+			\AsyncWeb\DB\DB::u("menu",$id2,array("page"=>MainMenu::$PAGE,"path"=>$path,"parent"=>null,"order"=>"1000","text"=>$ktext,"domain"=>MainMenu::getDomain(),"visible"=>$kv,"style"=>"standard","type"=>"category","logintype"=>"all","title"=>$kt,"description"=>$kd,"keywords"=>$kk));
+			\AsyncWeb\DB\DB::u("articles",md5(uniqid()),array("text"=>Language::set("{{{Main}}}"),"type"=>"html","category"=>$id2,"published"=>\AsyncWeb\Date\Time::get(),"created"=>\AsyncWeb\Date\Time::get(),"logintype"=>"all","group"=>null,));
+			
+				
 	}
 }
 

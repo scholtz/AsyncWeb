@@ -15,18 +15,49 @@ class Language{
 		$lang = Sess::getLang($sess);
 		return Language::setLang($lang);
 	}
-	public static function setLang($lang,$useLang=true){
+	public static function setLang($lang=false,$useLang=true){
+		if(!$lang){
+			// detect language
+			$lang = Language::getDefaultLang();
+		}
 		if(!isset(Language::$SUPPORTED_LANGUAGES[$lang])){
 			$lang = Language::$defaultLang;
 		}
 
 		Language::$lang = $lang;
 	}
+	public static function getDomain(){
+		return $_SERVER["HTTP_HOST"];
+	}
+	public static function getDefaultLang(){
+		
+		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$arr){
+			
+			if($arr == Language::getDomain() || $arr["domain"] == Language::getDomain()){
+				return $lang;
+			}
+		}
+		$langs = Language::parseBrowserLang();
+		foreach($langs as $arr){
+			foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$d){
+				if($arr["code"] == $lang) return $lang;
+				if($arr["code"] == "cs-CZ") return "sk-SK";
+			}
+		}
+		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$d){
+			return $lang;
+		}
+		return "en-US";
+	}
 	public static function getLang(){
 		return Language::$lang;
 	}
 	public static $gettingDictionary = false;
-	public static function set($origterm,$value,$lang=false){
+	public static function set($origterm,$value=null,$lang=false){
+		if($value===null){
+			$value = $origterm;
+			$origterm = "";
+		}
 		$term = $origterm;
 		if(!$term) $term = "L_".substr(md5(uniqid()),0,30);
 		if(!$lang) $lang=Language::$lang;
@@ -61,7 +92,7 @@ class Language{
 				Language::$dictionary[$lang] = $L = Language::build($lang);
 				Language::makeCache($lang);
 			}
-			//var_dump(Language::$dictionary[$lang]);
+			
 			Language::$gettingDictionary = false;
 		}
 	}
@@ -160,7 +191,7 @@ class Language{
 	protected static function build($lang,$D=false){
 		
 		$L = array();
-		//var_dump("in");
+		
 		if(!$D && $lang != "en-US"){
 			if(!isset(Language::$SUPPORTED_LANGUAGES["en-US"])){
 				// we want to make sure that at least in english each dictionary item is available
@@ -185,10 +216,8 @@ class Language{
 					switch(pathinfo($file, PATHINFO_EXTENSION)){
 						case "php":
 							if(Language::$USE_PHP_LANG_FILES){
-								//var_dump(count($L));
 								$L = array_merge($L,Language::buildFromPHP($path));
-								//var_dump(count($L));
-								//var_Dump($L);
+								
 							}
 						break;
 						case "csv":
@@ -225,7 +254,6 @@ class Language{
 				Language::$reversedictionary[$lang][$v][] = $k;
 			}
 		}
-		//var_dump($L);//exit;
 		return $L;
 	}
 	protected static function buildFromCSV($file){
@@ -382,11 +410,14 @@ class Language{
 			$code=htmlentities($found[1],ENT_QUOTES);
 			$coef=sprintf('%3.1f',$found[5]?$found[5]:'1');
 			$key=$coef.'-'.$code;
+			if(strpos($code,"-") === false){
+				$code = \AsyncWeb\Text\ConvertLangToLangCountry::convert($code);
+			}
 			$langa[$key]=array('code'=>$code,'coef'=>$coef);
 		}
 		krsort($langa);
 		return $langa;
 	}
-
+	
 }
 ?>

@@ -141,7 +141,7 @@ class BasicDataViewCell implements DataViewCell{
 		return $this->myclass;
 	}
 	public function setInputFilter($inputFilter){
-		if(is_a($inputFilter,"InputFilter")){
+		if(is_a($inputFilter,"\\AsyncWeb\\View\\InputFilter")){
 			$this->inputFilter = $inputFilter;
 		}
 	}
@@ -325,7 +325,7 @@ class NumberDataViewCell extends BasicDataViewCell{
 	public $datatype = "number";
 	private $NumberFormatter = null;
 	public function __construct($NumberFormatter=null,$class="number"){
-		if(is_a($NumberFormatter,"NumberFormatter")){
+		if(is_a($NumberFormatter,"\\AsyncWeb\\View\\NumberFormatter")){
 			$this->NumberFormatter = $NumberFormatter;
 		}
 		$this->myclass = $class;
@@ -627,7 +627,7 @@ class THViewCellConfig{
 		return $this->dvc;
 	}
 	public function setDVC($arg){
-		if(is_a($arg,"DataViewCell")){
+		if(is_a($arg,"\\AsyncWeb\\View\\DataViewCell")){
 			$this->dvc = $arg;
 			return true;
 		}
@@ -647,7 +647,7 @@ class THViewCellConfig{
 				if($this->filterable === null){$this->filterable = $arg;continue;}
 				if($this->exportable === null){$this->exportable = $arg;continue;}
 			}
-			if(is_a($arg,"DataViewCell")){
+			if(is_a($arg,"\\AsyncWeb\\View\\DataViewCell")){
 				$this->dvc = $arg;continue;
 			}
 		}
@@ -675,9 +675,9 @@ class BasicTHViewCell implements THViewCell{
 		$this->config = new THViewCellConfig();
 		$args = func_get_args();		
 		while(($arg = array_shift($args)) !== null){
-			if(is_a($arg,"THViewCellConfig")){
+			if(is_a($arg,"\\AsyncWeb\\View\\THViewCellConfig")){
 				$this->config = $arg;
-			}elseif(is_a($arg,"DataViewCell")){
+			}elseif(is_a($arg,"\\AsyncWeb\\View\\DataViewCell")){
 				$this->config->setDVC($arg);
 			}else{
 				$i++;
@@ -763,7 +763,7 @@ class BasicTHViewCell implements THViewCell{
 		$this->config->setFilterable($v);
 	}
 	public function setIsSorted($sortType){
-		if($sortType != SORT_ASC && $sortType != SORT_DESC) throw new Exception("Wrong sort type supplied");
+		if($sortType != SORT_ASC && $sortType != SORT_DESC) throw new \Exception("Wrong sort type supplied");
 		$this->isSorted = $sortType;
 	}
 	public function show($islast=false,$type="display"){
@@ -842,19 +842,19 @@ class BasicDataViewRow implements DataViewRow{
 	public function __construct($cellsconfig = array(),$basicDVC=null){
 		if(is_array($cellsconfig)){
 			foreach($cellsconfig as $k=>$v){
-				if($v && is_a($v,"DataViewCell")){
+				if($v && is_a($v,"\\AsyncWeb\\View\\DataViewCell")){
 					$this->cells[$k] = $v;
 				}
 			}
 		}
-		if($basicDVC && is_a($basicDVC,"DataViewCell")){
+		if($basicDVC && is_a($basicDVC,"\\AsyncWeb\\View\\DataViewCell")){
 			$this->basicDVC = $basicDVC;
 		}else{
 			$this->basicDVC = new BasicDataViewCell();
 		}
 	}
 	public function setCellConfig($key,$dataViewCell){
-		if($dataViewCell && is_a($basicDVC,"DataViewCell")){
+		if($dataViewCell && is_a($basicDVC,"\\AsyncWeb\\View\\DataViewCell")){
 			$this->cells[$key] = $dataViewCell;
 			return true;
 		}
@@ -894,7 +894,7 @@ class THDataViewRow{
 		$args = func_get_args();
 		//var_dump($args);
 		while(($arg = array_shift($args)) !== null){
-			if(is_a($arg,"THViewCell")){
+			if(is_a($arg,"\\AsyncWeb\\View\\THViewCell")){
 				if($arg->getKey()){
 					$this->cols[$arg->getKey()] = $arg;
 				}else{
@@ -905,7 +905,7 @@ class THDataViewRow{
 			}
 			if(is_array($arg)){			
 				foreach($arg as $k=>$v){
-					if(is_a($v,"THViewCell")){
+					if(is_a($v,"\\AsyncWeb\\View\\THViewCell")){
 						if($v->getKey()){
 							$this->cols[$v->getKey()] = $v;
 						}else{
@@ -920,7 +920,7 @@ class THDataViewRow{
 	}
 	public function check($key,$name,$title=""){
 		if(!$title) $title = $name;
-		if(is_a($name,"THViewCell")){
+		if(is_a($name,"\\AsyncWeb\\View\\THViewCell")){
 			$this->cols[$k] = $name;
 		}else{
 			if(!array_key_exists($key,$this->cols)){
@@ -978,15 +978,15 @@ class TDDataViewRow implements DataViewRow{
 		$args = func_get_args();
 		$thcells = array();
 		while(($arg = array_shift($args)) !== null){
-			if(is_a($arg,"ViewConfig")){
+			if(is_a($arg,"\\AsyncWeb\\View\\ViewConfig")){
 				foreach($arg->get() as $k=>$v){
 					
-					if(is_a($v,"THViewCell")){
+					if(is_a($v,"\\AsyncWeb\\View\\THViewCell")){
 						$thcells[$k] = $v;
 					}
 				}
 			}
-			if(is_a($arg,"THDataViewRow")){
+			if(is_a($arg,"\\AsyncWeb\\View\\THDataViewRow")){
 				$this->thr = $arg;
 			}
 		}
@@ -1071,8 +1071,8 @@ class DBDataSource implements DataSource{
 		$this->qb["distinct"] = $cols;
 	}
 	public function sort($DataSort){
-		if(!is_a($DataSort,"DataSort")){
-			throw new Exception("Sort function expects object of type DataSort");
+		if(!is_a($DataSort,"\\AsyncWeb\\View\\DataSort")){
+			throw new \Exception("Sort function expects object of type DataSort");
 		}
 		foreach($DataSort->get() as $sortcol){
 			$dir="asc";
@@ -1097,15 +1097,15 @@ class DBDataSource implements DataSource{
 		return $ret;
 	}
 	public function setLimits($from,$count){
-		if(!is_numeric($from)) throw new Exception("Invalid from number");
-		if(!is_numeric($count)) throw new Exception("Invalid count number");
-		if($this->res) throw new Exception("DB already initialised");
+		if(!is_numeric($from)) throw new \Exception("Invalid from number");
+		if(!is_numeric($count)) throw new \Exception("Invalid count number");
+		if($this->res) throw new \Exception("DB already initialised");
 		$this->qb["offset"] = $from;
 		$this->qb["limit"] = $count;
 	}
 	public function filter($DataFilter){
-		if(!is_a($DataFilter,"DataFilter")){
-			throw new Exception("Filter function expects obect of type DataFilter");
+		if(!is_a($DataFilter,"\\AsyncWeb\\View\\DataFilter")){
+			throw new \Exception("Filter function expects obect of type DataFilter");
 		}
 		$cols = $DataFilter->get();
 		if($cols){
@@ -1183,8 +1183,8 @@ class ArrayDataSource implements DataSource{
 	}
 
 	public function setLimits($from,$limit){// from starts from zero
-		if(!is_numeric($from)) throw new Exception("Invalid from number");
-		if(!is_numeric($limit)) throw new Exception("Invalid limit number");
+		if(!is_numeric($from)) throw new \Exception("Invalid from number");
+		if(!is_numeric($limit)) throw new \Exception("Invalid limit number");
 		
 		reset($this->data);
 		
@@ -1197,7 +1197,7 @@ class ArrayDataSource implements DataSource{
 		return true;
 	}
 	public function sort($DataSort){
-		if(is_a($DataSort,"DataSort")){
+		if(is_a($DataSort,"\\AsyncWeb\\View\\DataSort")){
 			
 			$cols = $DataSort->get();
 			if(!$cols) return ;
@@ -1256,8 +1256,8 @@ class ArrayDataSource implements DataSource{
 	}
 	public function filter($DataFilter){
 		
-		if(!is_a($DataFilter,"DataFilter")){
-			throw new Exception("Filter function expects object of type DataFilter");
+		if(!is_a($DataFilter,"\\AsyncWeb\\View\\DataFilter")){
+			throw new \Exception("Filter function expects object of type DataFilter");
 		}
 		
 		$cols = $DataFilter->get();
@@ -1274,7 +1274,7 @@ class ArrayDataSource implements DataSource{
 	}
 	private function evaluateSibling($row,$filters,$first = false){
 		if(!is_array($row)){
-			throw new Exception("EvaluateInner function expects array data row");
+			throw new \Exception("EvaluateInner function expects array data row");
 		}
 		$ret = null;
 		$depth = 0;
@@ -1284,8 +1284,8 @@ class ArrayDataSource implements DataSource{
 			$filters2 = $filters;
 			array_unshift($filters2,$filter);
 			$r = true;
-			if(!is_a($filter,"DataFilterItem")){
-				throw new Exception("Evaluate function expects array of objects of type DataFilterItem");
+			if(!is_a($filter,"\\AsyncWeb\\View\\DataFilterItem")){
+				throw new \Exception("Evaluate function expects array of objects of type DataFilterItem");
 			}
 			$new = false;
 			switch($lastbinding){
@@ -1379,7 +1379,7 @@ class ColSort{
 	protected $type = SORT_REGULAR;
 	
 	public function __construct($key,$dir="",$type=""){
-		if(!$key) throw new Exception("Invalid key for sorting");
+		if(!$key) throw new \Exception("Invalid key for sorting");
 		
 		$this->key = $key;
 		switch($dir){
@@ -1392,7 +1392,7 @@ class ColSort{
 			case "":
 			break;
 			default:
-				throw new Exception("Sort direction not defined!");
+				throw new \Exception("Sort direction not defined!");
 
 		}
 		switch($type){
@@ -1408,7 +1408,7 @@ class ColSort{
 			case "":
 			break;
 			default:
-				throw new Exception("Sort type not defined!");
+				throw new \Exception("Sort type not defined!");
 		}
 	}
 	public function getCol(){
@@ -1426,7 +1426,7 @@ class DataSort{
 	public function __construct(){
 		$args = func_get_args();
 		while(($arg = array_shift($args)) !== null){
-			if(is_a($arg,"ColSort")){
+			if(is_a($arg,"\\AsyncWeb\\View\\ColSort")){
 				$this->cols[] = $arg;
 			}
 			if($arg == "doNotUseCollate"){
@@ -1439,7 +1439,7 @@ class DataSort{
 	}
 	private $doNotUseCollate = false;
 	public function add($ColSort){
-		if(is_a($ColSort,"ColSort")){
+		if(is_a($ColSort,"\\AsyncWeb\\View\\ColSort")){
 			$this->cols[] = $ColSort;
 			return true;
 		}
@@ -1473,7 +1473,7 @@ class DataFilterItem{
 		return $this->binding;
 	}
 	public function __construct($col,$operator,$value,$binding){
-		if(!$col) throw new Exception("Column has not been selected");
+		if(!$col) throw new \Exception("Column has not been selected");
 		$this->col = $col;
 		if(	$operator != DV_OP_EQUAL && 
 			$operator != DV_OP_NOT_EQUAL && 
@@ -1486,7 +1486,7 @@ class DataFilterItem{
 			$operator != DV_OP_IS && 
 			$operator != DV_OP_IS_NOT && 
 			$operator != DV_OP_NULL){
-				throw new Exception("Operator $operator has not been recognized");
+				throw new \Exception("Operator $operator has not been recognized");
 			}
 		if(	$binding != DV_BINDING_AND && 
 			$binding != DV_BINDING_OR &&  
@@ -1495,7 +1495,7 @@ class DataFilterItem{
 			$binding != DV_BINDING_OR_LB &&  
 			$binding != DV_BINDING_RB_OR &&  
 			$binding != DV_BINDING_NONE){
-				throw new Exception("Binding condition has not been recognized");
+				throw new \Exception("Binding condition has not been recognized");
 			}
 		$this->operator = $operator;
 		$this->value = $value;
@@ -1507,12 +1507,12 @@ class DataFilter{
 	public function __construct(){
 		$args = func_get_args();
 		while(($arg = array_shift($args)) !== null){
-			if(is_a($arg,"DataFilterItem")){
+			if(is_a($arg,"\\AsyncWeb\\View\\DataFilterItem")){
 				$this->items[] = $arg;
 			}
 			if(is_array($arg)){
 				foreach($arg as $v){
-					if(is_a($v,"DataFilterItem")){
+					if(is_a($v,"\\AsyncWeb\\View\\DataFilterItem")){
 						$this->items[] = $v;
 					}
 				}
@@ -1521,7 +1521,7 @@ class DataFilter{
 	}
 	protected $DataViewRow = null;
 	public function setDataViewRow($DataViewRow){
-		if(is_a($DataViewRow,"DataViewRow")){
+		if(is_a($DataViewRow,"\\AsyncWeb\\View\\DataViewRow")){
 			$this->DataViewRow = $DataViewRow;
 		}
 	}
@@ -1537,7 +1537,7 @@ class DataFilter{
 		return $ret;
 	}
 	public function add($v){
-		if(is_a($v,"DataFilterItem")){
+		if(is_a($v,"\\AsyncWeb\\View\\DataFilterItem")){
 			$this->items[] = $v;
 			return true;
 		}
@@ -1708,7 +1708,7 @@ class TableMenuExportXML extends BasicTableMenuItem{
 					$key = $col->getKey();
 					if(!$key) continue;
 					$key = \AsyncWeb\Text\Texts::clear_($key);
-					//if(!array_key_exists($key,$datarow)) throw new Exception("Key :$key: does not exists in datarow");
+					//if(!array_key_exists($key,$datarow)) throw new \Exception("Key :$key: does not exists in datarow");
 					$value = $datarow[$key];
 					$ret.="<$key>$value</$key>";
 				}
@@ -1896,6 +1896,7 @@ class TextAppend{
 }
 class Mobile{}
 class TableView implements View{
+	public static $INIT = false;
 	protected $id = null;
 	public function getId(){
 		return $this->id;
@@ -1927,46 +1928,46 @@ class TableView implements View{
 		$args = func_get_args();
 		while(($arg = array_shift($args)) !== null){
 		
-			if(is_a($arg,"ViewConfig")){
+			if(is_a($arg,"\\AsyncWeb\\View\\ViewConfig")){
 				$this->ViewConfig = $arg;
 				$this->cols = $arg->getValue("cols",1);
 				$this->rows = $arg->getValue("rows",30);
 				$this->id = \AsyncWeb\Text\Texts::clear_($arg->getValue("id"));
 			}
-			if(is_a($arg,"DataSource")){
+			if(is_a($arg,"\\AsyncWeb\\View\\DataSource")){
 				$this->datasource = $arg;
 			}
-			if(is_a($arg,"THDataViewRow")){
+			if(is_a($arg,"\\AsyncWeb\\View\\THDataViewRow")){
 				$this->thr = $arg;
 				$arg->setTableView($this);
 			}
-			if(is_a($arg,"DataViewRow")){
+			if(is_a($arg,"\\AsyncWeb\\View\\DataViewRow")){
 				$this->dvr = $arg;
 				$arg->setTableView($this);
 			}
-			if(is_a($arg,"TextAppend")){
+			if(is_a($arg,"\\AsyncWeb\\View\\TextAppend")){
 				$this->append = $arg;
 			}
-			if(is_a($arg,"DataFilter")){
+			if(is_a($arg,"\\AsyncWeb\\View\\DataFilter")){
 				$this->filter = $arg; 
 			}
-			if(is_a($arg,"DataSort")){
+			if(is_a($arg,"\\AsyncWeb\\View\\DataSort")){
 				$this->sort = $arg; 
 			}
-			if(is_a($arg,"TableMenuItem")){
+			if(is_a($arg,"\\AsyncWeb\\View\\TableMenuItem")){
 				$this->TableMenuItems[] = $arg; 
 				$arg->setTableView($this);
 				
 			}
-			if(is_a($arg,"Mobile")){
+			if(is_a($arg,"\\AsyncWeb\\View\\Mobile")){
 				$this->mobile = $arg; 
 			}
-			if(is_a($arg,"TableMenuItems")){
+			if(is_a($arg,"\\AsyncWeb\\View\\TableMenuItems")){
 				$items = $arg->get();
 				
 				if($items){
 					foreach($items as $item){
-						if(is_a($item,"TableMenuItem")){
+						if(is_a($item,"\\AsyncWeb\\View\\TableMenuItem")){
 							$this->TableMenuItems[] = $item; 
 							$item->setTableView($this);
 						}
@@ -1978,44 +1979,44 @@ class TableView implements View{
 				foreach($argv as $arg){
 					
 							
-					if(is_a($arg,"ViewConfig")){
+					if(is_a($arg,"\\AsyncWeb\\View\\ViewConfig")){
 						$this->ViewConfig = $arg;
 						$this->cols = $arg->getValue("cols",1);
 						$this->rows = $arg->getValue("rows",30);
 						$this->id = \AsyncWeb\Text\Texts::clear_($arg->getValue("id"));
 					}
-					if(is_a($arg,"DataSource")){
+					if(is_a($arg,"\\AsyncWeb\\View\\DataSource")){
 						$this->datasource = $arg;
 					}
-					if(is_a($arg,"THDataViewRow")){
+					if(is_a($arg,"\\AsyncWeb\\View\\THDataViewRow")){
 						$this->thr = $arg;
 						$arg->setTableView($this);
 					}
-					if(is_a($arg,"DataViewRow")){
+					if(is_a($arg,"\\AsyncWeb\\View\\DataViewRow")){
 						$this->dvr = $arg;
 						$arg->setTableView($this);
 					}
-					if(is_a($arg,"DataFilter")){
+					if(is_a($arg,"\\AsyncWeb\\View\\DataFilter")){
 						$this->filter = $arg; 
 					}
-					if(is_a($arg,"DataSort")){
+					if(is_a($arg,"\\AsyncWeb\\View\\DataSort")){
 						$this->sort = $arg; 
 					}
-					if(is_a($arg,"TableMenuItem")){
+					if(is_a($arg,"\\AsyncWeb\\View\\TableMenuItem")){
 						$this->TableMenuItems[] = $arg; 
 						$arg->setTableView($this);
 						
 					}
-					if(is_a($arg,"Mobile")){
+					if(is_a($arg,"\\AsyncWeb\\View\\Mobile")){
 						$this->mobile = $arg; 
 					}
 					
-					if(is_a($arg,"TableMenuItems")){
+					if(is_a($arg,"\\AsyncWeb\\View\\TableMenuItems")){
 						$items = $arg->get();
 						
 						if($items){
 							foreach($items as $item){
-								if(is_a($item,"TableMenuItem")){
+								if(is_a($item,"\\AsyncWeb\\View\\TableMenuItem")){
 									$this->TableMenuItems[] = $item; 
 									$item->setTableView($this);
 								}
@@ -2027,8 +2028,8 @@ class TableView implements View{
 			
 			if(!$this->ViewConfig) $this->ViewConfig = new ViewConfig();
 		}
-		if(!$this->id) throw new Exception("Table ID must be defined!");
-		if(!$this->datasource){ throw new Exception("No datasource!");}
+		if(!$this->id) throw new \Exception("Table ID must be defined!");
+		if(!$this->datasource){ throw new \Exception("No datasource!");}
 		
 		if(!$this->thr) $this->thr = new THDataViewRow();
 		if(!$this->dvr){
@@ -2077,7 +2078,7 @@ class TableView implements View{
 		if($this->sort){
 			if($this->thr){
 				foreach($this->sort->get() as $k=>$v){
-					if(is_a($v,"ColSort")){
+					if(is_a($v,"\\AsyncWeb\\View\\ColSort")){
 						if($cell = $this->thr->getCell($v->getCol())){
 							if($cell->getIsSortable()){
 								$cell->setIsSorted($v->getDir());
@@ -2098,9 +2099,9 @@ class TableView implements View{
 		
 	}
 	public function show(){
-		if(!$this->datasource) throw new Exception("DataSource not yet initialised!");
-		if($this->cols <= 0) throw new Exception("Wrong amount of cols!");
-		if($this->rows <= 0) throw new Exception("Wrong amount of rows!");
+		if(!$this->datasource) throw new \Exception("DataSource not yet initialised!");
+		if($this->cols <= 0) throw new \Exception("Wrong amount of cols!");
+		if($this->rows <= 0) throw new \Exception("Wrong amount of rows!");
 	
 		
 		foreach($this->TableMenuItems as $menuitems){
@@ -2226,13 +2227,44 @@ class InputFilter{
 				$ret.= number_format($data,$filter["decimal"],$filter["desat_oddelocac"],$filter["oddelovac_tisicov"]);
 				break;
 			case 'path':
-				if(!$data)$data = "-";
-				$ret.= '<a href="'.$filter["src"].'">'.$data.'</a>';
+				if(!$data) $data = "-";
+				$path = $filter["src"];
+				if(is_array($filter["src"])){
+					$move = array();
+					foreach($filter["src"] as $k=>$v){
+						if(isset($data[$k])){
+							$move[$v] = $data[$k];
+						}if(isset($data[$v])){
+							$move[$v] = $data[$v];
+						}
+					}
+					$path = \AsyncWeb\System\Path::make($move);
+				}
+				$ret.= '<a href="'.$path.'">'.$data.'</a>';
 				break;
 			case 'href':
 				if(!$data)$data = "-";
 				$ret.= '<a href="'.$filter["src"].$row["id"].'">'.$data.'</a>';
 				break;
+			case "urlparser":
+				if(!$data) $data = "-";
+				$path = $filter["src"];
+				if(is_array($filter["src"])){
+					$move = array();
+					if(isset($filter["src"]["var"]))
+					foreach($filter["src"]["var"] as $k=>$v){
+						if(isset($row[$k])){
+							$move[$v] = $row[$k];
+						}if(isset($row[$v])){
+							$move[$v] = $row[$v];
+						}
+					}
+					$filter["src"]["var"] = $move;
+					$path = \AsyncWeb\Frontend\URLParser::merge2($filter["src"],\AsyncWeb\Frontend\URLParser::parse());
+				}
+				$ret.= '<a href="'.$path.'">'.$data.'</a>';
+				
+			break;
 			case 'hrefID2':
 				if(!$data)$data = "-";
 				if(!($col = @$filter["col"])){
@@ -2280,6 +2312,3 @@ class InputFilter{
 		return $ret;
 	}
 }
-
-
-?>

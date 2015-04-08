@@ -24,15 +24,15 @@ define("__SESSION_max_life_var","__SESSION_MAX_LIFE");
  class Session{
   public static $timeout = 3600;
   public static $max_life = 86000;
-  public static $checkip = true;// ak je nastavne v Login::$useTrusedIPs true, tak nekontroluje IP adresu
+  public static $checkip = true;
   
   private function __construct($force=true){
 	Session::set_cookie_params();
    @session_start();
    \AsyncWeb\HTTP\Header::send("Cache-Control: private");
    Session::check_timeout();
-   if(class_exists("Login")){
-    if(Login::$useTrusedIPs) Session::$checkip = false;
+   if(\AsyncWeb\Security\Auth::controllerIsRegistered('\AsyncWeb\Security\TrustedIPController')){
+    Session::$checkip = false;
    }
   }
   public static function init($force=false){
@@ -164,7 +164,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
   	if(isset($_SESSION)){
   	 if(array_key_exists(__SESSION_time_var,$_SESSION)){ $time = $_SESSION[__SESSION_time_var];}
   	}
-  	if(class_exists("Login") && Login::getUserId()){
+  	if(!\AsyncWeb\Security\Auth::$CHECKING && \AsyncWeb\Security\Auth::userId()){
 		if(array_key_exists(__SESSION_max_life_var,$_SESSION)){
 			if($_SESSION[__SESSION_max_life_var] + Session::$max_life < $ctime){
 				$id = session_id();
@@ -173,23 +173,14 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 				Session::set_cookie_params();
 				@session_start($id);
 				
-				if(class_exists("Messages")){
-					if(class_exists("Language")){
-						\AsyncWeb\Text\Messages::getInstance()->error(Language::get("error_session_timeout"));
-					}else{
-						\AsyncWeb\Text\Messages::getInstance()->error("Príliš dlho ste nepracovali s touto session! Session time out!");
-					}
-					\AsyncWeb\HTTP\Header::s("reload");//\AsyncWeb\HTTP\Header::s("location","/");
-					exit;
-				}else{
-					echo "Príliš dlho ste nepracovali s touto session! Session time out! <a href=\"/\">continue</a>";
-					exit;
-				}
-			}/**/
+				\AsyncWeb\Text\Messages::getInstance()->error(\AsyncWeb\System\Language::get("Príliš dlho ste nepracovali s touto session! Session time out!"));
+				\AsyncWeb\HTTP\Header::s("reload");//\AsyncWeb\HTTP\Header::s("location","/");
+				
+			}
 		}
 	}
 	if(Session::$uses_long_timeout){
-		if(class_exists("Login") && Login::getUserId()){
+		if(!\AsyncWeb\Security\Auth::$CHECKING && Auth::userId()){
 			if($time < ($ctime - Session::$timeout)){
 				
 				@session_destroy();
@@ -197,7 +188,6 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 				if(class_exists("\AsyncWeb\Text\Messages")){
 					\AsyncWeb\Text\Messages::getInstance()->error("Príliš dlho ste nepracovali na stránke! Boli ste odhlásený! Session time out!");
 					\AsyncWeb\HTTP\Header::s("reload");
-					exit;
 				}else{
 					echo "Príliš dlho ste nepracovali na stránke! Boli ste odhlásený! Session time out! <a href=\"/\">continue</a>";
 					exit;
@@ -257,10 +247,9 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
   	}else{
 //  		echo "b"; exit;
   		if(isset($_SESSION) && $_SESSION) {session_destroy();$_SESSION = array();}
-  		if(class_exists("Login")){
-  			Login::getInstance()->logout();
-  		}
-  		if(class_exists("Messages")){
+		\AsyncWeb\Security\Auth::logout();
+
+  		if(class_exists('\AsyncWeb\Text\Messages')){
   			\AsyncWeb\Text\Messages::die_error("SESSION was modified outside of system!!!!");
   		}else{
 			echo "killing sess.";

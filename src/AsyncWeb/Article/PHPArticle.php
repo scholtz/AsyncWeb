@@ -2,6 +2,15 @@
 
 namespace AsyncWeb\Article;
 use AsyncWeb\Objects\Group;
+use AsyncWeb\HTML\Container;
+use AsyncWeb\System\Language;
+use AsyncWeb\Storage\Session;
+use AsyncWeb\HTTP\Header;
+use AsyncWeb\View\MakeForm;
+use AsyncWeb\Date\Time;
+use AsyncWeb\Menu\MainMenu;
+use AsyncWeb\IO\File;
+use AsyncWeb\Storage\Log;
 
 
 class PHPArticle implements ArticleV2{
@@ -11,8 +20,8 @@ class PHPArticle implements ArticleV2{
 	private function __construct(){		
 		CategoryArticle::addListener($this,"php");
 		if(Group::is_in_group("PHPEditor")){
-			require_once("modules/Session.php");
-			if(isset($_REQUEST["newphparticle"])) {Session::set("newphparticle","1");require_once("modules/Header.php");Header::s("reload",array("newphparticle"=>""));exit;}
+			
+			if(isset($_REQUEST["newphparticle"])) {Session::set("newphparticle","1");Header::s("reload",array("newphparticle"=>""));exit;}
 			if(isset($_REQUEST["finishArticleEditing"])) {Session::set("newphparticle","0");}
 			$this->show = Session::get("newphparticle");
 			if($this->show){
@@ -69,7 +78,6 @@ class PHPArticle implements ArticleV2{
 				);
 				
 			
-				require_once("modules/makeFormV4.php");
 				$this->form = new MakeForm($form);
 			}
 			$this->editor = true;
@@ -88,7 +96,7 @@ class PHPArticle implements ArticleV2{
 		return $this->form->show("ALL");
 	}
 	public function makeArticleRSS(&$articlerow){
-		require_once("modules/Time.php");
+		
 		return ' <item>
   <guid>'.md5($articlerow["id2"]."-ajfskajf").'</guid>
   <title>'.Language::get("Script article").'</title>
@@ -99,10 +107,9 @@ class PHPArticle implements ArticleV2{
 ';
 	}
 	public function makeArticle(&$articlerow){
-		require_once("modules/Container.php");
 		$include_return = "";
 		$ret = "";
-		require_once("modules/File.php");
+		
 		$file = "php/".Language::get($articlerow["text"]).".php";
 		$file2 = "cebphp/".Language::get($articlerow["text"]).".php";
 		if(is_file($file)){//najskor skontroluj lokalne
@@ -112,14 +119,12 @@ class PHPArticle implements ArticleV2{
 		}elseif(File::exists($file)){// potom skontroluj inde
 			include $file;
 		}else{
-			require_once("modules/MyLog.php");
-			MyLog::log("CatergoryArticle","PHP Article not found: ".$file,ML__HIGH_PRIORITY);
+			Log::log("CatergoryArticle","PHP Article not found: ".$file,ML__HIGH_PRIORITY);
 			$include_return = '<div class="error">'.Language::get('PHP Article error!').'</div>';
 		}
 		$include_return .= $ret;
 		$c1 = new Container("article");
 		if($include_return) $c1->setBody($include_return);
-		require_once("modules/MainMenu.php");
 		
 		if($this->editor && (MainMenu::$editingmenu || MainMenu::$editingart) && isset($articlerow["id"])){
 
@@ -133,15 +138,15 @@ class PHPArticle implements ArticleV2{
 	return $c1->show();
 	}
 	public static function onInsert($articlerow){
-		require_once("modules/Session.php");
+		
 		Session::set("newphparticle","0");
 	}
 	public static function onUpdate($r){
-		require_once("modules/Session.php");
+		
 		Session::set("newphparticle","0");
 	}
 	public static function onDelete($r){
-		require_once("modules/Session.php");
+		
 		Session::set("newphparticle","0");
 	}
 }

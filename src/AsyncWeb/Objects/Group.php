@@ -5,8 +5,8 @@
  created by Ludovit Scholtz, 12. july 2011 ludovit __at__ scholtz __dot__ sk
  
  
-20120828 	Login::is_in_group() moze obsahovat array() skupin.. ak je aspon v jednej z tych skupin, vrati true. inak vrati false.
-			Pouzitie: npr Login::requiredLoggedIn2(array("CEO","COO"));
+20120828 	Login ::is_in_group() moze obsahovat array() skupin.. ak je aspon v jednej z tych skupin, vrati true. inak vrati false.
+			Pouzitie: npr Login :: requiredLoggedIn2(array("CEO","COO"));
 */
 
 namespace AsyncWeb\Objects;

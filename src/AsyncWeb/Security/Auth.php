@@ -2,17 +2,21 @@
 
 namespace AsyncWeb\Security;
 use \AsyncWeb\Storage\Session;
+use \AsyncWeb\DB\DB;
 
 class Auth{
 	protected static $SESS_CHAIN_NAME = "_AUTH_CHAIN";
+	public static $TRY_TO_INSTALL_DATA = true;
+	public static $CHECKING = false;
 	public static function check(){
+		Auth::$CHECKING = true;
 		$ret = false;
 		foreach(Auth::$services as $service){
 			if($service->check()){
 				$ret=true;
 			}
 		}
-		
+				
 		$auth = Session::get(Auth::$SESS_CHAIN_NAME);
 		if($auth && is_array($auth)){
 			foreach($auth as $service){
@@ -33,6 +37,9 @@ class Auth{
 				throw new \AsyncWeb\Exceptions\SecurityException("Service provider did not register user properly! 0x9319512");
 			}
 		}
+		//var_dump($ret);exit;
+		
+		Auth::$CHECKING = false;
 		return $ret;
 	}
 	public static function checkControllers(){
@@ -53,7 +60,8 @@ class Auth{
 		$auth = Session::get(Auth::$SESS_CHAIN_NAME);
 		$data["id"] = $service->SERVICE_ID();
 		$auth[] = $data;
-		return Session::set(Auth::$SESS_CHAIN_NAME,$auth);
+		$ret= Session::set(Auth::$SESS_CHAIN_NAME,$auth);
+		return $ret;
 	}
 	public static function logout($completelogout=false){
 		if($completelogout){
@@ -72,10 +80,39 @@ class Auth{
 		}
 		return false;
 	}
+	protected static $installing = false;
 	public static function userId(){
 		$auth = Session::get(Auth::$SESS_CHAIN_NAME);
 		if($auth && is_array($auth)){
 			$data = array_pop($auth);
+			
+			if(!Auth::$installing && $data["userid"] && Auth::$TRY_TO_INSTALL_DATA){
+				Auth::$installing = true;
+				$g = DB::gr("groups");
+				if(!$g){
+					// i have to install default groups
+					DB::u("groups","1",array("id3"=>"admin","name"=>\AsyncWeb\System\Language::set("Admin"),"level"=>"256"));
+					DB::u("groups","2",array("id3"=>"editor","name"=>\AsyncWeb\System\Language::set("Editor"),"level"=>"16"));
+					DB::u("groups","5",array("id3"=>"HTMLEditor","name"=>\AsyncWeb\System\Language::set("Editor of HTML articles"),"level"=>"17"));
+					DB::u("groups","7",array("id3"=>"PHPEditor","name"=>\AsyncWeb\System\Language::set("Editor of PHP articles"),"level"=>"17"));
+					DB::u("groups","6ecacf46f8b9d84870ed676627ac84f7",array("id3"=>"MenuEditor","name"=>\AsyncWeb\System\Language::set("Editor Menu"),"level"=>"16"));
+					DB::u("groups","5df18354b6fc1fb58bdc473253b17197",array("id3"=>"ProcessEditor","name"=>\AsyncWeb\System\Language::set("Process Editor"),"level"=>"16"));
+					
+					$usr = $data["userid"];
+					DB::u("users_in_groups",md5("$usr-1"),array("users"=>$usr,"groups"=>"1"));
+					DB::u("users_in_groups",md5("$usr-5"),array("users"=>$usr,"groups"=>"5"));
+					DB::u("users_in_groups",md5("$usr-7"),array("users"=>$usr,"groups"=>"7"));
+					DB::u("users_in_groups",md5("$usr-6ecacf46f8b9d84870ed676627ac84f7"),array("users"=>$usr,"groups"=>"6ecacf46f8b9d84870ed676627ac84f7"));
+					DB::u("users_in_groups",md5("$usr-5df18354b6fc1fb58bdc473253b17197"),array("users"=>$usr,"groups"=>"5df18354b6fc1fb58bdc473253b17197"));
+					
+					\AsyncWeb\Cache\Cache::invalidate("menu");
+					
+					\AsyncWeb\Text\Msg::mes(\AsyncWeb\System\Language::get("You have just installed groups, and added your self to Admin and Editor groups."));
+
+				}
+				
+			}
+			
 			return $data["userid"];
 		}
 		return false;
@@ -84,9 +121,15 @@ class Auth{
 	public static function register(\AsyncWeb\Security\AuthService $service){
 		Auth::$services[$service->SERVICE_ID()] = $service;
 	}
+	public static function serviceIsRegistered($id){
+		return isset(Auth::$services[$id]);
+	}
 	protected static $controllers = array();
 	public static function registerController(\AsyncWeb\Security\AuthController $controller){
 		Auth::$controllers[$controller->SERVICE_ID()] = $controller;
+	}
+	public static function controllerIsRegistered($id){
+		return isset(Auth::$controllers[$id]);
 	}
 	public static function loginForm(){
 		$ret = '';

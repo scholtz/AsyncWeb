@@ -9,8 +9,8 @@ class BlockManagement{
 	}
 	public static function renderWeb(){
 		if(BlockManagement::$defaultBlock == null){
-			if(Block::exists("index")){
-				$def = Block::create("index");
+			if(Block::exists("Index")){
+				$def = Block::create("Index");
 				BlockManagement::setDefaultBlock($def);
 			}else{
 				echo "Please set up the default block in the settings file or create index block!";exit;

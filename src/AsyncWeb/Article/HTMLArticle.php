@@ -2,7 +2,14 @@
 
 namespace AsyncWeb\Article;
 use AsyncWeb\Objects\Group;
-
+use AsyncWeb\HTML\Container;
+use AsyncWeb\System\Language;
+use AsyncWeb\Storage\Session;
+use AsyncWeb\HTTP\Header;
+use AsyncWeb\View\MakeForm;
+use AsyncWeb\Date\Time;
+use AsyncWeb\Menu\MainMenu;
+use AsyncWeb\System\Path;
 
 class HTMLArticle implements ArticleV2{
 	private $form = null;
@@ -15,9 +22,8 @@ class HTMLArticle implements ArticleV2{
 		CategoryArticle::addListener($this,"html");
 		
 		if(Group::is_in_group("HTMLEditor")){
-			require_once("modules/Session.php");
-			require_once("modules/make_form_v_3.php");
-			if(isset($_REQUEST["newhtmlarticle"])) {Session::set("newhtmlarticle","1");require_once("modules/Header.php");Header::s("reload",array("newhtmlarticle"=>""));exit;}
+			
+			if(isset($_REQUEST["newhtmlarticle"])) {Session::set("newhtmlarticle","1");Header::s("reload",array("newhtmlarticle"=>""));exit;}
 			if(isset($_REQUEST["finishArticleEditing"])) {Session::set("newhtmlarticle","0");}
 			$this->show = Session::get("newhtmlarticle");
 			if($this->show){
@@ -26,9 +32,9 @@ class HTMLArticle implements ArticleV2{
 					 "col" => array(
 					 array("name"=>"Text","form"=>array("type"=>"tinyMCE","theme"=>"advanced"),"data"=>array("col"=>"text","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
 					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"type"),"texts"=>array("text"=>"html"),"usage"=>array("MFi","MFu","MFd")),
-					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"category"),"texts"=>array("text"=>"PHP::MainMenu::getCurrentId()"),"usage"=>array("MFi","MFu","MFd")),
+					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"category"),"texts"=>array("text"=>"PHP::\AsyncWeb\Menu\MainMenu::getCurrentId()"),"usage"=>array("MFi","MFu","MFd")),
 					 //array("form"=>array("type"=>"value"),"data"=>array("col"=>"created"),"texts"=>array("text"=>"PHP::Time::get()"),"usage"=>array("MFi","MFu","MFd")),
-					 array("name"=>"Time","form"=>array("type"=>"textbox"),"data"=>array("col"=>"created","datatype"=>"date"),"texts"=>array("default"=>"PHP::HTMLArticle::getDefaultDate()"),"filter"=>array("type"=>"date","format"=>"d.m.Y H:i:s"),"usage"=>array("MFi","MFu","DBVs","DBVe")),
+					 array("name"=>"Time","form"=>array("type"=>"textbox"),"data"=>array("col"=>"created","datatype"=>"date"),"texts"=>array("default"=>"PHP::\AsyncWeb\Article\HTMLArticle::getDefaultDate()"),"filter"=>array("type"=>"date","format"=>"d.m.Y H:i:s"),"usage"=>array("MFi","MFu","DBVs","DBVe")),
 					 array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Všetci vidia obsah","notlogged"=>"Iba neprihlásení","logged"=>"Prihlásení")),"usage"=>array("MFi","MFu","MFd")),
 					 array(
 						"name"=>"Group",
@@ -48,7 +54,7 @@ class HTMLArticle implements ArticleV2{
 					),
 					"where"=>array(
 					 "type"=>"html",
-					 "category"=>"PHP::MainMenu::getCurrentId()",
+					 "category"=>"PHP::\AsyncWeb\Menu\MainMenu::getCurrentId()",
 					),
 
 					"order" => array(
@@ -64,9 +70,9 @@ class HTMLArticle implements ArticleV2{
 					 "rights"=>array("insert"=>"HTMLEditor","update"=>"HTMLEditor","delete"=>"HTMLEditor",),
 					 
 					 "execute"=>array(
-					  "onInsert"=>"PHP::HTMLArticle::onInsert",
-					  "onUpdate"=>"PHP::HTMLArticle::onUpdate",
-					  "onDelete"=>"PHP::HTMLArticle::onDelete",
+					  "onInsert"=>"PHP::\AsyncWeb\Article\HTMLArticle::onInsert",
+					  "onUpdate"=>"PHP::\AsyncWeb\Article\HTMLArticle::onUpdate",
+					  "onDelete"=>"PHP::\AsyncWeb\Article\HTMLArticle::onDelete",
 					 ),
 					 
 					 "iter"=>array("per_page"=>"20"),
@@ -74,7 +80,6 @@ class HTMLArticle implements ArticleV2{
 				);
 				
 			
-				require_once("modules/makeFormV4.php");
 				$this->form = new MakeForm($form);
 				//$this->form = new make_form(file_get_contents("forms/editHTMLArticle.xml"));
 			}
@@ -105,7 +110,6 @@ class HTMLArticle implements ArticleV2{
 
 		$path = str_replace("RSS=1","",$_SERVER["REQUEST_URI"]);
 		if(substr($path,-1)=="?") $path = substr($path,0,-1);
-		require_once("modules/Time.php");
 		return ' <item>
   <guid>'.md5($articlerow["id2"]."-ajfskajf").'</guid>
   <title>'.$nadpis.'</title>
@@ -116,30 +120,27 @@ class HTMLArticle implements ArticleV2{
 ';
 	}
 	public function makeArticle(&$articlerow){
-		require_once("modules/Container.php");
+		
 		$c1 = new Container("article");
 		$c1->setBody(Language::get($articlerow["text"]));
-		require_once("modules/MainMenu.php");
+		
 		if($this->editor && isset($articlerow["id"]) && (MainMenu::$editingmenu || MainMenu::$editingart)){
 $c1->appendBody(
 '<div class="editarticle">
-<a href="?articles_html___UPDATE1=1&amp;articles_html___ID='.@$articlerow["id"].'&newhtmlarticle=1">'.Language::get("L__Edit_article").'</a>
+<a href="'.Path::make(array("articles_html___UPDATE1"=>1,"articles_html___ID"=>$articlerow["id"],"newhtmlarticle"=>"1")).'">'.Language::get("L__Edit_article").'</a>
 |
-<a onclick="confirm(\''.Language::get("L__Delete_article_confirm").'\')?ret=true:ret=false;return ret;" href="?articles_html___DELETE=1&amp;articles_html___ID='.$articlerow["id"].'&newhtmlarticle=1">'.Language::get("L__Delete_article").'</a>
+<a onclick="confirm(\''.Language::get("L__Delete_article_confirm").'\')?ret=true:ret=false;return ret;" href="'.Path::make(array("articles_html___DELETE"=>1,"articles_html___ID"=>$articlerow["id"],"newhtmlarticle"=>"1")).'">'.Language::get("L__Delete_article").'</a>
 </div>');
 		}
 		return $c1->show();
 	}
 	public static function onInsert($articlerow){
-		require_once("modules/Session.php");
 		Session::set("newhtmlarticle","0");
 	}
 	public static function onUpdate($r){
-		require_once("modules/Session.php");
 		Session::set("newhtmlarticle","0");
 	}
 	public static function onDelete($r){
-		require_once("modules/Session.php");
 		Session::set("newhtmlarticle","0");
 	}
 }
