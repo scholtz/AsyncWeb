@@ -25,6 +25,5 @@
         "php": ">=5.3.9"
       , "cboden/Ratchet": "0.3.*"
       , "mustache/mustache": "~2.5"
-	  , "recaptcha/php5": "dev-master"
 	}
 }
