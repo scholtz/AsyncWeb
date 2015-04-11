@@ -2234,7 +2234,7 @@ class InputFilter{
 					foreach($filter["src"] as $k=>$v){
 						if(isset($data[$k])){
 							$move[$v] = $data[$k];
-						}if(isset($data[$v])){
+						}elseif(isset($data[$v])){
 							$move[$v] = $data[$v];
 						}
 					}

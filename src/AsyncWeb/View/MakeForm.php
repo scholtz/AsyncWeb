@@ -765,12 +765,7 @@ class MakeForm{
      	$data[$colname] = $value;
      break;
      case 'password':
-      $hashing=Config::getInstance()->getValue("//bezpecnostne/hashing");
-      if($hashing=="SHA256"){
-      	$data[$colname] = Message::calcHash('SHA256',URLParser::v($name1));
-      }else{
-		$data[$colname] = md5(URLParser::v($name1));
-      }
+      	$data[$colname] = hash('sha256',URLParser::v($name1));
      case 'htmlText':
      case 'tinyMCE':
 	  
@@ -1030,11 +1025,7 @@ class MakeForm{
      break;
 	 case 'password':
       $hashing=Config::getInstance()->getValue("//bezpecnostne/hashing");
-      if($hashing=="SHA256"){
-      	$colValue= Message::calcHash('SHA256',$colValue);
-      }else{
-       $colValue= md5($colValue);
-      }
+      $colValue = hash('sha256',$colValue);
 	 case 'tinyMCE':
 	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
