@@ -1024,7 +1024,6 @@ class MakeForm{
 	  $cols[$colname] = $this->filters($value,@$item["data"]["datatype"],true);
      break;
 	 case 'password':
-      $hashing=Config::getInstance()->getValue("//bezpecnostne/hashing");
       $colValue = hash('sha256',$colValue);
 	 case 'tinyMCE':
 	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
