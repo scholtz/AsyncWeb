@@ -473,15 +473,16 @@ class MainMenu{
 		foreach(MainMenu::$addLeftMenuItems as $item){
 			$ret.='<li><a href="'.$item["path"].'">'.$item["text"].'</a></li>';
 		}
-		$ret.='<li><a id="menu-toggle">Toggle menu</a></li>';
+		//$ret.='<li><a id="menu-toggle">Toggle menu</a></li>';
 		$ret .='</ul></div>
-		<script>
+		';
+		/*$ret.='		<script>
 			$("#menu-toggle").click(function(e) {
 				e.preventDefault();
 				$("#wrapper").toggleClass("toggled");
 			});
 		</script>
-		';
+';/**/
 		
 		Cache::set($key,"menu",$ret);
 		
