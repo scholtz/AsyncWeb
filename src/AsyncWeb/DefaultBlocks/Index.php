@@ -32,7 +32,6 @@ class Index extends \AsyncWeb\Frontend\Block{
 {{{Cat}}}
 </div>
 </div>
-</div>
 {{{Footer}}}
 </body>
 </html>';

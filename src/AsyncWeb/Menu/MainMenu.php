@@ -299,16 +299,19 @@ class MainMenu{
 	}
 	public static function showMenuItem(&$row,$recursive=true,$class="menuitem",$subclass="submenu",$showsubmenu=false,$showeditor=true,$type="main"){
 		$ret = '';
-		
+		$adddropdown = "";
 		if(!@$row["visible"] && !MainMenu::$editingmenu) return $ret;
+		if($type=="main" && isset($row["submenu"]) && is_array($row["submenu"]) && $row["submenu"]){
+			$class.=" dropdown";$adddropdown = ' class="dropdown-toggle" data-toggle="dropdown"';$dropdowncaret=' <span class="caret"></span>';
+		}
 		$ret.='<li class="'.$class.' '.@$row["class"].'">';
 		if(!$row["type"]) $row["type"] = "category";
 		if($row["type"] == "category" && !$row["text"]){$row["text"] = "?";}
 		if($type == "left" || $type == "nav") $row["type"] = "category";
 		switch($row["type"]){
-			case "image": $ret.= '<a href="'.$row["path"].'"><img src="'.$row["img"].'" width="'.$row["imgwidth"].'" height="'.$row["imgheight"].'" alt="'.$row["imgalt"].'" title="'.($row["text"]).'" /></a>';break;
+			case "image": $ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><img src="'.$row["img"].'" width="'.$row["imgwidth"].'" height="'.$row["imgheight"].'" alt="'.$row["imgalt"].'" title="'.($row["text"]).'" />'.$dropdowncaret.'</a>';break;
 			case "text":$ret.= '<span class="menutext">'.($row["text"]).'</span>';break;
-			case "category":$ret.= '<a href="/'.MainMenu::$CATEGORY_TAG_NAME.":".$row["path"].'"><span class="menutext">'.($row["text"]).'</span></a>';break;
+			case "category":$ret.= '<a'.$adddropdown.' href="/'.MainMenu::$CATEGORY_TAG_NAME.":".$row["path"].'"><span class="menutext">'.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
 			case "src":$ret.= '<a href="'.$row["path"].'"><span class="menutext">'.($row["text"]).'</span></a>';break;
 		}
 
@@ -322,10 +325,12 @@ class MainMenu{
 					if($k=="submenu") continue;
 					$sub.=MainMenu::showMenuItem($row1,$recursive,$class,$subclass,$showsubmenu,$showeditor,$type);
 				}
+				
 				if($sub){
-					$style = ' style="display:none"';
+					//$style = ' style="display:none"';
 					if($showsubmenu) $style = '';
-					$ret.='<ul class="'.$subclass.'"'.$style.'>'.$sub.'</ul>';
+					if($type == "main") $subclass .= " dropdown-menu";
+					$ret.='<ul role="menu" class="'.$subclass.'"'.$style.'>'.$sub.'</ul>';
 				}
 			}
 		}
@@ -377,7 +382,7 @@ class MainMenu{
 			if($k=="submenu") continue;
 			$t = MainMenu::showMenuItem($row);
 			if($t){
-				if(MainMenu::$showsep && $i>MainMenu::$showsepfrom) $sub.='<li>|</li>';
+				//if(MainMenu::$showsep && $i>MainMenu::$showsepfrom) $sub.='<li>|</li>';
 				$sub.=$t;
 			}
 			$lrow = $row;
