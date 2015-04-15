@@ -180,7 +180,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 		}
 	}
 	if(Session::$uses_long_timeout){
-		if(!\AsyncWeb\Security\Auth::$CHECKING && Auth::userId()){
+		if(!\AsyncWeb\Security\Auth::$CHECKING && \AsyncWeb\Security\Auth::userId()){
 			if($time < ($ctime - Session::$timeout)){
 				
 				@session_destroy();
@@ -286,4 +286,3 @@ if(isset($debug) && $debug){
  echo "<div>Session:".(microtime(true) - $t1)."</div>";
 }
 
-?>

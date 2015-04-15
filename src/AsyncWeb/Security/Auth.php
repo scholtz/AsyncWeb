@@ -8,7 +8,7 @@ class Auth{
 	protected static $SESS_CHAIN_NAME = "_AUTH_CHAIN";
 	public static $TRY_TO_INSTALL_DATA = true;
 	public static $CHECKING = false;
-	public static function check(){
+	public static function check($skipControllers=false){
 		Auth::$CHECKING = true;
 		$ret = false;
 		foreach(Auth::$services as $service){
@@ -16,7 +16,7 @@ class Auth{
 				$ret=true;
 			}
 		}
-				
+		
 		$auth = Session::get(Auth::$SESS_CHAIN_NAME);
 		if($auth && is_array($auth)){
 			foreach($auth as $service){
@@ -27,6 +27,7 @@ class Auth{
 					throw new \AsyncWeb\Exceptions\SecurityException("Out of date data! 0x9319511");
 				}
 			}
+			$ret = true; // if none fails, than we are ok
 			if(isset($_REQUEST["logout"])){
 				Auth::logout();
 				\AsyncWeb\HTTP\Header::s("reload",array("logout"=>""));
@@ -37,8 +38,7 @@ class Auth{
 				throw new \AsyncWeb\Exceptions\SecurityException("Service provider did not register user properly! 0x9319512");
 			}
 		}
-		//var_dump($ret);exit;
-		
+		if(!$skipControllers && $ret){$ret = (true === Auth::checkControllers());}// if any controller fails, check is false
 		Auth::$CHECKING = false;
 		return $ret;
 	}
@@ -53,6 +53,7 @@ class Auth{
 	}
 	public static function showControllerForm(){
 		$k = Auth::checkControllers();
+		
 		return Auth::$controllers[$k]->form();
 	}
 	public static function auth(Array $data, AuthService $service){

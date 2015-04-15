@@ -4,6 +4,8 @@
 // Created & designed by Ludovit Scholtz
 // ludovit __ AT __ scholtz.sk
 //
+// 14.4.2015	{ is replaced by &#123; in textareas so that templates are not executed in forms 
+//
 // 23.2.2015 	Captcha moved to dependency recaptcha/php5-v2
 //
 // 23.2.2015	Namespace added
@@ -504,9 +506,7 @@ class MakeForm{
        throw new \Exception($this->getExceptionText($item,"dataTypeException"));
       }
     }elseif($data_type == "number"){
-		var_dump($name1);
-	  var_dump(URLParser::v($name1));
-      $name1val = str_replace(",",".",URLParser::v($name1));
+	  $name1val = str_replace(",",".",URLParser::v($name1));
       $name1val = str_replace(" ","",$name1val);
 	  if(isset($item["data"]["allowNull"]) && !$name1val){
 		return;
@@ -1000,8 +1000,7 @@ class MakeForm{
 	 $item["editable"] = false;
    }
 
-
-   
+   	 	
    // nepokracuj ak je item typu part, ak nieje editovatelny, alebo sa nezmenil	
    if($item["form"]["type"] == "part") continue;
    if(isset($item["editable"]) && !$item["editable"]) continue;
@@ -1042,7 +1041,7 @@ class MakeForm{
 	 break;
      case 'textbox':
      case 'textarea':
-	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
+	   $value = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
 		$langupdates[$colname] = $value;
 	  }else{
@@ -1544,6 +1543,11 @@ class MakeForm{
 	return $ret;
  }
  private $insertingN2N = false;
+ protected function encodeEntities($str){
+	 //$str = htmlentities($str,ENT_COMPAT, 'UTF-8');// gets converted in URLParser::v()
+	 $str = str_replace("{","&#123;",$str);// so that templates are not executed when editing
+	 return $str;
+ }
  private function insertForm(){
   if(!isset($this->data["allowInsert"])) return false;
   if(isset($this->data["rights"])){
@@ -1975,9 +1979,9 @@ class MakeForm{
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
      if($form_submitted){
-      $ret.=$colValue;
+      $ret.=$this->encodeEntities($colValue);
      }else{
-      if(isset($item["texts"]["default"])) $ret .= $this->getText($item["texts"]["default"]);
+      if(isset($item["texts"]["default"])) $ret .= $this->encodeEntities($this->getText($item["texts"]["default"]));
      }
      $ret.='</textarea>';
 	 if(!isset($this->data["bootstrap"])){
@@ -2001,105 +2005,44 @@ class MakeForm{
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
      if($form_submitted){
-      $ret.=$colValue;
+      $ret.=$this->encodeEntities($colValue);
      }else{
-      if(isset($item["texts"]["default"])) $ret .= $this->getText($item["texts"]["default"]);
+      if(isset($item["texts"]["default"])) $ret .= $this->encodeEntities($this->getText($item["texts"]["default"]));
      }
 $theme = "simple";
 	 if(isset($item["form"]["theme"])){
 		$theme = $item["form"]["theme"];
 	 }
      $ret.='</textarea>
-	 <script type="text/javascript" src="/js/tiny_mce/jquery.tinymce.js"></script>';
+	 ';
 	 if($theme != "advanced"){
 	 $ret.= '	 
 	 <script type="text/javascript">
-	 $(document).on("focusin", function(e) {
-		if ($(e.target).closest(".mce-window").length) {
-			e.stopImmediatePropagation();
-		}
-	});
 	$().ready(function() {
-		$("#'.$name.'").tinymce({
-			script_url : "/js/tiny_mce/tiny_mce.js",
-			remove_script_host : false,
-			convert_urls : false,
-			relative_urls : false,
-			theme : "'.$theme.'",
-		});
+		tinymce.init({selector:"#'.$name.'",
+		remove_script_host : false,
+		convert_urls : false,
+		relative_urls : false
+		
+		';
+		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
+		$ret.='});
 	});
 	</script>';
+	
 	 }else{
 //			theme_advanced_styles : "image",
 	 $ret.= '
 <script type="text/javascript">
 	$().ready(function() {
-		$("#'.$name.'").tinymce({
-			script_url : "/js/tiny_mce/tiny_mce.js",
-			language : "'.Language::getLang().'",
-			theme : "'.$theme.'",
-			elements : "ajaxfilemanager",
-			file_browser_callback : "ajaxfilemanager",
-			mode : "textareas",
-			plugins : "advlink,advimage,fullscreen,media,preview,style,autoresize,table",
-			theme_advanced_resizing : true,
-			theme_advanced_resize_horizontal : true,
-			theme_advanced_resize_vertical : true,
-			theme_advanced_buttons2_add : "tablecontrols",
-			theme_advanced_buttons3_add : "preview,media",
-			apply_source_formatting : true,
-			fullscreen_new_window : true,
-			width:"100%",
-			remove_script_host : false,
-			convert_urls : false,
-			relative_urls : false,';
-			if(is_file("js/tiny_mce/themes/advanced/skins/o2k7/content.css")){
-			$ret.='
-			skin : "o2k7",
-			';//skin_variant : "silver",
-			}
-			
-			$ret.='
-			fullscreen_settings : {
-					theme_advanced_path_location : "top"
-			}
-
-		});
+		tinymce.init({selector:"#'.$name.'",
+		remove_script_host : false,
+		convert_urls : false,
+		relative_urls : false,
+		plugins : "advlist autolink link image lists charmap print preview searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste"';
+		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
+		$ret.='});
 	});
-	
-	function ajaxfilemanager(field_name, url, type, win) {
-		var ajaxfilemanagerurl = "/ajaxfilemanager/ajaxfilemanager.php";
-		switch (type) {
-			case "image":
-				ajaxfilemanagerurl += "?type=img";
-			break;
-			case "media":
-				ajaxfilemanagerurl += "?type=media";
-			break;
-			case "flash": //for older versions of tinymce
-				ajaxfilemanagerurl += "?type=media";
-			break;
-			case "file":
-				ajaxfilemanagerurl += "?type=files";
-			break;
-			default:
-			return false;
-		}
-		var fileBrowserWindow = new Array();
-		fileBrowserWindow["file"] = ajaxfilemanagerurl;
-		fileBrowserWindow["title"] = "Ajax File Manager";
-		fileBrowserWindow["width"] = "782";
-		fileBrowserWindow["height"] = "440";
-		fileBrowserWindow["resizable "] = "yes";
-		fileBrowserWindow["inline"] = "yes";
-		fileBrowserWindow["close_previous"] = "no";
-		tinyMCE.activeEditor.windowManager.open(fileBrowserWindow, {
-			window : win,
-			input : field_name
-		});
-
-		return false;
-	}
 </script>
 	 ';
 	 }
@@ -2666,7 +2609,7 @@ $theme = "simple";
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <input class="MFInput form-control'.$addclass.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true" type="text" id="'.$name.'" name="'.$name.'"';
      if($form_submitted){
-	  if(array_key_exists("date_".$name,$_REQUEST)){
+	  if(URLParser::v("date_".$name) !== null){
        $ret.=' value="'.stripslashes(URLParser::v("date_".$name)).'"';
 	  }else{
 	   $ret.=' value="'.stripslashes($colValue).'"';
@@ -2959,9 +2902,9 @@ $theme = "simple";
      if($form_submitted){
       $ret .= $colValue;
      }else{
-	   $value = $row[$col];
+	   $value = $this->encodeEntities($row[$col]);
 	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-	    $value = $this->getText($value,true);
+	    $value = $this->encodeEntities($this->getText($value,true));
 	   }
       $ret .= $value;
      }
@@ -2994,9 +2937,9 @@ $theme = "simple";
      if($form_submitted){
       $ret .= $colValue;
      }else{
-	   $value = $row[$col];
+	   $value = $this->encodeEntities($row[$col]);
 	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-	    $value = $this->getText($value,true);
+	    $value = $this->encodeEntities($this->getText($value,true));
 	   }
       $ret .= $value;
      }
@@ -3005,97 +2948,35 @@ $theme = "simple";
 	 if(isset($item["form"]["theme"])){
 		$theme = $item["form"]["theme"];
 	 }
-     $ret.='</textarea>
-	 <script type="text/javascript" src="/js/tiny_mce/jquery.tinymce.js"></script>';
+     $ret.='</textarea>';
 	 if($theme != "advanced"){
 	 $ret.= '	 
 	 <script type="text/javascript">
-	 $(document).on("focusin", function(e) {
-		if ($(e.target).closest(".mce-window").length) {
-			e.stopImmediatePropagation();
-		}
-	});
 	$().ready(function() {
-		$("#'.$name.'").tinymce({
-			script_url : "/js/tiny_mce/tiny_mce.js",
-			remove_script_host : false,
-			convert_urls : false,
-			relative_urls : false,
-			theme : "'.$theme.'",
-		});
+		tinymce.init({selector:"#'.$name.'",
+		remove_script_host : false,
+		convert_urls : false,
+		relative_urls : false
+		
+		';
+		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
+		$ret.='});
 	});
 	</script>';
+	
 	 }else{
 //			theme_advanced_styles : "image",
 	 $ret.= '
 <script type="text/javascript">
 	$().ready(function() {
-		$("#'.$name.'").tinymce({
-			script_url : "/js/tiny_mce/tiny_mce.js",
-			language : "'.Language::getLang().'",
-			theme : "'.$theme.'",
-			elements : "ajaxfilemanager",
-			file_browser_callback : "ajaxfilemanager",
-			mode : "textareas",
-			plugins : "advlink,advimage,fullscreen,media,preview,style,autoresize,table",
-			theme_advanced_resizing : true,
-			theme_advanced_resize_horizontal : true,
-			theme_advanced_resize_vertical : true,
-			theme_advanced_buttons2_add : "tablecontrols",
-			theme_advanced_buttons3_add : "preview,media",
-			apply_source_formatting : true,
-			fullscreen_new_window : true,
-			width:"100%",
-			remove_script_host : false,
-			convert_urls : false,
-			relative_urls : false,';
-			if(is_file("js/tiny_mce/themes/advanced/skins/o2k7/content.css")){
-			$ret.='
-			skin : "o2k7",
-			';//skin_variant : "silver",
-			}
-			
-			$ret.='
-			fullscreen_settings : {
-					theme_advanced_path_location : "top"
-			}
-
-		});
+		tinymce.init({selector:"#'.$name.'",
+		remove_script_host : false,
+		convert_urls : false,
+		relative_urls : false,
+		plugins : "advlist autolink link image lists charmap print preview searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste"';
+		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
+		$ret.='});
 	});
-	
-	function ajaxfilemanager(field_name, url, type, win) {
-		var ajaxfilemanagerurl = "/ajaxfilemanager/ajaxfilemanager.php";
-		switch (type) {
-			case "image":
-				ajaxfilemanagerurl += "?type=img";
-			break;
-			case "media":
-				ajaxfilemanagerurl += "?type=media";
-			break;
-			case "flash": //for older versions of tinymce
-				ajaxfilemanagerurl += "?type=media";
-			break;
-			case "file":
-				ajaxfilemanagerurl += "?type=files";
-			break;
-			default:
-			return false;
-		}
-		var fileBrowserWindow = new Array();
-		fileBrowserWindow["file"] = ajaxfilemanagerurl;
-		fileBrowserWindow["title"] = "Ajax File Manager";
-		fileBrowserWindow["width"] = "782";
-		fileBrowserWindow["height"] = "440";
-		fileBrowserWindow["resizable "] = "yes";
-		fileBrowserWindow["inline"] = "yes";
-		fileBrowserWindow["close_previous"] = "no";
-		tinyMCE.activeEditor.windowManager.open(fileBrowserWindow, {
-			window : win,
-			input : field_name
-		});
-
-		return false;
-	}
 </script>
 	 ';
 	 }
@@ -3121,7 +3002,7 @@ $theme = "simple";
 	 }
      $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
      if($form_submitted){
-      if(array_key_exists($name,$_REQUEST))
+      if(URLParser::v($name) !== null)
       if($colValue=="on"){
        $ret.= ' checked="checked"';
       }

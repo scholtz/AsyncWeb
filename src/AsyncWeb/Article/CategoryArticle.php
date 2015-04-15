@@ -11,7 +11,7 @@ use AsyncWeb\Cache\Cache;
 
 class CategoryArticle{
 	private static $listenerCheck = array();
-	public static function make($cat){
+	public static function make($cat=false){
 		if(!$cat){
 			$cat = MainMenu::getCurrent();
 		}
@@ -104,7 +104,8 @@ class CategoryArticle{
 		if(!$ret){
 			$ret.= Language::get('Kategória neobsahuje žiadny článok');
 		}
-		return $ret;
+		
+		return $ret; 
 	}
 	public static function makeArticle(&$articlerow){
 		if(!$articlerow) return;

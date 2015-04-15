@@ -620,6 +620,7 @@ class MainMenu{
 		$ret = '';
 		
 		if(isset($cur["submenu"])){
+			ksort($cur["submenu"]);
 			foreach($cur["submenu"] as $row){
 				$ret.=MainMenu::showLeftMenuItem($row,false,"art_menuitem");
 			}

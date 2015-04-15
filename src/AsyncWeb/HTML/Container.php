@@ -54,7 +54,7 @@ class Container{
 	
 	public function show(){
 		$ret = "";
-		$ret .= '<div class="container">';
+		$ret .= '<div class="AWcontainer">';
 		$ret .= '<div class="container_'.$this->name.'_1">';
 		$ret .= '<div class="container_'.$this->name.'_2">';
 		$ret .= '<div class="container_'.$this->name.'_3">';

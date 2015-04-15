@@ -125,8 +125,13 @@ class URLParser{
 	public static function v($name){
 		$data = URLParser::parse();
 		if(!isset($data["var"][$name])){
-			if(isset($_REQUEST[$name])) return $_REQUEST[$name];
+			/**
+			 Converts all input to htmlspecialchars. in DB all input should be converted (f.e. " &quot;
+			 it is prevention against XSS
+			*/
+			if(isset($_REQUEST[$name])) return htmlspecialchars($_REQUEST[$name],ENT_COMPAT | ENT_HTML5, 'UTF-8');
+			return null;
 		}
-		return @$data["var"][$name];
+		return $data["var"][$name];
 	}
 }

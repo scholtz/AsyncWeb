@@ -122,7 +122,7 @@ class HTMLArticle implements ArticleV2{
 	public function makeArticle(&$articlerow){
 		
 		$c1 = new Container("article");
-		$c1->setBody(Language::get($articlerow["text"]));
+		$c1->setBody(html_entity_decode(Language::get($articlerow["text"])));
 		
 		if($this->editor && isset($articlerow["id"]) && (MainMenu::$editingmenu || MainMenu::$editingart)){
 $c1->appendBody(
@@ -144,6 +144,3 @@ $c1->appendBody(
 		Session::set("newhtmlarticle","0");
 	}
 }
-
-
-?>
