@@ -1,5 +1,7 @@
 <?php
 namespace AsyncWeb\Objects;
+use AsyncWeb\DB\DB;
+
 class User{
 	public static function get($id2=null){
 		if($id2==null){

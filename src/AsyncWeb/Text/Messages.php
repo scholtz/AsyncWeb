@@ -45,7 +45,7 @@ class Messages{
  private $conf_ses_save_msg = "Message_msg";
  private $conf_ses_save_alert = "Message_alert";
 
- private function Messages(){
+ private function __construct(){
   if($this->err == "" && \AsyncWeb\Storage\Session::get($this->conf_ses_save_err)){ $this->err = \AsyncWeb\Storage\Session::get($this->conf_ses_save_err);}
   if($this->warn == "" && \AsyncWeb\Storage\Session::get($this->conf_ses_save_warn)){ $this->warn = \AsyncWeb\Storage\Session::get($this->conf_ses_save_warn);}
   if($this->msg == "" && \AsyncWeb\Storage\Session::get($this->conf_ses_save_msg)){ $this->msg = \AsyncWeb\Storage\Session::get($this->conf_ses_save_msg);}
@@ -120,9 +120,7 @@ class Messages{
 
  public function show(){
   $ret = $this->err.$this->warn.$this->msg;
-  $this->clear_msg();
-  $this->clear_warn();
-  $this->clear_err();
+  $this->clear();
   return $ret;
  }
 
