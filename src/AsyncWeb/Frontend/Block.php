@@ -145,6 +145,13 @@ class Block{
 			$this->data[$namespace] = array();
 		};
 		
+		if(isset(static::$DICTIONARY[\AsyncWeb\System\Language::get()])){
+			foreach(static::$DICTIONARY[\AsyncWeb\System\Language::get()] as $k=>$v){
+				$this->data[$namespace][$k] = $v;
+			}
+		}
+		
+
 		$pos = 0;
 		while(($pos = strpos($this->template,"{{{",$pos)) !== false){
 			$pos+=3;
@@ -172,11 +179,6 @@ class Block{
 			}
 		}
 		
-		if(isset(static::$DICTIONARY[\AsyncWeb\System\Language::get()])){
-			foreach(static::$DICTIONARY[\AsyncWeb\System\Language::get()] as $k=>$v){
-				$this->data[$namespace][$k] = $v;
-			}
-		}
 		
 		if($this->data[$namespace]["USER_ID"] = \AsyncWeb\Security\Auth::userId()){
 			
@@ -194,6 +196,7 @@ class Block{
 			$this->data[$namespace]["AUTH"] = false;
 			$this->data[$namespace]["PREAUTH"] = false;
 		}
+		$this->data[$namespace]["TEMPLATE_START_DELIMITER"] = "{{{";
 		
 		return Block::$MustacheEngine->render($this->template,$this->data[$namespace]);
 	}
