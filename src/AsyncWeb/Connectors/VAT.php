@@ -5,12 +5,14 @@ use AsyncWeb\Date\Time;
 use AsyncWeb\Objects\User;
 use AsyncWeb\Connectors\Page;
 
+define("VAT_RATE_SUPER_REDUCED","srr");
+define("VAT_RATE_REDUCED","rr");
+define("VAT_RATE_REDUCED2","rr2");
+define("VAT_RATE_STANDARD","standard");
+define("VAT_RATE_PARKING","parking");
+
+
 class VAT{
-	public static final $RATE_SUPER_REDUCED = "srr";
-	public static final $RATE_REDUCED = "rr";
-	public static final $RATE_REDUCED2 = "rr2";
-	public static final $RATE_STANDARD = "standard";
-	public static final $RATE_PARKING = "parking";
 	
 	public static $DOMESTIC_ZONE = "UK";
 	public static $VAT_CHECK_TABLE = "vat_verification";
@@ -28,26 +30,28 @@ class VAT{
 		$num = substr($vat,2);
 		
 		$text = Page::get($q="http://ec.europa.eu/taxation_customs/vies/viesquer.do?BtnSubmitVat=Verify&ms=$country&iso=$country&vat=$num");
-		
 		if(!$text) return "Error checking VAT: ".curl_error($ch);
-		if(strpos($text,"Yes, valid VAT number")) {DB::u(VAT::$VAT_CHECK_TABLE,md5($vat),array("vat"=>$vat,"result"=>"1"));return true;};
-		if(strpos($text,"No, invalid VAT number")) {DB::u(VAT::$VAT_CHECK_TABLE,md5($vat),array("vat"=>$vat,"result"=>"VAT not listed in VIES - VAT Information Exchange System"));return "VAT not listed in VIES - VAT Information Exchange System";}
-		return "Unknown result. Please contact CEB for help.";
+		if(!strpos($text,"invalidStyle")) {
+			DB::u(VAT::$VAT_CHECK_TABLE,md5($vat),array("vat"=>$vat,"result"=>"1"));return true;
+		}else{
+			if(strpos($text,"invalidStyle")) {DB::u(VAT::$VAT_CHECK_TABLE,md5($vat),array("vat"=>$vat,"result"=>"VAT not listed in VIES - VAT Information Exchange System"));return "VAT not listed in VIES - VAT Information Exchange System";}
+		}
+		
 	}
-	public static function getVATMult($type=VAT::$RATE_STANDARD,$time=null){
+	public static function getVATMult($type=VAT_RATE_STANDARD,$time=null){
 		$curtime = Time::get();
 		if($time) $curtime=$time;
 		
 		if(Time::get(strtotime("2011-01-01")) < $curtime && VAT::$DOMESTIC_ZONE == "SK") return 1.20;
 		
 		$rates=array(
-			VAT::$RATE_SUPER_REDUCED=>array(
+			VAT_RATE_SUPER_REDUCED=>array(
 				"ES"=>1.04,
 				"FR"=>1.021,
 				"IE"=>1.048,
 				"IT"=>1.04,
 				"LU"=>1.03,),
-			VAT::$RATE_REDUCED=>array(
+			VAT_RATE_REDUCED=>array(
 				"BE"=>1.06,
 				"BG"=>1.09,
 				"CZ"=>1.10,
@@ -77,7 +81,7 @@ class VAT{
 				"UK"=>1.05,
 						 
 			),
-			VAT::$RATE_REDUCED2=>array(
+			VAT_RATE_REDUCED2=>array(
 				"BE"=>1.12,
 				"CZ"=>1.15,
 				"EL"=>1.13,
@@ -95,7 +99,7 @@ class VAT{
 				"SE"=>1.12,
 						 
 			),
-			VAT::$RATE_STANDARD=>array(
+			VAT_RATE_STANDARD=>array(
 				"BE"=>1.21,
 				"BG"=>1.20,
 				"CZ"=>1.21,
@@ -126,7 +130,7 @@ class VAT{
 				"UK"=>1.20,
 						 
 			),
-			VAT::$RATE_PARKING=>array(
+			VAT_RATE_PARKING=>array(
 				"BE"=>1.12,
 				"IE"=>1.135,
 				"LU"=>1.14,
@@ -137,10 +141,10 @@ class VAT{
 		
 		if(isset($rates[$type][VAT::$DOMESTIC_ZONE])) return $rates[$type][VAT::$DOMESTIC_ZONE];
 	}
-	public static function getVAT($type=VAT::$RATE_STANDARD,$time=null){
+	public static function getVAT($type=VAT_RATE_STANDARD,$time=null){
 		return (VAT::getVATMult($type,$time)-1)*100;
 	}
-	public static function getVATMultUserToUser($usr1,$usr2=false,$type=VAT::$RATE_STANDARD,$time=null){
+	public static function getVATMultUserToUser($usr1,$usr2=false,$type=VAT_RATE_STANDARD,$time=null){
 		if(User::getDPH($usr1) == "f") return 1;
 		if($usr2) if(User::getDPH($usr2) == "f") return 1;
 		return VAT::getVATMult($type,$time);
