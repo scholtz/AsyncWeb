@@ -5,6 +5,7 @@ use AsyncWeb\Date\Time;
 use AsyncWeb\Objects\User;
 use AsyncWeb\Connectors\Page;
 
+define("VAT_RATE_ZERO","novat");
 define("VAT_RATE_SUPER_REDUCED","srr");
 define("VAT_RATE_REDUCED","rr");
 define("VAT_RATE_REDUCED2","rr2");
