@@ -55,28 +55,13 @@ class Container{
 	public function show(){
 		$ret = "";
 		$ret .= '<div class="AWcontainer">';
-		$ret .= '<div class="container_'.$this->name.'_1">';
-		$ret .= '<div class="container_'.$this->name.'_2">';
-		$ret .= '<div class="container_'.$this->name.'_3">';
-		$ret .= '<div class="container_'.$this->name.'_4">';
-		$ret .= '<div class="container_'.$this->name.'_T">';
 
 		if($this->header){
 			
 		$ret .= '<div class="container_head">';
-		$ret .= '<div class="container_head_'.$this->name.'_1">';
-		$ret .= '<div class="container_head_'.$this->name.'_2">';
-		$ret .= '<div class="container_head_'.$this->name.'_3">';
-		$ret .= '<div class="container_head_'.$this->name.'_4">';
-		$ret .= '<div class="container_head_'.$this->name.'_T">';
 			
 		$ret .= $this->header;
 		
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
 		$ret .= '</div>';
 		
 		}
@@ -84,28 +69,13 @@ class Container{
 		if($this->body){
 			
 		$ret .= '<div class="container_body">';
-		$ret .= '<div class="container_body_'.$this->name.'_1">';
-		$ret .= '<div class="container_body_'.$this->name.'_2">';
-		$ret .= '<div class="container_body_'.$this->name.'_3">';
-		$ret .= '<div class="container_body_'.$this->name.'_4">';
-		$ret .= '<div class="container_body_'.$this->name.'_T">';
 			
 		$ret .= $this->body;
 		
 		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
 		
 		}
 		
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
-		$ret .= '</div>';
 		$ret .= '</div>';
 		
 		return $ret;

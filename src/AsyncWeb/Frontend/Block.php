@@ -5,6 +5,7 @@ class Block{
 	public static $TEMPLATES_PATH = "../templates/";
 	public static $BLOCK_PATH = "../templates/";
 	public static $DICTIONARY = array();
+	public $blockElement = "div";
 	protected static $i = 1;
 	protected static $MustacheEngine = null;
 	protected $template = "";
@@ -12,6 +13,7 @@ class Block{
 	protected $tid = "";
 	protected $clients = array();
 	protected $usesparams = array();
+	
 	public function getUsesParams(){
 		return $this->usesparams;
 	}
@@ -170,7 +172,7 @@ class Block{
 						if($p = strpos($item,":")){
 							$itemid = substr($item,0,$p);
 						}
-						$this->data[$namespace][$item] = '<span id="T_'.$itemid.'">'.$itemcl->get().'</span>';
+						$this->data[$namespace][$item] = '<'.$this->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$this->blockElement.'>';
 					}
 				}catch(Exception $exc){
 					
