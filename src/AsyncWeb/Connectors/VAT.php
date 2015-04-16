@@ -40,6 +40,7 @@ class VAT{
 		
 	}
 	public static function getVATMult($type=VAT_RATE_STANDARD,$time=null){
+		if($type==VAT_RATE_ZERO) return 1;
 		$curtime = Time::get();
 		if($time) $curtime=$time;
 		
