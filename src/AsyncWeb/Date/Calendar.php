@@ -328,7 +328,7 @@ class Calendar{
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.\AsyncWeb\System\Language::getLang().'">
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
- <title>'.\AsyncWeb\System\Language::get("Kalendár").'</title>
+ <title>'.\AsyncWeb\System\Language::get("Calendar").'</title>
  '.$this->style().'
  <script type="text/javascript" src="/js/jquery.js"></script>
  '.$this->script().'

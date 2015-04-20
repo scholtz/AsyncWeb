@@ -82,7 +82,7 @@ class DBMenu5 extends MenuBuilder{
 			
 				if($showeditor){
 					if(!$row["submenu"]){
-						$row["submenu"][1] = MenuItemBuilder::get(md5(uniqid()),Language::get('Vytvoriť podmenu'),Path::make(array("insert_data_dbmenu5_edit"=>"1","addmenuitemsub"=>$row["id2"]),false,"?"));
+						$row["submenu"][1] = MenuItemBuilder::get(md5(uniqid()),Language::get('New submenu'),Path::make(array("insert_data_dbmenu5_edit"=>"1","addmenuitemsub"=>$row["id2"]),false,"?"));
 					}
 					
 					//$menu2[$order*100-2] = MenuItemBuilder::get(md5(uniqid()),"&lt;*",Path::make(array("insert_data_dbmenu5_edit"=>"1","addmenuitembefore"=>$row["id2"]),false,"?"));
@@ -295,7 +295,7 @@ class DBMenu5 extends MenuBuilder{
 					 "col" => array(
 					 array("name"=>"Path","form"=>array("type"=>"textbox"),"data"=>array("col"=>"path","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
 					 array("name"=>"Text","form"=>array("type"=>"textbox"),"data"=>array("col"=>"text","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
-					 array("name"=>"Run","form"=>array("type"=>"textbox"),"data"=>array("col"=>"run"),"usage"=>array("MFu","MFd")),
+					 array("name"=>"FA Icon","form"=>array("type"=>"textbox"),"data"=>array("col"=>"fa"),"usage"=>array("MFi","MFu","MFd")),
 					 array("name"=>"ID3","form"=>array("type"=>"textbox"),"data"=>array("col"=>"id3"),"usage"=>array("MFu","MFd")),
 					 array(
 						"name"=>"Parent",
@@ -313,24 +313,24 @@ class DBMenu5 extends MenuBuilder{
 						),
 						"usage"=>array("MFi","MFu","MFd")),
 
-					array("name"=>"Poradie","form"=>array("type"=>"textbox"),"texts"=>array("default"=>"PHP::\AsyncWeb\Menu\DBMenu5::getInsertDefaultOrder()"),"data"=>array("col"=>"order","datatype"=>"number","minnum"=>-100000,"maxnum"=>10000000),"filter"=>array("type"=>"number_format","decimal"=>"0","desat_oddelocac"=>",","oddelovac_tisicov"=>"."),"usage"=>array("MFi","MFu","MFd")),
+					array("name"=>"Order","form"=>array("type"=>"textbox"),"texts"=>array("default"=>"PHP::\AsyncWeb\Menu\DBMenu5::getInsertDefaultOrder()"),"data"=>array("col"=>"order","datatype"=>"number","minnum"=>-100000,"maxnum"=>10000000),"filter"=>array("type"=>"number_format","decimal"=>"0","desat_oddelocac"=>",","oddelovac_tisicov"=>"."),"usage"=>array("MFi","MFu","MFd")),
 					array("name"=>"Visible","form"=>array("type"=>"checkbox"),"texts"=>array("default"=>"1"),"data"=>array("col"=>"visible","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
 					array("name"=>"Style","form"=>array("type"=>"textbox"),"texts"=>array("default"=>"standard"),"data"=>array("col"=>"style"),"usage"=>array("MFu","MFd")),
 					array("name"=>"Title","form"=>array("type"=>"textbox"),"data"=>array("col"=>"title","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
 					array("name"=>"Description","form"=>array("type"=>"textbox"),"data"=>array("col"=>"description","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
 					array("name"=>"Keywords","form"=>array("type"=>"textbox"),"data"=>array("col"=>"keywords","dictionary"=>true),"usage"=>array("MFi","MFu","MFd")),
-					array("name"=>"Typ","form"=>array("type"=>"select"),"data"=>array("col"=>"type","datatype"=>"enum"),"filter"=>array("type"=>"option",
+					array("name"=>"Type","form"=>array("type"=>"select"),"data"=>array("col"=>"type","datatype"=>"enum"),"filter"=>array("type"=>"option",
 						"option"=>array(
-							"category"=>Language::get("Kategória"),
-							"image"=>Language::get("Obrázok"),
-							"src"=>Language::get("Odkaz"),
+							"category"=>Language::get("Category"),
+							"image"=>Language::get("Picture"),
+							"src"=>Language::get("Link"),
 							"text"=>Language::get("Text"))),"usage"=>array("MFu","MFd")),
-					array("name"=>"Cesta k obrázku","form"=>array("type"=>"textbox"),"data"=>array("col"=>"img"),"usage"=>array("MFu","MFd")),
+					array("name"=>"Path to picture","form"=>array("type"=>"textbox"),"data"=>array("col"=>"img"),"usage"=>array("MFu","MFd")),
 					array("name"=>"Alt. Text","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgalt","dictionary"=>true),"usage"=>array("MFu","MFd")),
-					array("name"=>"Výška obr.","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgheight"),"usage"=>array("MFu","MFd")),
-					array("name"=>"Šírka obr.","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgwidth"),"usage"=>array("MFu","MFd")),
+					array("name"=>"Picture height","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgheight"),"usage"=>array("MFu","MFd")),
+					array("name"=>"Picture width","form"=>array("type"=>"textbox"),"data"=>array("col"=>"imgwidth"),"usage"=>array("MFu","MFd")),
 					array("name"=>"Class","form"=>array("type"=>"textbox"),"data"=>array("col"=>"class"),"usage"=>array("MFu","MFd")),
-					array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Všetci vidia obsah","notlogged"=>"Iba neprihlásení","logged"=>"Iba prihlásení")),"usage"=>array("MFi","MFu","MFd")),
+					array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Everyone see the category","notlogged"=>"Category is visible only to Unauthenticated","logged"=>"Category is visible only to Authenticated")),"usage"=>array("MFi","MFu","MFd")),
 					array(
 						"name"=>"Group",
 						"form"=>array("type"=>"selectDB"),
@@ -375,7 +375,7 @@ class DBMenu5 extends MenuBuilder{
 			$form = new \AsyncWeb\View\MakeForm($form);
 			
 
-			$ret = '<h1>'.Language::get("Menu editor").'</h1><div><a href="'.Path::make(array("closeMenuEditor"=>"1")).'">'.Language::get("Koniec upravovania menu").'</a></div>';
+			$ret = '<h1>'.Language::get("Menu editor").'</h1><div><a href="'.Path::make(array("closeMenuEditor"=>"1")).'">'.Language::get("Finish editing menu").'</a></div>';
 			
 			$ret .=$form->show_results();
 			$ret .=$form->show("ALL");

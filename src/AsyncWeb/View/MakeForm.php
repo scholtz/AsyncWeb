@@ -380,77 +380,77 @@ class MakeForm{
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Boli zadané chybné dáta";
+    if(!$text || $text == "MF_$exception") $text = Language::get("Wrong data type has been supplied");
    break;
    case 'minLengthException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Vstup je príliš krátky";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Input is too short");
    break;
    case 'maxLengthException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Vstup je príliš dlhý";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Input is too long");
    break;
    case 'uniqueException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Daná hodnota sa už nachádza v db";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Value must be unique. This value is already in the DB.");
    break;
    case 'fileExistsException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Súbor s daným menom už existuje";
+    if(!$text || $text=="MF_$exception") $text = Language::get("File with the same name already exists");
    break;
    case 'fileNotAllowed':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Súbor nemôže byť spracovaný z bezpečnostných dôvodov";
+    if(!$text || $text=="MF_$exception") $text = Language::get("File cannot be processed because of security reasons");
    break;
    case 'errorWhileMovingFile':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Nastala chyba pri kopírovaní súboru";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Error occured while copying file");
    break;
    case 'minNumException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Zadané číslo je príliš krátke";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Number is too low");
    break;
    case 'maxNumException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Zadané číslo je príliš dlhé";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Number is too high");
    break;
    case "enumTypeException":
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Bola zadaná chybná hodnota";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Wrong value has been entered");;
    break;
    case "captchaTypeException":
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
     if(isset($item["texts"]["exceptions"]["$exception"])) return $this->getText($item["texts"]["exceptions"]["$exception"]);
     if(isset($this->data["$exception"])) return $this->getText($this->data["$exception"]);
     if(!$text) $text = $this->getText("MF_$exception");
-    if(!$text) $text = "Chybná anti-spam kontrola";
+    if(!$text || $text=="MF_$exception") $text = Language::get("Captcha is not correct");;
    break;
   }
   return $text;
@@ -936,7 +936,7 @@ class MakeForm{
 	}else{
 		$text = $this->getText("insertSucces");
 	}
-    if(!$text) $text = "Vloženie novej položky prebehlo úspešne";
+    if(!$text || $text == "insertSucces") $text = Language::get("New item has been successfully inserted");
     Messages::getInstance()->mes($text);
 	Header::s("reload",array($this->data["uid"]."___INSERT"=>"","insert_data_".$this->data["uid"]=>""));exit;
 	}
@@ -1236,7 +1236,7 @@ class MakeForm{
    }
    if(!$this->merged){
 	   $text = $this->getText("updateSucces");
-	   if(!$text) $text = "Úprava položky sa úspešne podarila";
+	   if(!$text || $text = "updateSucces") $text = Language::get("Item has been successfully updated");
 	   Messages::getInstance()->mes($text);//
 	   Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___UPDATE2"=>"",$this->data["uid"]."___UPDATE1"=>""));exit;
 	   exit;
@@ -1331,7 +1331,7 @@ class MakeForm{
 	   
 		if(!$this->merged){
 		   $text = $this->getText("deleteSucces");
-		   if(!$text) $text = "Zrušenie položky sa úspešne podarilo";
+		   if(!$text || $text == "deleteSucces") $text = Language::get("Deletion has been successfully commited");
 		   Messages::getInstance()->mes($text);//$this->data["uid"]."___DELETE"
 		   Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___DELETE"=>""));exit;
 		   exit;
@@ -1341,9 +1341,8 @@ class MakeForm{
    
 		if(!$this->merged){
 		   $text = $this->getText("deleteNotSucces");
-		   if(!$text) $text = Lang::get("error occured");
+		   if(!$text || $text == "deleteNotSucces") $text = Language::get("Error occured while deleting the item");
 		   Messages::getInstance()->err($text);
-		   
 	   }
 	   return false;
 	   
@@ -2269,7 +2268,7 @@ $theme = "simple";
  private function makeN2NInsertCols(){
 	
   $cols =array(
-	array("name"=>Language::get("Vyber existujúci alebo nový záznam"),
+	array("name"=>Language::get("Select existing or new item"),
 						"form"=>array("type"=>"selectDB"),
 						"data"=>array(
 						    "col"=>$this->data["tableN2Ncol2"],
@@ -2279,7 +2278,7 @@ $theme = "simple";
 							"dictionary"=>true,
 							"where"=>@$this->data["tableN2Ncol2Where"],
 						),"usage"=>array("MFi"),
-						"texts"=>array("nullValue"=>"Nový záznam","allowNull"=>true),
+						"texts"=>array("nullValue"=>"New item","allowNull"=>true),
 					));
   $cols[] = array("form"=>array("type"=>"submitReset"),"texts"=>array("insert"=>"MF_insert","update"=>"MF_update","delete"=>"MF_delete","reset"=>"MF_reset"),"usage"=>array("MFi","MFu","MFd"));					
 	return $cols;
@@ -2448,7 +2447,7 @@ $theme = "simple";
   $row = DB::gr($this->data["table"],$where);
   
   if(!$row){
-  	Messages::message(Language::get("Chyba pri získavaní informácií z databázi."));
+  	Messages::message(Language::get("Error while selecting information from the database"));
   	\AsyncWeb\Storage\Log::log("MakeForm","update2 no row selected",ML__HIGH_PRIORITY);
   	Header::s("location",MakeForm::$redirectAfterSuccess);
   	exit;

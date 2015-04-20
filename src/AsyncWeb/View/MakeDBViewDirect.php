@@ -19,7 +19,7 @@
  *
  *   pridana podpora pre od do
  * 
- *  	15.11.07 "brokerska_spolocnost"=>array("name"=>"Číslo b. spol.","table"=>"brokerska_spolocnost","refalias"=>"br0","refid"=>"id2","refcol"=>array(
+ *  	15.11.07 "brokerska_spolocnost"=>array("name"=>"Number","table"=>"brokerska_spolocnost","refalias"=>"br0","refid"=>"id2","refcol"=>array(
  *		  array("type"=>"col","value"=>"kod_brokerskej_spol","od"=>"od","do"=>"do"),
  *		)),
  *

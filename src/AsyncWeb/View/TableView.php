@@ -75,20 +75,20 @@ class BasicDataViewCell implements DataViewCell{
 	}
 	protected function makeFilterValue($trid,$key,$default=null){
 		$DataTableId = $this->getTableId();
-		$ret= '<input title="'.\AsyncWeb\System\Language::get("Podmienka").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" />';
+		$ret= '<input title="'.\AsyncWeb\System\Language::get("Condition").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" />';
 		return $ret;
 	}
 	public function makeFilterOperant($trid,$key,$selected=null){
 		$DataTableId = $this->getTableId();
-		$ret= '<select title="'.\AsyncWeb\System\Language::get("Operátor").'" id="FilterOperant_'.$trid.'" name="FilterOperant['.$DataTableId.']['.$key.']['.$trid.']" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);">';
+		$ret= '<select title="'.\AsyncWeb\System\Language::get("Operator").'" id="FilterOperant_'.$trid.'" name="FilterOperant['.$DataTableId.']['.$key.']['.$trid.']" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);">';
 		foreach($this->allowFilter() as $filterType){
 			switch($filterType){
 				case DV_OP_EQUAL: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>=</option>';break;
 				case DV_OP_NOT_EQUAL: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>!=</option>';break;
-				case DV_OP_LIKE: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Obsahuje").'</option>';break;
-				case DV_OP_NOT_LIKE: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Neobsahuje").'</option>';break;
-				case DV_OP_IS: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Nevyplnená hodnota").'</option>';break;
-				case DV_OP_IS_NOT: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Vyplnená hodnota").'</option>';break;
+				case DV_OP_LIKE: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Contains").'</option>';break;
+				case DV_OP_NOT_LIKE: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Deos not contain").'</option>';break;
+				case DV_OP_IS: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Null value").'</option>';break;
+				case DV_OP_IS_NOT: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>'.\AsyncWeb\System\Language::get("Not null value").'</option>';break;
 				case DV_OP_GT: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>&gt;</option>';break;
 				case DV_OP_GTEQ: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>&gt;=</option>';break;
 				case DV_OP_LT: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>&lt;</option>';break;
@@ -101,7 +101,7 @@ class BasicDataViewCell implements DataViewCell{
 	protected function generateEmptyFilterRow($key){
 		$DataTableId = $this->getTableId();
 		$ret="";
-		$ret .= '<tr id="tr%trid%"><td><input title="'.\AsyncWeb\System\Language::get("Použi podmienku").'" name="FilterCH['.$DataTableId.']['.$key.'][%trid%]" id="ch%trid%" type="checkbox" />';
+		$ret .= '<tr id="tr%trid%"><td><input title="'.\AsyncWeb\System\Language::get("Use condition").'" name="FilterCH['.$DataTableId.']['.$key.'][%trid%]" id="ch%trid%" type="checkbox" />';
 		$ret.='<script type="text/javascript">$("#ch%trid%").change(function() {if($(this).is(\\\':checked\\\')){$(\\\'#FilterValue_%trid%\\\').prop(\\\'disabled\\\', false);$(\\\'#FilterOperant_%trid%\\\').prop(\\\'disabled\\\', false);}else{$(\\\'#FilterValue_%trid%\\\').prop(\\\'disabled\\\', true);$(\\\'#FilterOperant_%trid%\\\').prop(\\\'disabled\\\', true);}});</script>';
 		$ret.='</td><td>'.addslashes($this->makeFilterOperant('%trid%',$key)).'</td><td>'.addslashes($this->makeFilterValue('%trid%',$key)).'</td><td><img class="clickable" onclick="$(\\\'#tr%trid%\\\').remove();" src="/img/delete.png" width="20" height="20" alt="X" /></td></tr>';
 		
@@ -121,18 +121,18 @@ class BasicDataViewCell implements DataViewCell{
 				if($k != $key) continue;
 				foreach($rows as $row){
 					$i++;
-						$ret .= '<tr id="tr'.($trid=md5(uniqid())).'"><td><input title="'.\AsyncWeb\System\Language::get("Použi podmienku").'" checked="checked" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
+						$ret .= '<tr id="tr'.($trid=md5(uniqid())).'"><td><input title="'.\AsyncWeb\System\Language::get("Use condition").'" checked="checked" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
 						$ret.= '<script type="text/javascript">$("#ch'.$trid.'").change(function() {if($(this).is(\':checked\')){$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', false);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', false);}else{$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', true);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', true);}});</script>';
 						$ret.= '</td><td>'.$this->makeFilterOperant($trid,$key,$row["op"]).'</td><td>'.$this->makeFilterValue($trid,$key,$row["value"]).'</td><td><img class="clickable" onclick="$(\'#tr'.$trid.'\').remove();" src="/img/delete.png" width="20" height="20" alt="X" /></td></tr>';
 				}
 			}
 		}
 		if(!$i){
-			$ret .= '<tr id="tr'.($trid = md5(uniqid())).'"><td><input title="'.\AsyncWeb\System\Language::get("Použi podmienku").'" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
+			$ret .= '<tr id="tr'.($trid = md5(uniqid())).'"><td><input title="'.\AsyncWeb\System\Language::get("Use condition").'" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
 			$ret.= '<script type="text/javascript">$("#ch'.$trid.'").change(function() {if($(this).is(\':checked\')){$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', false);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', false);}else{$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', true);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', true);}});</script>';
 			$ret.= '</td><td>'.$this->makeFilterOperant($trid,$key).'</td><td>'.$this->makeFilterValue($trid,$key).'</td><td><img class="clickable" onclick="$(\'#tr'.$trid.'\').remove();" src="/img/delete.png" width="20" height="20" alt="X" /></td></tr>';
 		}
-		$ret .= '<tr><td></td><td><input style="width:100%; min-width:150px" type="submit" value="'.\AsyncWeb\System\Language::get("Nová podmienka").'" onclick="trid = Math.round(Math.random()*100000); $(\'#'.$tid.' tr:last\').before(\''.$this->generateEmptyFilterRow($key).'\');return false;"  /></td><td><input type="submit" value="'.\AsyncWeb\System\Language::get("Aplikuj filter").'" onclick="'.TSAjax::applyFilterScript($key,$DataTableId).'" style="width:100%; min-width:150px"/></td><td colspan="10"></td></tr>';
+		$ret .= '<tr><td></td><td><input style="width:100%; min-width:150px" type="submit" value="'.\AsyncWeb\System\Language::get("New condition").'" onclick="trid = Math.round(Math.random()*100000); $(\'#'.$tid.' tr:last\').before(\''.$this->generateEmptyFilterRow($key).'\');return false;"  /></td><td><input type="submit" value="'.\AsyncWeb\System\Language::get("Apply filter").'" onclick="'.TSAjax::applyFilterScript($key,$DataTableId).'" style="width:100%; min-width:150px"/></td><td colspan="10"></td></tr>';
 		$ret.= '</table>';
 		return $ret;
 		
@@ -286,14 +286,14 @@ class DateDataViewCell extends BasicDataViewCell{
 	protected function makeFilterValue($trid,$key,$default=null){
 		$DataTableId = $this->getTableId();
 		if(!$default) $default = date("d.m.Y");
-		$ret= '<input title="'.\AsyncWeb\System\Language::get("Podmienka").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" /></td><td>';
+		$ret= '<input title="'.\AsyncWeb\System\Language::get("Condition").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" /></td><td>';
 		
 		if(ViewConfig::$useFontAwesome){
 			$ret.='<i class="fa fa-calendar"></i>';
 		}elseif(\AsyncWeb\IO\File::exists("img/icons/calendar.png")){
-			$ret.='<a class="clickable button" onclick="select_date(\'FilterValue_'.$trid.'\');return false;"><img src="/img/icons/calendar.png" alt="'.\AsyncWeb\System\Language::get("Vyberte dátum").'" width="20" height="20" /></a>';
+			$ret.='<a class="clickable button" onclick="select_date(\'FilterValue_'.$trid.'\');return false;"><img src="/img/icons/calendar.png" alt="'.\AsyncWeb\System\Language::get("Select date").'" width="20" height="20" /></a>';
 		}else{
-			$ret.=\AsyncWeb\System\Language::get("Vyberte dátum");
+			$ret.=\AsyncWeb\System\Language::get("Select date");
 		}
 		return $ret;
 	}
@@ -470,7 +470,7 @@ class UpdateItemDataViewCellV1 extends BasicDataViewCell{
 		$ret.='<a href="'.\AsyncWeb\System\Path::make(array($this->getTableId()."___ID"=>$datarow["id"],$this->getTableId()."___UPDATE1"=>"1","AJAX"=>"")).'">';
 		if(ViewConfig::$useFontAwesome){
 			$ret.='<i class="fa fa-plus-circle"></i>';
-		}elseif(\AsyncWeb\IO\File::exists("img/icons/blog_compose.png")){$ret.='<img src="/img/icons/blog_compose.png" width="20" height="20" alt="'.\AsyncWeb\System\Language::get("Upraviť záznam").'" />';}else{$ret.=\AsyncWeb\System\Language::get("Upraviť záznam");}$ret.='</a>';
+		}elseif(\AsyncWeb\IO\File::exists("img/icons/blog_compose.png")){$ret.='<img src="/img/icons/blog_compose.png" width="20" height="20" alt="'.\AsyncWeb\System\Language::get("Edit item").'" />';}else{$ret.=\AsyncWeb\System\Language::get("Edit item");}$ret.='</a>';
 		if($this->inputFilter) $ret = $this->inputFilter->filter($ret,$datarow);
 		return $ret;
 	}
@@ -482,7 +482,7 @@ class UpdateItemDataViewCell extends FunctionItemDataViewCell{
 	public function __construct(){
 
 		parent::__construct(
-			\AsyncWeb\System\Language::get("Upraviť záznam"),
+			\AsyncWeb\System\Language::get("Edit item"),
 			\AsyncWeb\System\Path::make(array("%getTableId%___ID"=>"%id%","%getTableId%___UPDATE1"=>"1","AJAX"=>"")),
 			array("%id%"=>"id","%getTableId%"=>"%getTableId%"),
 			"img/icons/blog_compose.png",
@@ -1573,7 +1573,7 @@ class TSAjax{
 				}
 			}
 			if(!$ret){
-				$ret.=\AsyncWeb\System\Language::get("Menu neobsahuje žiadnu položku");
+				$ret.=\AsyncWeb\System\Language::get("Menu does not contain any item");
 			}
 			$ret.= '</div>';
 			return $ret;
@@ -1655,6 +1655,14 @@ class TableMenuItemIconHref extends BasicTableMenuItem {
 		$ret = '<div class="table_menu_item">';
 		$id = "";
 		if($this->TableView) $id = $this->TableView->getId();
+		
+		$showIcon = false;
+		if(substr($this->icon,0,7) == "http://" || substr($this->icon,0,8) == "https://" || substr($this->icon,0,2) == "//"){
+			$showIcon = true;
+		}else{
+			if(\AsyncWeb\IO\File::exists($this->icon)) $showIcon = true;
+		}
+		
 		if($this->icon){
 			$ret .= '<a title="'.$this->text.'" href="'.$this->href.'">';
 			$ret.='<img src="'.$this->icon.'" width="30" height="30" alt="" />';
@@ -1674,13 +1682,13 @@ class TableMenuExportXML extends BasicTableMenuItem{
 		$id = "";
 		if($this->TableView) $id = $this->TableView->getId();
 		
-		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export do XML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-xml"),"showmenubox"=>"","AJAX"=>"")).'">';
+		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export to XML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-xml"),"showmenubox"=>"","AJAX"=>"")).'">';
 		if(\AsyncWeb\IO\File::exists("img/icons/file_download_xml.png")){
 			$ret.='<img src="/img/icons/file_download_xml.png" width="30" height="30" alt="XML" />';
 		}
 		$ret.='</a> ';
-		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export do XML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-xml"),"showmenubox"=>"","AJAX"=>"")).'">';
-		$ret.= \AsyncWeb\System\Language::get("Export do XML");
+		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export to XML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-xml"),"showmenubox"=>"","AJAX"=>"")).'">';
+		$ret.= \AsyncWeb\System\Language::get("Export to XML");
 		$ret.='</a>';
 		$ret.='</div>';
 		return $ret;
@@ -1737,13 +1745,13 @@ class TableMenuExportHTML extends BasicTableMenuItem{
 		$id = "";
 		if($this->TableView) $id = $this->TableView->getId();
 		
-		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export do HTML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-html"),"showmenubox"=>"","AJAX"=>"")).'">';
+		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export to HTML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-html"),"showmenubox"=>"","AJAX"=>"")).'">';
 		if(\AsyncWeb\IO\File::exists("img/icons/file_download_html.png")){
 			$ret.='<img src="/img/icons/file_download_html.png" width="30" height="30" alt="HTML" />';
 		}
 		$ret.='</a> ';
-		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export do HTML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-html"),"showmenubox"=>"","AJAX"=>"")).'">';
-		$ret.= \AsyncWeb\System\Language::get("Export do HTML");
+		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export to HTML").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-html"),"showmenubox"=>"","AJAX"=>"")).'">';
+		$ret.= \AsyncWeb\System\Language::get("Export to HTML");
 		$ret.='</a>';
 		$ret.='</div>';
 		return $ret;
@@ -1815,13 +1823,13 @@ class TableMenuExportCSV extends BasicTableMenuItem{
 		$id = "";
 		if($this->TableView) $id = $this->TableView->getId();
 		
-		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export do Excelu").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-csv"),"showmenubox"=>"","AJAX"=>"")).'">';
+		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export to Excel").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-csv"),"showmenubox"=>"","AJAX"=>"")).'">';
 		if(\AsyncWeb\IO\File::exists("img/icons/file_download_excel.png")){
 			$ret.='<img src="/img/icons/file_download_excel.png" width="30" height="30" alt="Excel" />';
 		}
 		$ret.='</a> ';
-		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export do Excelu").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-csv"),"showmenubox"=>"","AJAX"=>"")).'">';
-		$ret.= \AsyncWeb\System\Language::get("Export do Excelu");
+		$ret .= '<a title="'.\AsyncWeb\System\Language::get("Export to Excel").'" href="'.\AsyncWeb\System\Path::make(array('DTV_export'=>md5($id."-csv"),"showmenubox"=>"","AJAX"=>"")).'">';
+		$ret.= \AsyncWeb\System\Language::get("Export to Excel");
 		$ret.='</a>';
 		$ret.='</div>';
 		return $ret;
@@ -2131,13 +2139,13 @@ class TableView implements View{
 			}
 		}
 		if(!$c){
-			$tbody .= '<td colspan="'.($this->thr->count()).'">'.\AsyncWeb\System\Language::get($this->ViewConfig->getValue("no_data",'Tabuľka neobsahuje žiadny záznam')).'</td>';
+			$tbody .= '<td colspan="'.($this->thr->count()).'">'.\AsyncWeb\System\Language::get($this->ViewConfig->getValue("no_data",'Table does not contain any item')).'</td>';
 		}
 		$tbody.='</tr>';
 		
 		$tfoot = ' <tfoot>
     <tr>
-      <td colspan="'.($this->thr->count()).'">'.\AsyncWeb\System\Language::get("Počet záznamov").': '.$count.'; '.\AsyncWeb\System\Language::get("Strana").': '.($iter->getPage()+1).'/'.($iter->getPagesCount($count)-1)."; ".\AsyncWeb\System\Language::get("Vygenerované za").": ".(round(1000*(microtime(true)-$this->utime))/1000)." s";
+      <td colspan="'.($this->thr->count()).'">'.\AsyncWeb\System\Language::get("Number of items").': '.$count.'; '.\AsyncWeb\System\Language::get("Page").': '.($iter->getPage()+1).'/'.($iter->getPagesCount($count)-1)."; ".\AsyncWeb\System\Language::get("Generated in").": ".(round(1000*(microtime(true)-$this->utime))/1000)." s";
 	  if($iter->getPagesCount($count)>2) $tfoot .= $iter->show_bar($count,5,array(),"DTTV_bottom");
 	  $tfoot.='</td>
     </tr>

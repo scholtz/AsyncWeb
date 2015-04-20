@@ -4,7 +4,7 @@
 Email::send("sendto@email","subject","message","sendfrom@email",array(),"html");
 
 		// $sign = array("crt"=>"file.crt","pass"=>$pass);
-		// $attachment = array( array( "content-type"=> "text/plain", "name"=>"subor", "data"=>file_get_contents("x")));
+		// $attachment = array( array( "content-type"=> "text/plain", "name"=>"file", "data"=>file_get_contents("x")));
 
 
 */

@@ -11,14 +11,13 @@ class ListProcessObjects extends \AsyncWeb\Frontend\Block{
 		$data2 = array(
 			"table" => "processobject",
 			"col" => array( 
-			 array("name"=>Language::get("Názov"),"data"=>array("col"=>"name","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe"),
+			 array("name"=>"Name","data"=>array("col"=>"name","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe"),
 			  "filter"=>array("type"=>"urlparser","src"=>array("tmpl"=>array("ListProcessObjects"=>"ListProcesses"),"var"=>array("id2"=>"processobject")))),
-			 //array("name"=>Language::get("Export"),"virtual"=>true,"show"=>true,"filter"=>array("type"=>"php","function"=>"PHP::LocalObj::ExportProcess()"),"usage"=>array("DBVs","DBVe",)),
 			),
 			"order" => array("name"=>"asc",),
 			 "prefix"=>"ls",
 			 "uid"=>"processobject",
-			 "popis"=>Language::get("Zoznam objektov pre procesy"),
+			 "popis"=>Language::get("List of process objects"),
 			 "no_data"=>"-",
 			 "show_export"=>true,
 			 "rights"=>array("insert"=>"ProcessEditor","update"=>"ProcessEditor","delete"=>"ProcessEditor",),
@@ -27,9 +26,9 @@ class ListProcessObjects extends \AsyncWeb\Frontend\Block{
 			 "MakeDVView"=>5,
 		);
 		if(URLParser::v("expertmode")){
-			$data2["col"][] = array("name"=>Language::get("Prog. názov"),"data"=>array("col"=>"id3"),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe"));
+			$data2["col"][] = array("name"=>Language::get("Prog. name"),"data"=>array("col"=>"id3"),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe"));
 			$data2["col"][] = array(
-						"name"=>"Skupina",
+						"name"=>"Group",
 						"form"=>array("type"=>"selectDB"),
 						"data"=>array(
 						    "col"=>"group",
@@ -39,11 +38,11 @@ class ListProcessObjects extends \AsyncWeb\Frontend\Block{
 							"dictionary"=>true,
 						),
 						"texts"=>array(
-							"nullValue"=>"Vyber",
+							"nullValue"=>"Select",
 						),
 						"usage"=>array("MFi","MFu","MFd","DBVs","DBVe"));
 			$data2["col"][] = array(
-						"name"=>"Proces",
+						"name"=>"Process",
 						"form"=>array("type"=>"selectDB"),
 						"data"=>array(
 						    "col"=>"process",
@@ -54,7 +53,7 @@ class ListProcessObjects extends \AsyncWeb\Frontend\Block{
 							"where"=>array("flagentrypoint"=>"1"),
 						),
 						"texts"=>array(
-							"nullValue"=>"Vyber",
+							"nullValue"=>"Select",
 						),
 						"usage"=>array("MFi","MFu","MFd","DBVs","DBVe"));/**/
 		}

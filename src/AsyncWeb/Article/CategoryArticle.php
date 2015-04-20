@@ -85,7 +85,7 @@ class CategoryArticle{
 		$ret .= CategoryArticle::checkForms();
 		$ret .= $forms = CategoryArticle::showForms();
 		if($forms){
-			$ret.= '<div><a href="?finishArticleEditing=1">'.Language::get('Koniec úpravy článkov').'</a></div>';
+			$ret.= '<div><a href="?finishArticleEditing=1">'.Language::get('Finish article editing').'</a></div>';
 		}else{
 			while($articlerow=DB::f($res)){
 		
@@ -102,7 +102,7 @@ class CategoryArticle{
 			$ret = MainMenu::generateSubmenuArticle($cat);
 		}
 		if(!$ret){
-			$ret.= Language::get('Kategória neobsahuje žiadny článok');
+			$ret.= Language::get('Category deos not conaint any article');
 		}
 		
 		return $ret; 

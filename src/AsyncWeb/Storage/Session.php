@@ -173,7 +173,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 				Session::set_cookie_params();
 				@session_start($id);
 				
-				\AsyncWeb\Text\Messages::getInstance()->error(\AsyncWeb\System\Language::get("Príliš dlho ste nepracovali s touto session! Session time out!"));
+				\AsyncWeb\Text\Messages::getInstance()->error(\AsyncWeb\System\Language::get("You have been inactive for too long! Your session has expired."));
 				\AsyncWeb\HTTP\Header::s("reload");//\AsyncWeb\HTTP\Header::s("location","/");
 				
 			}

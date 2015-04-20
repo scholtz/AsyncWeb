@@ -55,11 +55,11 @@ class MainMenu{
 			}
 			
 			if(!MainMenu::$editingmenu){
-				MainMenu::$addLeftMenuItems["seteditmenu"] = array("path"=>Path::make(array("seteditmenu"=>"1")),"text"=>Language::get("Správa štruktúry"));
+				MainMenu::$addLeftMenuItems["seteditmenu"] = array("path"=>Path::make(array("seteditmenu"=>"1")),"text"=>Language::get("Manage structure"));
 			}else{
-				MainMenu::$addLeftMenuItems["setexportallmenu"] = array("path"=>Path::make(array("exportallmenu"=>"1")),"text"=>Language::get("Export celé menu"));
+				MainMenu::$addLeftMenuItems["setexportallmenu"] = array("path"=>Path::make(array("exportallmenu"=>"1")),"text"=>Language::get("Menu Export"));
 				//MainMenu::$addLeftMenuItems["setexportsubmenu"] = array("path"=>"?exportsubmenu=1","text"=>"Export submenu");
-				MainMenu::$addLeftMenuItems["seteditmenu"] = array("path"=>Path::make(array("seteditmenu"=>"0")),"text"=>Language::get("Koniec správy štruktúry"));
+				MainMenu::$addLeftMenuItems["seteditmenu"] = array("path"=>Path::make(array("seteditmenu"=>"0")),"text"=>Language::get("Finish structure management"));
 			}
 		}
 		if(Group::is_in_group("HTMLEditor") || Group::is_in_group("PHPEditor")){
@@ -73,9 +73,9 @@ class MainMenu{
 			}
 			
 			if(MainMenu::$editingart){
-				MainMenu::$addLeftMenuItems["seteditart"] = array("path"=>Path::make(array("seteditart"=>"0")),"text"=>Language::get("Koniec správy textov"));
+				MainMenu::$addLeftMenuItems["seteditart"] = array("path"=>Path::make(array("seteditart"=>"0")),"text"=>Language::get("Finish article management"));
 			}else{
-				MainMenu::$addLeftMenuItems["seteditart"] = array("path"=>Path::make(array("seteditart"=>"1")),"text"=>Language::get("Správa textov"));
+				MainMenu::$addLeftMenuItems["seteditart"] = array("path"=>Path::make(array("seteditart"=>"1")),"text"=>Language::get("Article management"));
 			}
 		}
 		
@@ -168,15 +168,22 @@ class MainMenu{
 		$ret = '';
 		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$arr){
 			$path = MainMenu::makeLangPath($cur,$lang);
-			$pathImg = $arr["img"];
 			
 			if(isset($clang) && $clang) $path = "http://".$clang["domain"].$clang["path"];
 			if($ret) $ret.= '&nbsp;';
+			
+			if(isset($arr["img"])){
+				$pathImg = $arr["img"];
+			}else{
+				$pathImg = "img/flags/$lang.png";
+			}
+			
 			if($pathImg && \AsyncWeb\IO\File::exists($pathImg)){
 				$ret.='	 <a href="'.$path.'">';
-				$ret.='<img src="'.$pathImg.'" class="flag" width="18" height="12" alt="'.Language::get("LB_$lang").'" title="'.Language::get("L__LB_$lang").'" />';
+				$ret.='<img src="'.$pathImg.'" class="flag" width="18" height="12" alt="'.Language::get("L__LB_$lang").'" title="'.Language::get("L__LB_$lang").'" />';
 				$ret.='</a>';
 			}
+			
 			if(MainMenu::$showLangBarTexts){
 				$ret.='<a href="'.$path.'" class="current_lang">'.Language::get("L__LB_$lang").'</a>';
 			}
@@ -192,7 +199,11 @@ class MainMenu{
 			$path = MainMenu::makeLangPath($cur,$lang);
 			$pathImg = false;
 			
-			if(isset($arr["img"])) $pathImg = $arr["img"];
+			if(isset($arr["img"])){
+				$pathImg = $arr["img"];
+			}else{
+				$pathImg = "img/flags/$lang.png";
+			}
 			
 			if(isset($clang) && $clang) $path = "http://".$clang["domain"].$clang["path"];
 			//if($ret) $ret.= '&nbsp;';
@@ -221,8 +232,6 @@ class MainMenu{
 			if($_SERVER["SERVER_PORT"] == 443){
 				$protocol = "https";
 			}
-			
-//			while(substr(Language::$SUPPORTED_LANGUAGES[$lang]["domain"],-1,1) == "/") Language::$SUPPORTED_LANGUAGES[$lang]["domain"] = substr(Language::$SUPPORTED_LANGUAGES[$lang]["domain"],0,-1);			
 			$domain = "";
 			if(isset(Language::$SUPPORTED_LANGUAGES[$lang]["domain"])) $domain = Language::$SUPPORTED_LANGUAGES[$lang]["domain"];
 			if(!$domain && !is_array(Language::$SUPPORTED_LANGUAGES[$lang])) $domain = Language::$SUPPORTED_LANGUAGES[$lang];
@@ -297,6 +306,28 @@ class MainMenu{
 	public static function getLangs(){
 		return Language::$SUPPORTED_LANGUAGES;
 	}
+	public static function isSubmenuOfCurrent(&$menu){
+		$cur = MainMenu::getCurrent();
+		if($cur["id2"] == $menu["id2"]){ return true;}
+//		var_dump($cur);
+		if(isset($menu["submenu"])){
+			foreach($menu["submenu"] as $menulvl1){
+				if($cur["id2"] == $menulvl1["id2"]){ return true;}
+		if(isset($menulvl1["submenu"])){
+			foreach($menulvl1["submenu"] as $menulvl2){
+				if($cur["id2"] == $menulvl2["id2"]){ return true;}
+		if(isset($menulvl2["submenu"])){
+			foreach($menulvl2["submenu"] as $menulvl3){
+				if($cur["id2"] == $menulvl3["id2"]){ return true;}
+			}
+		}				
+				
+			}
+		}				
+				
+			}
+		}
+	}
 	public static function showMenuItem(&$row,$recursive=true,$class="menuitem",$subclass="submenu",$showsubmenu=false,$showeditor=true,$type="main"){
 		$ret = '';
 		$adddropdown = "";
@@ -304,15 +335,20 @@ class MainMenu{
 		if($type=="main" && isset($row["submenu"]) && is_array($row["submenu"]) && $row["submenu"]){
 			$class.=" dropdown";$adddropdown = ' class="dropdown-toggle" data-toggle="dropdown"';$dropdowncaret=' <span class="caret"></span>';
 		}
-		$ret.='<li class="'.$class.' '.@$row["class"].'">';
+		$active = "";
+		if(MainMenu::isSubmenuOfCurrent($row)) $active = "active ";
+
+		$ret.='<li class="'.$active.$class.' '.@$row["class"].'">';
 		if(!$row["type"]) $row["type"] = "category";
 		if($row["type"] == "category" && !$row["text"]){$row["text"] = "?";}
 		if($type == "left" || $type == "nav") $row["type"] = "category";
+
+		$fa = "";if(isset($row["fa"]) && $row["fa"]) $fa = '<i class="fa fa-'.$row["fa"].'"></i>';
 		switch($row["type"]){
 			case "image": $ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><img src="'.$row["img"].'" width="'.$row["imgwidth"].'" height="'.$row["imgheight"].'" alt="'.$row["imgalt"].'" title="'.($row["text"]).'" />'.$dropdowncaret.'</a>';break;
-			case "text":$ret.= '<span class="menutext">'.($row["text"]).'</span>';break;
-			case "category":$ret.= '<a'.$adddropdown.' href="/'.MainMenu::$CATEGORY_TAG_NAME.":".$row["path"].'"><span class="menutext">'.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
-			case "src":$ret.= '<a href="'.$row["path"].'"><span class="menutext">'.($row["text"]).'</span></a>';break;
+			case "text":$ret.= '<span class="menutext">'.$fa.($row["text"]).'</span>';break;
+			case "category":$ret.= '<a'.$adddropdown.' href="/'.MainMenu::$CATEGORY_TAG_NAME.":".$row["path"].'"><span class="menutext">'.$fa.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
+			case "src":$ret.= '<a href="'.$row["path"].'"><span class="menutext">'.$fa.($row["text"]).'</span></a>';break;
 		}
 
 		$sub = "";
@@ -426,41 +462,24 @@ class MainMenu{
 	}
 	public static function showLeftMenu(){
 		$cur = MainMenu::getCurrent();
-		/*
-		if(!$cur){
-			// 404
-			$uri = $_SERVER["REQUEST_URI"];
-			if(($pos = strpos($uri,"?"))!==false){
-				$uri = substr($uri,0,$pos);
-			}
-			if($uri=="/"){
-				//var_dump(MainMenu::$menu);exit;
-				MainMenu::installDefaultValues();
-				
-			}
-			return;
-		}
-		/**/
+
 		$key = "LeftMenuMain_l:".Language::getLang()."_c:".$cur["id2"]."_u:".\AsyncWeb\Security\Auth::userId()."_p:".MainMenu::$PAGE;
 		if($menu = Cache::get($key,"menu")){
 				return $menu;
 		}
-
-		MainMenu::clearMenu(MainMenu::$leftMenu,$cur["id2"]);
 		
-		
-		
-		
-		$ret = '
-		<div id="sidebar-wrapper" role="navigation"><ul class="nav sidebar-nav" id="menu2">';
+$ret='  
+		<nav class="sidebar navbar navbar-side" role="navigation">
+            <div class="sidebar-collapse sidebar-nav"><ul id="menu2">
+';		
 		
 		ksort(MainMenu::$leftMenu);
 		foreach(MainMenu::$leftMenu as $row){
 			$ret.= MainMenu::showLeftMenuItem($row);
-			
+
 		}
-		
-		
+
+
 		if(Group::is_in_group("HTMLEditor") && (MainMenu::$editingmenu || MainMenu::$editingart)){
 			$ret.='<li><a href="'.Path::make(array("insert_data_articles_html"=>"1","newhtmlarticle"=>"1")).'">'.Language::get("Nový HTML článok").'</a></li>';
 		}
@@ -478,16 +497,9 @@ class MainMenu{
 		foreach(MainMenu::$addLeftMenuItems as $item){
 			$ret.='<li><a href="'.$item["path"].'">'.$item["text"].'</a></li>';
 		}
-		//$ret.='<li><a id="menu-toggle">Toggle menu</a></li>';
-		$ret .='</ul></div>
-		';
-		/*$ret.='		<script>
-			$("#menu-toggle").click(function(e) {
-				e.preventDefault();
-				$("#wrapper").toggleClass("toggled");
-			});
-		</script>
-';/**/
+
+
+		$ret .='</ul></div></nav>';
 		
 		Cache::set($key,"menu",$ret);
 		

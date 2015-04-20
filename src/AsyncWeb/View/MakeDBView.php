@@ -19,7 +19,7 @@
  *
  *   pridana podpora pre od do
  * 
- *  	15.11.07 "brokerska_spolocnost"=>array("name"=>"Číslo b. spol.","table"=>"brokerska_spolocnost","refalias"=>"br0","refid"=>"id2","refcol"=>array(
+ *  	15.11.07 "brokerska_spolocnost"=>array("name"=>"Number","table"=>"brokerska_spolocnost","refalias"=>"br0","refid"=>"id2","refcol"=>array(
  *		  array("type"=>"col","value"=>"kod_brokerskej_spol","od"=>"od","do"=>"do"),
  *		)),
  *
@@ -214,10 +214,10 @@ class MakeDBView{
 			}
 		}
 		if($update){
-			$cols[] = new BasicTHViewCell(new THViewCellConfig("update","",Language::get("Upraviť záznam"),$display=true,$sortable=false,$filterable=false,$exportable=false,new UpdateItemDataViewCell()));
+			$cols[] = new BasicTHViewCell(new THViewCellConfig("update","",Language::get("Edit item"),$display=true,$sortable=false,$filterable=false,$exportable=false,new UpdateItemDataViewCell()));
 		}
 		if($delete){
-			$cols[] = new BasicTHViewCell(new THViewCellConfig("delete","",Language::get("Vymazať záznam"),$display=true,$sortable=false,$filterable=false,$exportable=false,new DeleteItemDataViewCell()));
+			$cols[] = new BasicTHViewCell(new THViewCellConfig("delete","",Language::get("Delete item"),$display=true,$sortable=false,$filterable=false,$exportable=false,new DeleteItemDataViewCell()));
 		}
 
 		$thr = new THDataViewRow($cols);

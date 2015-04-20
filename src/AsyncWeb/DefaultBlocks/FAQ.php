@@ -15,14 +15,14 @@ class FAQ extends \AsyncWeb\Frontend\Block{
 		$ret = '';
 		
 		if(\AsyncWeb\Objects\Group::is_in_group("admin")){
-			$ret.='<h1>Správa FAQ</h1>';
+			$ret.='<h1>'.Language::get("Manage FAQ").'</h1>';
 			
 			$data2 = array(
 					"table" => "faq",
 					"col" => array( 
-						array("name"=>"Otázka","data"=>array("col"=>"question","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
-						array("name"=>"Odpoveï","form"=>array("type"=>"tinyMCE","theme"=>"advanced"),"data"=>array("col"=>"answer","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVe")),
-						array("name"=>"Poradie","data"=>array("col"=>"order"),"texts"=>array("default"=>'PHP::\FAQ::getNextFAQOrder'),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
+						array("name"=>"Question","data"=>array("col"=>"question","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
+						array("name"=>"Answer","form"=>array("type"=>"tinyMCE","theme"=>"advanced"),"data"=>array("col"=>"answer","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVe")),
+						array("name"=>"Order","data"=>array("col"=>"order"),"texts"=>array("default"=>'PHP::\FAQ::getNextFAQOrder'),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
 						array("form"=>array("type"=>"value"),"data"=>array("col"=>"created"),"texts"=>array("text"=>"PHP::time()"),"usage"=>array("MFi",)),
 					),
 					 "bootstrap"=>"1",
@@ -41,7 +41,7 @@ class FAQ extends \AsyncWeb\Frontend\Block{
 			
 		}
 		
-		$ret.='<h1>FAQ</h1>';
+		$ret.='<h1>'.Language::get("FAQ").'</h1>';
 		$res = DB::qb("faq",array("order"=>array("order"=>"asc")));
 		$ret.='				<div class="panel-group" id="accordion">
 					<div class="panel panel-default">
