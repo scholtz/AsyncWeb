@@ -27,6 +27,7 @@ class URLParser{
 	protected static $parseCache = array();
 	public static function parse($url=""){
 		if(!$url) $url = URLParser::getCurrent();
+		if($pos=strpos($url,"?")) $url = substr($url,0,$pos);
 		if(isset(URLParser::$parseCache[$url])){
 			return URLParser::$parseCache[$url];
 		}
