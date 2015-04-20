@@ -1663,12 +1663,16 @@ class TableMenuItemIconHref extends BasicTableMenuItem {
 			if(\AsyncWeb\IO\File::exists($this->icon)) $showIcon = true;
 		}
 		
-		if($this->icon){
+		if($showIcon){
 			$ret .= '<a title="'.$this->text.'" href="'.$this->href.'">';
 			$ret.='<img src="'.$this->icon.'" width="30" height="30" alt="" />';
 			$ret.='</a> ';
 		}
 		$ret .= '<a title="'.$this->text.'" href="'.$this->href.'">';
+		if(substr($this->icon,0,2) == "fa "){
+			$ret.='<i class="'.$this->icon.'"></i>';
+		}
+		
 		$ret.= $this->text;
 		$ret.='</a>';
 		$ret.='</div>';
