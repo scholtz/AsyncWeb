@@ -147,3 +147,4 @@ $L['MF_insert'] = 'Vlož';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src
 $L['MF_update'] = 'Zmeň';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;
 $L['MF_delete'] = 'Vymaž';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;
 $L['MF_reset'] = 'Reset';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;
+$L['Please select value'] = 'Vyberte hodnotu';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;

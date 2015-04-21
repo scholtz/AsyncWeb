@@ -2865,7 +2865,9 @@ $theme = "simple";
 	   if(isset($item["texts"]["allowNull"]) && $item["texts"]["allowNull"]){
         $reto = '<option value="0">'.strip_tags($this->getText($item["texts"]["nullValue"])).'</option>'.$reto;
 	   }else{
-       $reto = '<option value="0">'.$this->getText("nullValue").'</option>'.$reto;
+		   $text = $this->getText("nullValue");
+		   if($text == "nullValue") $text = Language::get("Please select value");
+       $reto = '<option value="0">'.$text.'</option>'.$reto;
 	   }
       }
 	 $ret.=$reto;
