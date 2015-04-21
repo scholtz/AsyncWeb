@@ -570,15 +570,10 @@ $ret='
 		}else{
 			$title = "";
 		}
-		if($dbg){echo Timer1::show()."MainMenu:getCurrent:settitletoglobal:".($dbgi++).":\n";}
-		if(isset($ret["title"])) $GLOBALS["TMPL_title"] = $title;
-		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
-		if(isset($ret["description"])) $GLOBALS["TMPL_description"] = Language::get($ret["description"]);
-		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
-		if(isset($ret["keywords"])) $GLOBALS["TMPL_keywords"] = Language::get($ret["keywords"]);
-		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
 		
 		\AsyncWeb\Frontend\BlockManagement::get("HeaderTitle")->changeData(array("title"=>$ret["title"]));;
+		\AsyncWeb\Frontend\BlockManagement::get("HeaderDescription")->changeData(array("description"=>$ret["description"]));;
+		\AsyncWeb\Frontend\BlockManagement::get("HeaderKeywords")->changeData(array("keywords"=>$ret["keywords"]));;
 		
 		MainMenu::$current = $ret;
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}

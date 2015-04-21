@@ -6,7 +6,8 @@ class HeaderKeywords extends \AsyncWeb\Frontend\Block{
 		return true;
 	}
 	public function initTemplate(){
-		$this->template='{{#keywords}}<meta name="keywords" content="{{keywords}}" />{{/keywords}}';
+		$this->template='{{#keywords}}
+		<meta name="keywords" content="{{keywords}}" />{{/keywords}}';
 	}
 	public function init(){
 		$data = array("keywords"=>"");

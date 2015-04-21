@@ -6,7 +6,8 @@ class HeaderDescription extends \AsyncWeb\Frontend\Block{
 		return true;
 	}
 	public function initTemplate(){
-		$this->template='{{#description}}<meta name="description" content="{{description}}" />{{/description}}';
+		$this->template='{{#description}}
+		<meta name="description" content="{{description}}" />{{/description}}';
 	}
 	public function init(){
 		$data = array("description"=>"");
