@@ -342,7 +342,7 @@ class DBMenu5 extends MenuBuilder{
 							"fromColumn"=>"name",
 						),
 						"texts"=>array(
-							"nullValue"=>"Vyber",
+							"nullValue"=>"Select",
 						),
 						"usage"=>array("MFi","MFu","MFd")),
 					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"page"),"texts"=>array("text"=>"PHP::\AsyncWeb\Menu\DBMenu5::getPage()"),"usage"=>array("MFi","MFu","MFd")),
@@ -371,6 +371,21 @@ class DBMenu5 extends MenuBuilder{
 					 "iter"=>array("per_page"=>"20"),
 					 
 				);
+				$row = DB::gr("menu",array("page"=>MainMenu::$PAGE));
+				if($row["type"] != "image"){
+					foreach($form["cols"] as $k=>$col){
+						if(isset($col["data"]["col"])){
+							switch($col["data"]["col"]){
+								case "img":
+								case "imgalt":
+								case "imgheight":
+								case "imgwidth":
+								unset($form["cols"][$k]);
+								break;
+							}
+						}
+					}
+				}
 			
 			$form = new \AsyncWeb\View\MakeForm($form);
 			

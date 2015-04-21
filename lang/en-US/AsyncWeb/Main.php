@@ -147,3 +147,4 @@ $L['MF_update'] = 'Update';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/sr
 $L['MF_delete'] = 'Delete';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;
 $L['MF_reset'] = 'Reset';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;
 $L['Please select value'] = 'Please select value';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;
+$L['Select'] = 'Select';//AsyncWeb/src/AsyncWeb/View/MakeForm.php;AsyncWeb/src/AsyncWeb/View/MergedForm.php;

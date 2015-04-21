@@ -209,7 +209,7 @@ class MainMenu{
 			//if($ret) $ret.= '&nbsp;';
 			if($pathImg && \AsyncWeb\IO\File::exists($pathImg)){
 				$ret.='<li><a href="'.$path.'">';
-				$ret.='<img src="'.$pathImg.'" class="flag" width="18" height="12" alt="'.Language::get("LB_$lang").'" title="'.Language::get("L__LB_$lang").'" />';
+				$ret.='<img src="'.$pathImg.'" class="flag" width="18" height="12" alt="'.Language::get("L__LB_$lang").'" title="'.Language::get("L__LB_$lang").'" />';
 				$ret.='</a></li>';
 			}
 			if(MainMenu::$showLangBarTexts){
@@ -481,16 +481,16 @@ $ret='
 
 
 		if(Group::is_in_group("HTMLEditor") && (MainMenu::$editingmenu || MainMenu::$editingart)){
-			$ret.='<li><a href="'.Path::make(array("insert_data_articles_html"=>"1","newhtmlarticle"=>"1")).'">'.Language::get("Nový HTML článok").'</a></li>';
+			$ret.='<li><a href="'.Path::make(array("insert_data_articles_html"=>"1","newhtmlarticle"=>"1")).'">'.Language::get("New HTML article").'</a></li>';
 		}
 		if(Group::is_in_group("PHPEditor") && (MainMenu::$editingmenu || MainMenu::$editingart)){
-			$ret.='<li><a href="'.Path::make(array("insert_data_articles_php"=>"1","newphparticle"=>"1")).'">'.Language::get("Nový PHP článok").'</a></li>';
+			$ret.='<li><a href="'.Path::make(array("insert_data_articles_php"=>"1","newphparticle"=>"1")).'">'.Language::get("New PHP article").'</a></li>';
 		}
 		
 		if(MainMenu::$editingmenu){
 			if(Group::is_in_group("MenuEditor")){
-				if(isset($cur["id"])) $ret.='<li><a href="'.Path::make(array("dbmenu5_edit___UPDATE1"=>"1","dbmenu5_edit___ID"=>$cur["id"],"editmenu"=>"1")).'">'.Language::get("Edituj menu").'</a></li>';
-				$ret.='<li><a onclick="confirm(\''.Language::get("Naozaj chcete zrušiť menu?").'\')?ret=true:ret=false;return ret;" href="'.Path::make(array("dbmenu5_edit___DELETE"=>"1","dbmenu5_edit___ID"=>$cur["id"],"deletemenu"=>"1")).'">'.Language::get("Zruš menu").'</a></li>';
+				if(isset($cur["id"])) $ret.='<li><a href="'.Path::make(array("dbmenu5_edit___UPDATE1"=>"1","dbmenu5_edit___ID"=>$cur["id"],"editmenu"=>"1")).'">'.Language::get("Manage menu").'</a></li>';
+				$ret.='<li><a onclick="confirm(\''.Language::get("Are you sure you want to delete this menu?").'\')?ret=true:ret=false;return ret;" href="'.Path::make(array("dbmenu5_edit___DELETE"=>"1","dbmenu5_edit___ID"=>$cur["id"],"deletemenu"=>"1")).'">'.Language::get("Delete menu").'</a></li>';
 			}
 		}
 		

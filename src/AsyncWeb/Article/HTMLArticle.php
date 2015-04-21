@@ -35,7 +35,7 @@ class HTMLArticle implements ArticleV2{
 					 array("form"=>array("type"=>"value"),"data"=>array("col"=>"category"),"texts"=>array("text"=>"PHP::\AsyncWeb\Menu\MainMenu::getCurrentId()"),"usage"=>array("MFi","MFu","MFd")),
 					 //array("form"=>array("type"=>"value"),"data"=>array("col"=>"created"),"texts"=>array("text"=>"PHP::Time::get()"),"usage"=>array("MFi","MFu","MFd")),
 					 array("name"=>"Time","form"=>array("type"=>"textbox"),"data"=>array("col"=>"created","datatype"=>"date"),"texts"=>array("default"=>"PHP::\AsyncWeb\Article\HTMLArticle::getDefaultDate()"),"filter"=>array("type"=>"date","format"=>"d.m.Y H:i:s"),"usage"=>array("MFi","MFu","DBVs","DBVe")),
-					 array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Všetci vidia obsah","notlogged"=>"Iba neprihlásení","logged"=>"Prihlásení")),"usage"=>array("MFi","MFu","MFd")),
+ 					 array("name"=>"Logintype","form"=>array("type"=>"select"),"data"=>array("col"=>"logintype","datatype"=>"enum"),"filter"=>array("type"=>"option","option"=>array("all"=>"Everyone see the category","notlogged"=>"Category is visible only to Unauthenticated","logged"=>"Category is visible only to Authenticated")),"usage"=>array("MFi","MFu","MFd")),
 					 array(
 						"name"=>"Group",
 						"form"=>array("type"=>"selectDB"),
