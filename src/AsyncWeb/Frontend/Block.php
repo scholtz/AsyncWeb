@@ -10,6 +10,7 @@ class Block{
 	protected static $MustacheEngine = null;
 	protected $template = "";
 	protected $data = array();
+	protected $renderedTemplates = array();
 	protected $tid = "";
 	protected $clients = array();
 	protected $usesparams = array();
@@ -17,7 +18,9 @@ class Block{
 	public function getUsesParams(){
 		return $this->usesparams;
 	}
-	
+	public function overRideOuterBlock(){
+		return false;
+	}
 	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>true);
 	public static function registerBlockPath($namespace){
 		Block::$BLOCKS_PATHS[$namespace] = true;
@@ -103,6 +106,10 @@ class Block{
 	public function name(){
 		return $this->name;
 	}
+	protected $rendered = false;
+	public function isRendered(){
+		return $this->rendered;
+	}
 	public function setTemplate($template){
 		$this->template = $template;
 		//$this->notify();
@@ -113,6 +120,15 @@ class Block{
 	public function setData(Array $data, $namespace=""){
 		$this->data[$namespace] = $data;
 		$this->notify($namespace);
+	}
+	public function changeData(Array $data,$namespace=""){
+		$changed = false;
+		foreach($data as $k=>$v){
+			if($v!=$this->data[$namespace][$k]){$this->data[$namespace][$k] = $v;$changed = true;}
+		}
+		if($changed){
+			$this->notify($namespace);
+		}
 	}
 	public function getData($namespace=""){
 		return $this->data[$namespace];	
@@ -140,16 +156,16 @@ class Block{
 		return $ret;
 	}
 	public function get($namespace=""){
-		if(Block::$MustacheEngine == null) 
+		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
+		}
 		
-		if(!isset($this->data[$namespace])){
-			$this->data[$namespace] = array();
-		};
+		$dataToRender = array();
+		if(isset($this->data[$namespace])) $dataToRender = $this->data[$namespace];
 		
 		if(isset(static::$DICTIONARY[\AsyncWeb\System\Language::get()])){
 			foreach(static::$DICTIONARY[\AsyncWeb\System\Language::get()] as $k=>$v){
-				$this->data[$namespace][$k] = $v;
+				$dataToRender[$k] = $v;
 			}
 		}
 		
@@ -160,19 +176,24 @@ class Block{
 			$pos2 = strpos($this->template,"}}}",$pos);
 			$item = trim(substr($this->template,$pos,$pos2-$pos));
 			if(substr($item,0,4)=="url:"){
-				$this->data[$namespace][$item] = URLParser::add(substr($item,4));
-			}else if(!isset($this->data[$namespace][$item])){ // only if we do not use the variable with the same name, try to load template
+				$dataToRender[$item] = URLParser::add(substr($item,4));
+			}else if(!isset($dataToRender[$item])){ // only if we do not use the variable with the same name, try to load template
 				
 				
 				$templateid = URLParser::get($item);
 				try{
+
 					$tid = BlockManagement::getTid($templateid);
 					if($itemcl = BlockManagement::get($templateid,$tid)){
 						$itemid = $item;
 						if($p = strpos($item,":")){
 							$itemid = substr($item,0,$p);
 						}
-						$this->data[$namespace][$item] = '<'.$this->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$this->blockElement.'>';
+						if($itemcl->overRideOuterBlock()){
+							$dataToRender[$item] = $itemcl->get();
+						}else{
+							$dataToRender[$item] = '<'.$this->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$this->blockElement.'>';
+						}
 					}
 				}catch(Exception $exc){
 					
@@ -182,28 +203,33 @@ class Block{
 		}
 		
 		
-		if($this->data[$namespace]["USER_ID"] = \AsyncWeb\Security\Auth::userId()){
+		if($dataToRender["USER_ID"] = \AsyncWeb\Security\Auth::userId()){
 			
 			if(\AsyncWeb\Security\Auth::checkControllers() === true){
-				$this->data[$namespace]["UNAUTH"] = false;
-				$this->data[$namespace]["AUTH"] = true;
-				$this->data[$namespace]["PREAUTH"] = false;
+				$dataToRender["UNAUTH"] = false;
+				$dataToRender["AUTH"] = true;
+				$dataToRender["PREAUTH"] = false;
 			}else{
-				$this->data[$namespace]["UNAUTH"] = true;
-				$this->data[$namespace]["AUTH"] = false;
-				$this->data[$namespace]["PREAUTH"] = true;
+				$dataToRender["UNAUTH"] = true;
+				$dataToRender["AUTH"] = false;
+				$dataToRender["PREAUTH"] = true;
 			}
 		}else{
-			$this->data[$namespace]["UNAUTH"] = true;
-			$this->data[$namespace]["AUTH"] = false;
-			$this->data[$namespace]["PREAUTH"] = false;
+			$dataToRender["UNAUTH"] = true;
+			$dataToRender["AUTH"] = false;
+			$dataToRender["PREAUTH"] = false;
 		}
-		$this->data[$namespace]["TEMPLATE_START_DELIMITER"] = "{{{";
-		
-		return Block::$MustacheEngine->render($this->template,$this->data[$namespace]);
+		$dataToRender["TEMPLATE_START_DELIMITER"] = "{{{";
+		$this->rendered = true;
+		$ret= Block::$MustacheEngine->render($this->template,$dataToRender);
+		return $ret;
 	}
 	public function notify($namespace=""){
 		//$this->init();
+		if($this->isRendered()){
+			\AsyncWeb\Frontend\BlockManagement::rerender();
+		}
+		
 		$R = array("msg"=>"changed","id"=>Block::$i++,"changed"=>array("template"=>$this->name(),"tid"=>$this->tid,"data"=>$this->getData($namespace)));
 		$data = json_encode($R);
 		

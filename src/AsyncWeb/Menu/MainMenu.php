@@ -531,7 +531,7 @@ $ret='
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
 		
 		$url = \AsyncWeb\Frontend\URLParser::parse();
-		if(isset($url["tmpl"][MainMenu::$CATEGORY_TAG_NAME])){
+		if(isset($url["tmpl"][MainMenu::$CATEGORY_TAG_NAME]) && $url["tmpl"][MainMenu::$CATEGORY_TAG_NAME]){
 			$path = $url["tmpl"][MainMenu::$CATEGORY_TAG_NAME];
 		}else{
 			$path = "Main";
@@ -577,6 +577,9 @@ $ret='
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
 		if(isset($ret["keywords"])) $GLOBALS["TMPL_keywords"] = Language::get($ret["keywords"]);
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
+		
+		\AsyncWeb\Frontend\BlockManagement::get("HeaderTitle")->changeData(array("title"=>$ret["title"]));;
+		
 		MainMenu::$current = $ret;
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
 		

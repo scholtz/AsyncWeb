@@ -7,6 +7,10 @@ class BlockManagement{
 	public static function setDefaultBlock(Block $default){
 		BlockManagement::$defaultBlock = $default;
 	}
+	protected static $needToRerender = true;
+	public static function rerender(){
+		self::$needToRerender = true;
+	}
 	public static function renderWeb(){
 		if(BlockManagement::$defaultBlock == null){
 			if(Block::exists("Index")){
@@ -22,8 +26,13 @@ class BlockManagement{
 		if($usr = \AsyncWeb\Security\Auth::userId()){
 			$namespace = $usr;
 		}
+		while(self::$needToRerender){
+			self::$needToRerender = false;
+			$ret=BlockManagement::$defaultBlock->get($namespace);
+		}
+		echo $ret;
+		exit;
 		
-		echo BlockManagement::$defaultBlock->get($namespace);exit;
 	}
 	
 	protected static $blocks = array();
@@ -33,7 +42,7 @@ class BlockManagement{
 		$block = BlockManagement::get($blockname, "");
 		return $tid = URLParser::selectParameters($block->getUsesParams());
 	}
-	public static function get($name,$tid){
+	public static function get($name,$tid=""){
 		//var_dump("BlockManagement::get:$name;$tid");
 		try{
 			if(isset(BlockManagement::$instances[$name][$tid])){

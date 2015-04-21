@@ -65,7 +65,7 @@ class OAuthLibSession implements TokenStorageInterface
         } else {
 			Session::set($this->sessionVariableName,array(
                 $service => $serializedToken,
-            );
+            ));
         }
 
         // allow chaining
@@ -120,7 +120,7 @@ class OAuthLibSession implements TokenStorageInterface
         } else {
 			Session::set($this->stateVariableName,array(
                 $service => $state,
-            );
+            ));
         }
 
         // allow chaining
