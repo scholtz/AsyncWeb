@@ -106,7 +106,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 		Session::set_cookie_params();
      	session_start();
      	if(class_exists("\AsyncWeb\Text\Messages")){
-     		\AsyncWeb\Text\Messages::getInstance()->error("SESSION STEALING - Vaša session bola ukradnutá. Ak sa vám to zobrazilo na vašom počítači, mohla sa vám zmeniť IP adresa. Prosím prihláste sa ešte raz.");
+     		\AsyncWeb\Text\Messages::getInstance()->error(\AsyncWeb\System\Language::get("You have changed your IP address, upgraded browser, or some other security error has occured. Your session has been terminated."));
      	}
      }
 	 
@@ -134,7 +134,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 		Session::set_cookie_params();
      	session_start();
      	
-     	\AsyncWeb\Text\Messages::getInstance()->error("SESSION STEALING - Vaša session bola ukradnutá. Ak sa vám to zobrazilo na vašom počítači, mohla sa vám zmeniť IP adresa. Prosím prihláste sa ešte raz.");
+     	\AsyncWeb\Text\Messages::getInstance()->error(\AsyncWeb\System\Language::get("You have upgraded your browser, or some other security error has occured. Your session has been terminated."));
      	
      }
 	 }
@@ -186,10 +186,10 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 				@session_destroy();
 				@session_start();
 				if(class_exists("\AsyncWeb\Text\Messages")){
-					\AsyncWeb\Text\Messages::getInstance()->error("Príliš dlho ste nepracovali na stránke! Boli ste odhlásený! Session time out!");
+					\AsyncWeb\Text\Messages::getInstance()->error(\AsyncWeb\System\Language::get("You have been inactive for too long! Your session has expired."));
 					\AsyncWeb\HTTP\Header::s("reload");
 				}else{
-					echo "Príliš dlho ste nepracovali na stránke! Boli ste odhlásený! Session time out! <a href=\"/\">continue</a>";
+					echo \AsyncWeb\System\Language::get("You have been inactive for too long! Your session has expired.");
 					exit;
 				}
 			}
@@ -250,7 +250,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 		\AsyncWeb\Security\Auth::logout();
 
   		if(class_exists('\AsyncWeb\Text\Messages')){
-  			\AsyncWeb\Text\Messages::die_error("SESSION was modified outside of system!!!!");
+  			\AsyncWeb\Text\Messages::die_error(\AsyncWeb\System\Language::get("Session was modified outside of system!!!!"));
   		}else{
 			echo "killing sess.";
   		}
