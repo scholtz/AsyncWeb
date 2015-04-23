@@ -1201,17 +1201,17 @@ class ArrayDataSource implements DataSource{
 			
 			$cols = $DataSort->get();
 			if(!$cols) return ;
-			if(!$DataSort->getDoNotUseCollate() && class_exists("Collator")){
+			if(!$DataSort->getDoNotUseCollate() && class_exists("\\Collator")){
 				$coll = collator_create(\AsyncWeb\System\Language::getLang());
 				$col = array_shift($cols);
 				
 				$tmp = array();
 				$tmp2 = array();
 				
-				$type = Collator::SORT_REGULAR;
-				if($col->getType() == SORT_NUMERIC) $type = Collator::SORT_NUMERIC;
+				$type = \Collator::SORT_REGULAR;
+				if($col->getType() == SORT_NUMERIC) $type = \Collator::SORT_NUMERIC;
 				foreach($this->data as $k=>$v){
-					if($type == Collator::SORT_NUMERIC){
+					if($type == \Collator::SORT_NUMERIC){
 						$tmp[] = 10000*$v[$col->getCol()];
 						$tmp2[10000*$v[$col->getCol()]][] = $v;
 					}else{
