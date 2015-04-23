@@ -22,6 +22,11 @@ class Index extends \AsyncWeb\Frontend\Block{
 	<script async src="//cdnjs.cloudflare.com/ajax/libs/metisMenu/2.0.0/metisMenu.min.js"></script>
 	<link rel="stylesheet" href="/assets/css/metisMenu.css">
 	
+	<!-- DataTable -->
+	<script src="/assets/js/datatable.js"></script>
+    <link rel="stylesheet" href="/assets/css/datatable.css">
+
+
 	<!-- AsyncWeb scripts -->
 	
     <script src="/assets/js/reconnecting-websocket.js"></script>
@@ -29,7 +34,6 @@ class Index extends \AsyncWeb\Frontend\Block{
     <script src="/assets/js/mustache.js"></script>
     <script src="/assets/js/ratchetfrontend.js"></script>
 	
-    <link rel="stylesheet" href="/assets/css/datatable.css">
     <link rel="stylesheet" href="/assets/css/sidebar.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
