@@ -16,10 +16,19 @@ class Index extends \AsyncWeb\Frontend\Block{
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
     <script async type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
+
+	<!-- SideBar -->
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/metisMenu/2.0.0/metisMenu.min.css">
+	<script async src="//cdnjs.cloudflare.com/ajax/libs/metisMenu/2.0.0/metisMenu.min.js"></script>
+	<link rel="stylesheet" href="/assets/css/metisMenu.css">
+	
+	<!-- AsyncWeb scripts -->
+	
     <script src="/assets/js/reconnecting-websocket.js"></script>
     <script src="/assets/js/meteor-ddp.js"></script>
     <script src="/assets/js/mustache.js"></script>
     <script src="/assets/js/ratchetfrontend.js"></script>
+	
     <link rel="stylesheet" href="/assets/css/datatable.css">
     <link rel="stylesheet" href="/assets/css/sidebar.css">
     <link rel="stylesheet" href="/css/style.css">
