@@ -7,9 +7,9 @@ class User{
 		if($id2==null){
 			$id2=\AsyncWeb\Security\Auth::userId();
 		}
-		$usr = \AsyncWeb\DB\DB::gr("users",array("id2"=>$id2));
-		if($usr) return $usr;
 		$usr = \AsyncWeb\DB\DB::gr("outer_user_access",array("id2"=>$id2));
+		if($usr) return $usr;
+		$usr = \AsyncWeb\DB\DB::gr("users",array("id2"=>$id2));
 		if($usr) return $usr;
 		return false;
 	}
