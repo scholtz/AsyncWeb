@@ -44,6 +44,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	protected $logqueries = false;
 	protected $logfile = "d:/mysql.log";
 	protected $tryrepair = true;
+	
 	public function __construct($defaultsettings = true, $server="",$login="",$pass="",$db=""){
 
 		
@@ -108,6 +109,10 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	 * @return MysqlServer Instanciu
 	 */
 	protected static $instance;
+	public function setLogFile($logfile){
+		$logqueries = true;
+		$this->logfile = $logfile;
+	}
 	public static function getInstance(){
 
 		if(MysqlServer::$working) throw new \AsyncWeb\Exceptions\FatalException("MYSQL server loop");

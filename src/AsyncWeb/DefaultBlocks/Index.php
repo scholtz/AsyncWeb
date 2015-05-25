@@ -30,9 +30,8 @@ class Index extends \AsyncWeb\Frontend\Block{
 	<!-- AsyncWeb scripts -->
 	
     <script src="/assets/js/reconnecting-websocket.js"></script>
-    <script src="/assets/js/meteor-ddp.js"></script>
     <script src="/assets/js/mustache.js"></script>
-    <script src="/assets/js/ratchetfrontend.js"></script>
+    <script src="/assets/js/AWLibrary.js"></script>
 	
     <link rel="stylesheet" href="/assets/css/sidebar.css">
     <link rel="stylesheet" href="/css/style.css">
