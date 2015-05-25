@@ -110,7 +110,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	 */
 	protected static $instance;
 	public function setLogFile($logfile){
-		$logqueries = true;
+		$this->logqueries = true;
 		$this->logfile = $logfile;
 	}
 	public static function getInstance(){
