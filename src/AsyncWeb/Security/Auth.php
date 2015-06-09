@@ -42,6 +42,9 @@ class Auth{
 		Auth::$CHECKING = false;
 		return $ret;
 	}
+	public static function countControllers(){
+		return count(Auth::$controllers);
+	}
 	public static function checkControllers(){
 		$ret = true;
 		foreach(Auth::$controllers as $k=>$controller){
@@ -125,6 +128,10 @@ class Auth{
 	public static function serviceIsRegistered($id){
 		return isset(Auth::$services[$id]);
 	}
+	public static function countServices(){
+		return count(Auth::$services);
+	}
+
 	protected static $controllers = array();
 	public static function registerController(\AsyncWeb\Security\AuthController $controller){
 		Auth::$controllers[$controller->SERVICE_ID()] = $controller;

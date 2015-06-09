@@ -12,6 +12,9 @@ use AsyncWeb\Cache\Cache;
 class CategoryArticle{
 	private static $listenerCheck = array();
 	public static function make($cat=false){
+		if(!MainMenu::countBuilders()){
+			return "{{{Main}}}";
+		}
 		if(!$cat){
 			$cat = MainMenu::getCurrent();
 		}

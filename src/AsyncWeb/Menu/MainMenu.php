@@ -20,6 +20,9 @@ class MainMenu{
 	private static $leftMenu = array();
 	private static $navigator = array();
 	private static $builders = array();
+	public static function countBuilders(){
+		return count(MainMenu::$builders);
+	}
 	public static function registerBuilder($object,$priority=1){
 		if(MainMenu::$built) throw new Exception("MainMenu was already build");
 		if(is_a($object,'\AsyncWeb\Menu\MenuBuilder')){
