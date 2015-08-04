@@ -23,6 +23,7 @@ class Translate{
 				CURLOPT_ENCODING=>"gzip,deflate",
 				CURLOPT_COOKIEFILE=>"cookie.txt",
 				CURLOPT_COOKIEJAR=>"cookie.txt",
+				CURLOPT_SSL_VERIFYPEER => false,
 			);
 			curl_setopt_array(Translate::$translatech,$options);
 			curl_setopt(Translate::$translatech, CURLOPT_HTTPHEADER, $headers);  
@@ -47,7 +48,6 @@ class Translate{
 		$appId = '"ThnDPw99fdcdWVtemom9cAIadKAqILpSr6vhNpwPdNuYbo_PzP9-93t94OkNnUb7t"';
 		$appId = '"TGn9jnrGYr2FbXE6YSw5wWgoKcYj4uXH36-A5Fy36k0DVH2LEWVCCyDmvMNiEJkdl"';
 		$appId = '"TXL80-UnHTOsR6lGF7epGZ3LjIjwETFme_XZeU4Fm5nDswVOiMOEKSNPM_ZqvEHCs"';
-		
 		if(Translate::$bingappid){
 			$appId = Translate::$bingappid;
 		}else{
@@ -81,6 +81,8 @@ class Translate{
 		return $text;
 	}
 	public static function getGoogle($text,$from="sk",$to="en",$usecache=true){
+				//var_dump($text);exit;
+
 		$text = str_replace('"',"'",$text);
 		 if($from==$to) return $text;
 		 if(strlen($text) > 250) return $text;
@@ -95,17 +97,25 @@ class Translate{
 		if(!Translate::$translatech){
 			Translate::init();
 		}
-		curl_setopt(Translate::$translatech, CURLOPT_URL, "http://translate.google.com/translate_a/t?client=t&text=".urlencode($text)."&hl=en&sl=$from&tl=$to&ie=UTF-8&oe=UTF-8&multires=1&prev=btn&ssel=0&tsel=0&sc=1");
 		
+		//curl_setopt(Translate::$translatech, CURLOPT_URL, "http://translate.google.com/translate_a/t?client=t&text=".urlencode($text)."&hl=en&sl=$from&tl=$to&ie=UTF-8&oe=UTF-8&multires=1&prev=btn&ssel=0&tsel=0&sc=1");
+		curl_setopt(Translate::$translatech, CURLOPT_URL, $path="https://translate.google.com/translate_a/single?client=t&sl=$from&tl=$to&hl=en&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&dt=at&ie=UTF-8&oe=UTF-8&ssel=3&tsel=0&otf=1&kc=5&tk=523093|15087&q=".urlencode($text));
 		
 		 
 		$data = curl_exec(Translate::$translatech);
-		$data = str_replace(",,",",",$data);
-		$data = str_replace(",,",",",$data);
-		$data = str_replace(",,",",",$data);
-		$data = str_replace(",,",",",$data);
-		$data = str_replace(",,",",",$data);
-		$t = json_decode($data);
+
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace(",,",',"",',$data);
+		$data = str_replace("[,",'["",',$data);
+		$data = str_replace(",]",',""]',$data);
+		$t = json_decode($data,true);
+		//var_dump($data);
 		$trtext = @$t[0][0][0];
 		if(!$trtext && is_file("cookie.txt")){
 			unlink("cookie.txt");
