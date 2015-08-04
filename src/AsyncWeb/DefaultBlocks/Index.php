@@ -10,7 +10,7 @@ class Index extends \AsyncWeb\Frontend\Block{
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{#title}}<title>{{title}}</title>{{/title}}
+    {{{HeaderTitle}}}{{{HeaderDescription}}}{{{HeaderKeywords}}}
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.css" rel="stylesheet">
 	<script src="//code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">

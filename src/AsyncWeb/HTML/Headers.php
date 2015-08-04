@@ -1,5 +1,6 @@
 <?php
 namespace AsyncWeb\HTML;
+use AsyncWeb\HTTP\Header;
 /**
 usage \AsyncWeb\HTML\Headers::add_script("text/javascript","/js/jquery.js");
 */

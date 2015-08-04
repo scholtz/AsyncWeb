@@ -9,15 +9,16 @@ class Page{
 	public static $debug = false;
 	public static $cookieFile = "cookies.txt";
 	public static $ua = "Mozilla/5.0 (Windows; U; Windows NT 5.1; sk; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)";
+	public static $info = null;
 	public static function get($page,$post="",$showHeaders = "1",$curlparams=array()){
 		$n = 1;
 		$i = 0;
 		
 		while($n>0){$i++;
 			$ch = curl_init($page);
-			echo(curl_error($ch));
+			if(Page::$debug) echo(curl_error($ch));
 			curl_setopt($ch, CURLOPT_HEADER, $showHeaders);
-			echo(curl_error($ch));
+			if(Page::$debug) echo(curl_error($ch));
 			$p = "";
 			if($post){
 			 if(is_array($post)){
@@ -40,7 +41,7 @@ class Page{
 			curl_setopt($ch, CURLOPT_COOKIEJAR, Page::$cookieFile);
 			curl_setopt($ch, CURLOPT_COOKIEFILE, Page::$cookieFile);
 			curl_setopt($ch, CURLOPT_ENCODING , "gzip");
-			curl_setopt($ch, CURLOPT_HTTPHEADER,array(
+			$header = array(
 				"User-Agent: ".Page::$ua,
 				'Accept: application/json, text/javascript, */*',
 				"Accept-Language: sk,cs;q=0.8,en-us;q=0.5,en;q=0.3",
@@ -50,12 +51,22 @@ class Page{
 				"Keep-Alive: 300",
 				"Connection: keep-alive",
 				"Cache-Control: max-age=0"
-				)
-			);
+				);
+			if($curlparams && $curlparams[CURLOPT_HTTPHEADER]){
+				foreach($curlparams[CURLOPT_HTTPHEADER] as $k=>$v){
+					foreach($header as $kk=>$row){
+						if(substr($row,0,strlen($k)+1) == $k.":") unset($header[$kk]);
+					}
+					$header[] ="$k: $v";
+				}
+				unset($curlparams[CURLOPT_HTTPHEADER]);
+			}
+			curl_setopt($ch, CURLOPT_HTTPHEADER,$header);
 			if($curlparams) curl_setopt_array($ch,$curlparams);
 			$output = curl_exec($ch);      
 			if(Page::$debug)echo(curl_error($ch));
 			$n = curl_errno($ch);
+			Page::$info = curl_getinfo($ch);
 			curl_close($ch);
 			usleep(50000);
 			if(Page::$debug) file_put_contents("test08.html",$output);
@@ -244,5 +255,3 @@ class Page{
 
 	}
 }
-
-?>
