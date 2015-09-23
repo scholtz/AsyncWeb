@@ -32,13 +32,13 @@ class WebMining3{
 				$this->config = $config;
 		$this->time = Time::get($time);
 		
-		$this->doc = @DOMDocument::loadHtml($this->text);
+		$this->doc = @\DOMDocument::loadHtml($this->text);
 		if(!$this->doc){
 			file_put_contents("test002.html",$text);
 			exit;
 		}
 //		var_dump($this->doc);
-		$this->xpath = new DOMXPath($this->doc);
+		$this->xpath = new \DOMXPath($this->doc);
 		return $data = $this->createData();
 		
 	}
@@ -93,11 +93,11 @@ class WebMining3{
 		
 		foreach ($this->config["iter"] as $col=>$settings){
 			if(!$this->doc){
-				$this->doc = @DOMDocument::loadHtml($this->text);
+				$this->doc = @\DOMDocument::loadHtml($this->text);
 				if(!$this->doc) return false;
 			}
 			if(!$this->xpath){
-				$this->xpath = new DOMXPath($this->doc);
+				$this->xpath = new \DOMXPath($this->doc);
 			}
 			
 			foreach ($this->xpath->query($settings["xpath"]) as $node){
@@ -229,13 +229,13 @@ class WebMining3{
 	private function getXpathValue($query,$relative=false){
 //		file_put_contents("test003.html",$this->text);
 		if(!$this->doc){
-			$this->doc = @DOMDocument::loadHtml($this->text);
+			$this->doc = @\DOMDocument::loadHtml($this->text);
 			
 			if(!$this->doc) return false;
 		}
 //		$this->doc->save("test002.html");
 		if(!$this->xpath){
-			$this->xpath = new DOMXPath($this->doc);
+			$this->xpath = new \DOMXPath($this->doc);
 		}
 		if($relative && $this->currentNode){
 			$node = $this->xpath->query($query,$this->currentNode)->item(0);

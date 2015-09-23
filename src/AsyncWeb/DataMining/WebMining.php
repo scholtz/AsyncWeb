@@ -134,12 +134,12 @@ class WebMining{
 	
 	private function getXpathValue($query){
 		if(!$this->doc){
-			$this->doc = @DOMDocument::loadHtml($this->text);
+			$this->doc = @\DOMDocument::loadHtml($this->text);
 			
 			if(!$this->doc) return false;
 		}
 		if(!$this->xpath){
-			$this->xpath = new DOMXPath($this->doc);
+			$this->xpath = new \DOMXPath($this->doc);
 		}
 		
 		$node = $this->xpath->query($query)->item(0);

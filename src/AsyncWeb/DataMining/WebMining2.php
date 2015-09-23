@@ -45,11 +45,11 @@ class WebMining2{
 		$si = 0;
 		foreach ($this->config["iter"] as $col=>$settings){$si++;
 			if(!$this->doc){
-				$this->doc = @DOMDocument::loadHtml($this->text);
+				$this->doc = @\DOMDocument::loadHtml($this->text);
 				if(!$this->doc) return false;
 			}
 			if(!$this->xpath){
-				$this->xpath = new DOMXPath($this->doc);
+				$this->xpath = new \DOMXPath($this->doc);
 			}
 			$i = 0;
 			foreach ($this->xpath->query($settings["xpath"]) as $node){$i++;
@@ -190,13 +190,13 @@ class WebMining2{
 	protected function getXpathValue($query,$relative=false){
 //		file_put_contents("test003.html",$this->text);
 		if(!$this->doc){
-			$this->doc = @DOMDocument::loadHtml($this->text);
+			$this->doc = @\DOMDocument::loadHtml($this->text);
 			
 			if(!$this->doc) return false;
 		}
 //		$this->doc->save("test002.html");
 		if(!$this->xpath){
-			$this->xpath = new DOMXPath($this->doc);
+			$this->xpath = new \DOMXPath($this->doc);
 		}
 		if($relative && $this->currentNode){
 			$node = $this->xpath->query($query,$this->currentNode)->item(0);

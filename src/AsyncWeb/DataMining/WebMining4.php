@@ -7,11 +7,11 @@ class WebMining4 extends \AsyncWeb\DataMining\WebMining2{
 	protected function createData(){
 		$dataCol = array();
 		if(!$this->doc){
-			$this->doc = @DOMDocument::loadHtml($this->text);
+			$this->doc = @\DOMDocument::loadHtml($this->text);
 			if(!$this->doc) return false;
 		}
 		if(!$this->xpath){
-			$this->xpath = new DOMXPath($this->doc);
+			$this->xpath = new \DOMXPath($this->doc);
 		}
 		$ndata = array();
 		

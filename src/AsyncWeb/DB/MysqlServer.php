@@ -50,6 +50,8 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		
 		
 		if($defaultsettings){
+			if(MysqlServer::$instance) return MysqlServer::$instance;
+
 			$this->defaultServer = MysqlServer::$SERVER;
 			$this->defaultLogin = MysqlServer::$LOGIN;
 			$this->defaultPass = MysqlServer::$PASS;
@@ -99,6 +101,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		if(!@mysql_query("SET NAMES utf8")){
 			throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to set up charset"));
 		}
+		MysqlServer::$instance = $this;
 	}
 	/**
 	 * tato funkcia vrati defaultnu instanciu obj. MysqlServer
@@ -118,15 +121,15 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		if(MysqlServer::$working) throw new \AsyncWeb\Exceptions\FatalException("MYSQL server loop");
 		MysqlServer::$working = true;
 
-		if($instance == NULL){
+		if(MysqlServer::$instance == NULL){
 			try{
-				$instance = new MysqlServer();
+				MysqlServer::$instance = new MysqlServer();
 			}catch(Exception $e){
 				throw $e;
 			}
 		}
 		MysqlServer::$working = false;
-		return $instance;
+		return MysqlServer::$instance;
 	}
 	public function query($query,$link = null,$params = array()){
 		if($link == null) $link = $this->link;
@@ -222,27 +225,21 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 
 	 updates all colums from data col=>value to new values for identifier id2 = $id
 	 
-	 ak je id numericka hodnota, predpoklada sa, ze je to konkretny riadok s id
-	 
 	 */
 	public function updateSimple($table,$id,$data,$conf=array(),$insert_new = false){
 		
 		$where = array();
 		
-		if(is_numeric($id)){
-			$where = $id;
-		}else{
-			$where = $id;
-			if($insert_new){
-				$row = $this->gr($table,$where);
-				if(!$insert_new) if(!$row) return false;
-				
-				if(!$row){
-					$data["id2"] = $id;
-					return $this->insert($table,$data,$conf);
-				}
-				$where = $id = $this->myAddSlashes($row["id"]);
+		$where = $id;
+		if($insert_new){
+			$row = $this->gr($table,$where);
+			if(!$insert_new) if(!$row) return false;
+			
+			if(!$row){
+				$data["id2"] = $id;
+				return $this->insert($table,$data,$conf);
 			}
+			$where = $id = $this->myAddSlashes($row["id"]);
 		}
 		
 
@@ -280,7 +277,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 				}
 			}
 		}elseif(is_numeric($where)){
-			$qwhere = "id = '$id'";
+			$qwhere = "id2 = '$id'";
 		}else{
 			$qwhere = "id2 = '$id' and do = 0";
 		}
@@ -1315,5 +1312,3 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	return true;
 }
 }
-
-?>
