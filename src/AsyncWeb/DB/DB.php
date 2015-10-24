@@ -32,6 +32,10 @@ class DB{
 	}
  }
  
+ public static function setLogFile($logfile){
+  DB::connect();	
+  return DB::$connection->setLogFile($logfile);
+ }
  public static function query($query,$link=null,$params=array()){
   DB::connect();
   return DB::$connection->query($query,$link,$params);

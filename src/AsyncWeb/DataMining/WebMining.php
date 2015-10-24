@@ -74,6 +74,10 @@ class WebMining{
 				}
 			}
 
+
+		if(isset($this->config["postprocessing"])){
+			$data = Execute::run($this->config["postprocessing"],array("data"=>$data));
+		}
 		
 		$row = DB::gr($table,$id2);
 		if(!$row){
