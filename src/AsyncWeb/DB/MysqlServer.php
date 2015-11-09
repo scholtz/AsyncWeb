@@ -4,7 +4,6 @@ namespace AsyncWeb\DB;
 use AsyncWeb\DB\DBServer;
 use AsyncWeb\Storage\Log;
 use AsyncWeb\Date\Time;
-use AsyncWeb\System\Language;
 use AsyncWeb\DB\DB;
 
 /**
@@ -51,13 +50,13 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		
 		if($defaultsettings){
 			if(MysqlServer::$instance) return MysqlServer::$instance;
-
+			
 			$this->defaultServer = MysqlServer::$SERVER;
 			$this->defaultLogin = MysqlServer::$LOGIN;
 			$this->defaultPass = MysqlServer::$PASS;
 			$this->defaultDB = MysqlServer::$DB;
 			 
-			if(!$this->defaultLogin){
+			if(!$this->defaultLogin){ // backward compatibility
 				include("config/db.php");
 				$this->defaultServer = $DB_SERVER;
 				$this->defaultLogin = $DB_L;
@@ -69,36 +68,24 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			if(MysqlServer::$PERSISTENT_CONNECTION){
 				if(!function_exists("mysql_pconnect")){
 					$err = "Mysql not configured properly";
-					if($defaultsettings){
-						throw new \AsyncWeb\Exceptions\FatalException($err);
-					}else{
-						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-					}
+					if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+					throw new \AsyncWeb\Exceptions\FatalException($err);
 				}
 				if(!$this->link = @mysql_pconnect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
 					$err = "Failed to connect to the database";
-					if($defaultsettings){
-						throw new \AsyncWeb\Exceptions\FatalException($err);
-					}else{
-						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-					}
+					if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+					throw new \AsyncWeb\Exceptions\FatalException($err);
 				}
 			}else{
 				if(!function_exists("mysql_connect")){
 					$err = "Mysql not configured properly";
-					if($defaultsettings){
-						throw new \AsyncWeb\Exceptions\FatalException($err);
-					}else{
-						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-					}
+					if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+					throw new \AsyncWeb\Exceptions\FatalException($err);
 				}
 				if(!$this->link = @mysql_connect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
 					$err = "Failed to connect to the database";
-					if($defaultsettings){
-						throw new \AsyncWeb\Exceptions\FatalException($err);
-					}else{
-						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-					}
+					if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+					throw new \AsyncWeb\Exceptions\FatalException($err);
 				}
 			}
 			
@@ -110,36 +97,26 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			// do not try to do persistent on second connecitons MysqlServer::$PERSISTENT_CONNECTION
 			if(!function_exists("mysql_connect")){
 				$err = "Mysql not configured properly";
-				if($defaultsettings){
-					throw new \AsyncWeb\Exceptions\FatalException($err);
-				}else{
-					throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-				}
+				if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+				throw new \AsyncWeb\Exceptions\DBException($err);
 			}
 			if(!$this->link = @mysql_connect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
 				$err = "Failed to connect to the database";
-				if($defaultsettings){
-					throw new \AsyncWeb\Exceptions\FatalException($err);
-				}else{
-					throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-				}
+				
+				if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+				
+				throw new \AsyncWeb\Exceptions\DBException($err);
 			}
 		}
 		if(!@mysql_select_db($this->defaultDB, $this->link)){
 			$err = "Failed to select the database";
-			if($defaultsettings){
-				throw new \AsyncWeb\Exceptions\FatalException($err);
-			}else{
-				throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-			}
+			if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+			throw new \AsyncWeb\Exceptions\DBException($err);
 		}
 		if(!@mysql_query("SET NAMES utf8")){
 			$err = "Failed to connect to set up charset";
-			if($defaultsettings){
-				throw new \AsyncWeb\Exceptions\FatalException($err);
-			}else{
-				throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
-			}
+			if(\AsyncWeb\DB\DB::$CONNECTED) $err = \AsyncWeb\System\Language::get($err);
+			throw new \AsyncWeb\Exceptions\DBException($err);
 		}
 		MysqlServer::$instance = $this;
 	}
@@ -1224,131 +1201,131 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		$q = str_replace("PRIMARY KEY (`id`),","PRIMARY KEY (`id0`),KEY (`id`),",$q);
 		DB::query($q);
 		 
-}
+	}
 	public function clean($db,$dba,$table,$type="archiveObsolete",$t=1,$optimize=true,$where=array(),$dbg=false,$table2=false){
-	$dbg = $dbg || $this->debug || MysqlServer::$debug2;
-	if($dbg) echo "MysqlServer::clean()/".date("c")."\n";
-	$colrow = "";
-	$db = $this->myAddSlashes($db);
-	$dba = $this->myAddSlashes($dba);
-	if(!$table2) $table2 = $table;
-	$table = $this->myAddSlashes($table);
-	$table2 = $this->myAddSlashes($table2);
-	
-	$res = $this->query("select * from information_schema.columns where table_schema = '".$db."' and table_name = '".$table."'");
-	$in = array();
-	$inarchive = array();
-	if(!$res || !$this->num_rows($res)){
-		if($dbg) echo "nemam tabulku\n";
-		return false;
-	}
-	$types = array();
-	while($row=$this->f($res)){
-		if($row["COLUMN_NAME"] == "id") continue;
-		$col = $in[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
-		$types[$row["COLUMN_NAME"]] =  $row["COLUMN_TYPE"];
-		if($colrow) $colrow .= ",";
-		$colrow .= "`$col`";
-			
-	}
-	$res = $this->query("select * from information_schema.columns where table_schema = '".$dba."' and table_name = '".$table2."'");
-	$inarchive = array();
-	$notin = array();
-	if(!$res || !$this->num_rows($res)){
-		// vytvor tabulku
-		$row = $this->f($this->query("show create table $db.$table"));
-		$q = $row["Create Table"];
-		$q = str_replace("CREATE TABLE `$table","CREATE TABLE $dba.`$table2",$q);
-		DB::query($q);
-		if($e = $this->error()) {
-			if($dbg) echo "unable to create table in archive\n";return false;
-		}
-	}
-
-	while($row=$this->f($res)){
-		if($row["COLUMN_NAME"] == "id") continue;
-		$inarchive[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
-	}
-	if($dbg) var_dump($in);
-	foreach($in as $col){
-		if(!$inarchive[$col]){
-			$type = $types[$col];
-			if($dbg) echo "upravujem strukturu tabulky archivu pre stlpec $col: ".date("c")."\n";
-			$q="ALTER TABLE `$dba`.`$table2` ADD `$col` $type NULL DEFAULT NULL AFTER `id2` ;";
-			if($dbg) echo $q."\n";
-			DB::query($q);
-			if($dbg) echo "done: ".date("c")."\n";
-			//if($dbg) echo "table structures does not match! ($col) \n";return false;
-		}
-	}
+		$dbg = $dbg || $this->debug || MysqlServer::$debug2;
+		if($dbg) echo "MysqlServer::clean()/".date("c")."\n";
+		$colrow = "";
+		$db = $this->myAddSlashes($db);
+		$dba = $this->myAddSlashes($dba);
+		if(!$table2) $table2 = $table;
+		$table = $this->myAddSlashes($table);
+		$table2 = $this->myAddSlashes($table2);
 		
-	if($e = $this->error()) {if($dbg) echo "$q:$e\n";return false;}
-	$t = Time::get(Time::get() - Time::span($t));
-	$addLog2Lock = ", log2 write";
-	if($table == "log2"){
-		$addLog2Lock = "";
-	}
-	if($this->checkIndexes){
-		$addLog2Lock .= ", ZZZMysqlTablesKeys write";
-	}
-
-	$this->query($q = "LOCK TABLES `$dba`.`$table2` write,`$db`.`$table` write $addLog2Lock");
-
-	if($e = $this->error()) {
-		$this->query("UNLOCK TABLES");
-		if($dbg) echo "$q:$e\n";
-		return false;
-	}
-	$mywhere = "";
-	switch($type){
-		case "archiveObsolete":
-			$mywhere = " where (do > 0 and do < $t)";
-			break;
-		case "archiveOld":
-			$mywhere = " where (od < $t)";
-			break;
-		case "archiveAll":
-			$mywhere = "";
-			break;
-		case "checkStructure":
-			$mywhere = " and 1=2";
-			break;
-	}
-	foreach($where as $col=>$value){
-		if(is_array($value)){if($dbg) echo "array in where\n"; return false;}
-		if($mywhere){
-			$mywhere .= " and ";
-		}else{
-			$mywhere = " where ";
+		$res = $this->query("select * from information_schema.columns where table_schema = '".$db."' and table_name = '".$table."'");
+		$in = array();
+		$inarchive = array();
+		if(!$res || !$this->num_rows($res)){
+			if($dbg) echo "nemam tabulku\n";
+			return false;
 		}
-		$value = $this->myAddSlashes($value);
-		$mywhere .= "`$col`='$value'";
-	}
-	$q="insert into `$dba`.`$table2` ($colrow) select $colrow from $db.$table $mywhere";
-	if($dbg){
-		echo $q."\n";
-		//exit;
-	}
-	$res = $this->query($q);
-	if($e = $this->error()) {
-		$this->query("UNLOCK TABLES");
-		if($dbg) echo "$q:$e\n";
-		return false;
-	}
-	$rows = $this->affected_rows($res);
-	if($dbg){echo "moved rows: $rows\n";}
-	if($rows){
-		$this->query($q="delete from $db.$table $mywhere");
+		$types = array();
+		while($row=$this->f($res)){
+			if($row["COLUMN_NAME"] == "id") continue;
+			$col = $in[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
+			$types[$row["COLUMN_NAME"]] =  $row["COLUMN_TYPE"];
+			if($colrow) $colrow .= ",";
+			$colrow .= "`$col`";
+				
+		}
+		$res = $this->query("select * from information_schema.columns where table_schema = '".$dba."' and table_name = '".$table2."'");
+		$inarchive = array();
+		$notin = array();
+		if(!$res || !$this->num_rows($res)){
+			// vytvor tabulku
+			$row = $this->f($this->query("show create table $db.$table"));
+			$q = $row["Create Table"];
+			$q = str_replace("CREATE TABLE `$table","CREATE TABLE $dba.`$table2",$q);
+			DB::query($q);
+			if($e = $this->error()) {
+				if($dbg) echo "unable to create table in archive\n";return false;
+			}
+		}
+
+		while($row=$this->f($res)){
+			if($row["COLUMN_NAME"] == "id") continue;
+			$inarchive[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
+		}
+		if($dbg) var_dump($in);
+		foreach($in as $col){
+			if(!$inarchive[$col]){
+				$type = $types[$col];
+				if($dbg) echo "upravujem strukturu tabulky archivu pre stlpec $col: ".date("c")."\n";
+				$q="ALTER TABLE `$dba`.`$table2` ADD `$col` $type NULL DEFAULT NULL AFTER `id2` ;";
+				if($dbg) echo $q."\n";
+				DB::query($q);
+				if($dbg) echo "done: ".date("c")."\n";
+				//if($dbg) echo "table structures does not match! ($col) \n";return false;
+			}
+		}
+			
+		if($e = $this->error()) {if($dbg) echo "$q:$e\n";return false;}
+		$t = Time::get(Time::get() - Time::span($t));
+		$addLog2Lock = ", log2 write";
+		if($table == "log2"){
+			$addLog2Lock = "";
+		}
+		if($this->checkIndexes){
+			$addLog2Lock .= ", ZZZMysqlTablesKeys write";
+		}
+
+		$this->query($q = "LOCK TABLES `$dba`.`$table2` write,`$db`.`$table` write $addLog2Lock");
+
 		if($e = $this->error()) {
 			$this->query("UNLOCK TABLES");
 			if($dbg) echo "$q:$e\n";
 			return false;
 		}
+		$mywhere = "";
+		switch($type){
+			case "archiveObsolete":
+				$mywhere = " where (do > 0 and do < $t)";
+				break;
+			case "archiveOld":
+				$mywhere = " where (od < $t)";
+				break;
+			case "archiveAll":
+				$mywhere = "";
+				break;
+			case "checkStructure":
+				$mywhere = " and 1=2";
+				break;
+		}
+		foreach($where as $col=>$value){
+			if(is_array($value)){if($dbg) echo "array in where\n"; return false;}
+			if($mywhere){
+				$mywhere .= " and ";
+			}else{
+				$mywhere = " where ";
+			}
+			$value = $this->myAddSlashes($value);
+			$mywhere .= "`$col`='$value'";
+		}
+		$q="insert into `$dba`.`$table2` ($colrow) select $colrow from $db.$table $mywhere";
+		if($dbg){
+			echo $q."\n";
+			//exit;
+		}
+		$res = $this->query($q);
+		if($e = $this->error()) {
+			$this->query("UNLOCK TABLES");
+			if($dbg) echo "$q:$e\n";
+			return false;
+		}
+		$rows = $this->affected_rows($res);
+		if($dbg){echo "moved rows: $rows\n";}
+		if($rows){
+			$this->query($q="delete from $db.$table $mywhere");
+			if($e = $this->error()) {
+				$this->query("UNLOCK TABLES");
+				if($dbg) echo "$q:$e\n";
+				return false;
+			}
+		}
+		$this->query($q = "UNLOCK TABLES");
+		if($optimize) $this->query($q="OPTIMIZE TABLE `$table`");
+		if($e = $this->error()) {if($dbg) echo "$q:$e\n";return false;}
+		
+		return true;
 	}
-	$this->query($q = "UNLOCK TABLES");
-	if($optimize) $this->query($q="OPTIMIZE TABLE `$table`");
-	if($e = $this->error()) {if($dbg) echo "$q:$e\n";return false;}
-	
-	return true;
-}
 }
