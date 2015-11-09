@@ -3,6 +3,9 @@ namespace AsyncWeb\Objects;
 use AsyncWeb\DB\DB;
 
 class User{
+	public static function id(){
+		return \AsyncWeb\Security\Auth::userId();
+	}
 	public static function get($id2=null){
 		if($id2==null){
 			$id2=\AsyncWeb\Security\Auth::userId();
@@ -201,4 +204,3 @@ class User{
 		return $ret;
 	}
 }
-?>

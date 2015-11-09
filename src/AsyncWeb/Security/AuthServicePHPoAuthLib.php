@@ -5,12 +5,14 @@ use \AsyncWeb\Security\AuthService;
 
 
 class AuthServicePHPoAuthLib implements AuthService{
-	public function SERVICE_ID(){ return "\\AsyncWeb\\Security\\AuthServicePHPoAuthLib";}
+	public function SERVICE_ID(){ return $this->name;}
 	public static $TABLE_ASSOC = "users_superconnection";
 	
 	protected $services = array();
 	protected $info = array();
+	protected $name = "AuthServicePHPoAuthLib";
 	public function registerService($name,\OAuth\OAuth2\Service\AbstractService $service,$info){
+		$this->name=$name;
 		$this->services[$name] = $service;
 		$this->info[$name] = $info;
 	}
@@ -31,6 +33,9 @@ class AuthServicePHPoAuthLib implements AuthService{
 			$text = "Login with ".$class."!";
 			if($class=="Google"){
 				$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-google"></i></div>';
+			}		
+			if($class=="Vkontakte"){
+				$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-vk"></i></div>';
 			}				
 			$ret.="<a href='$url'>".$text."</a>";
 		}
@@ -43,58 +48,64 @@ class AuthServicePHPoAuthLib implements AuthService{
 	protected function checkAuth(){
 		\AsyncWeb\Frontend\URLParser::parse();
 
+		
+		if (!empty($_GET['code'])){
+			if($provider = \AsyncWeb\Storage\Session::get("oauth_provider")){
+				if($provider == $this->name) {
+					if(!isset($this->services[$provider])){
+						throw new \AsyncWeb\Exceptions\SecurityException("oAuth provider is not registered!");
+					}
+					
+					// This was a callback request from google, get the token
+					$service = $this->services[$provider];
+					$service->requestAccessToken($_GET['code']);
+					// Send a request with it
+					$result = json_decode($service->request($this->info[$provider]), true);
+					if(!$result["email"]){
+						throw new \AsyncWeb\Exceptions\SecurityException("Authorisation service did not provide your email address!");
+					}
+					
+					$result["id3"] = $result["id"];
+					
+					$email = $result["email"];
+					if(!$email) $email = $result["id"];
+					
+					$id2 = md5(substr($provider."-".md5($email),0,32));
+					unset($result["id"]);
+					
+					if($usr = \AsyncWeb\DB\DB::gr(AuthServicePHPoAuthLib::$DB_TABLE_USERS,$id2)){
+						if($usr["active"] !== null && $usr["active"] != "1") throw new \AsyncWeb\Exceptions\SecurityException("Your account has been blocked! Please contact administrators.");;
+					}
+					
+					$result["active"] = "1";
+					$result["last_access"] = \AsyncWeb\Date\Time::get();
 
-		if (!empty($_GET['code']) && $provider = \AsyncWeb\Storage\Session::get("oauth_provider")) {
-			
-			if(!isset($this->services[$provider])){
-				throw new \AsyncWeb\Exceptions\SecurityException("oAuth provider is not registered!");
-			}
-			
-	
-			// This was a callback request from google, get the token
-			$service = $this->services[$provider];
-			$service->requestAccessToken($_GET['code']);
-			// Send a request with it
-			$result = json_decode($service->request($this->info[$provider]), true);
-			$result["id3"] = $result["id"];
-			
-			$email = $result["email"];
-			if(!$email) $email = $result["id"];
-			
-			$id2 = md5(substr($provider."-".md5($email),0,32));
-			unset($result["id"]);
-			
-			if($usr = \AsyncWeb\DB\DB::gr(AuthServicePHPoAuthLib::$DB_TABLE_USERS,$id2)){
-				if($usr["active"] !== null && $usr["active"] != "1") throw new \AsyncWeb\Exceptions\SecurityException("Your account has been blocked! Please contact administrators.");;
-			}
-			
-			$result["active"] = "1";
-			$result["last_access"] = \AsyncWeb\Date\Time::get();
-			\AsyncWeb\DB\DB::u(AuthServicePHPoAuthLib::$DB_TABLE_USERS,$id2,$result);
-			
-			
-			
-			Auth::auth(array("userid"=>$id2),$this);
+					\AsyncWeb\DB\DB::u(AuthServicePHPoAuthLib::$DB_TABLE_USERS,$id2,$result);
+					
+					
+					Auth::auth(array("userid"=>$id2),$this);
 
-			if($path =  \AsyncWeb\Storage\Session::get("oauth_path")){
-				\AsyncWeb\HTTP\Header::s("location",$path);
+					if($path =  \AsyncWeb\Storage\Session::get("oauth_path")){
+						\AsyncWeb\HTTP\Header::s("location",$path);
+						exit;
+					}
+					
+					return true;
+				}
 			}
-			var_dump($path);
-			exit;
-
-			return true;
 		}
 		
 		foreach($this->services as $name=>$service){
 			$url = \AsyncWeb\Frontend\URLParser::parse();
-			if(isset($url["var"]["go"]) == $name){
+			if(isset($url["var"]["go"]) && $url["var"]["go"] == $name && $url["var"]["go"] == $this->name){
+
 				if(!\AsyncWeb\Storage\Session::get("oauth_path")){
 					$path = \AsyncWeb\Frontend\URLParser::addVariables(array("go"=>null));
 					\AsyncWeb\Storage\Session::set("oauth_path",$path);
 				}
+				
 				\AsyncWeb\Storage\Session::set("oauth_provider",$name);
 				$url = $service->getAuthorizationUri();
-//				header('Location: ' . $url);
 				\AsyncWeb\HTTP\Header::s("location",$url);
 				exit;
 			}
