@@ -23,7 +23,7 @@
     }
   , "require": {
         "php": ">=5.3.4"
-      , "cboden/Ratchet": "*"
+      , "cboden/Ratchet": "0.4.*"
       , "mustache/mustache": "~2.5"
       , "lusitanian/oauth": "0.3.*"
 	}

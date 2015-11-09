@@ -32,6 +32,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	public static $DB = null;
 	public static $PERSISTENT_CONNECTION = true;
 	
+	
 	protected $defaultServer="localhost";
 	protected $defaultLogin ="userlogin";
 	protected $defaultPass  ="userpassword";
@@ -44,7 +45,6 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	protected $logqueries = false;
 	protected $logfile = "d:/mysql.log";
 	protected $tryrepair = true;
-	
 	public function __construct($defaultsettings = true, $server="",$login="",$pass="",$db=""){
 
 		
@@ -68,17 +68,37 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 
 			if(MysqlServer::$PERSISTENT_CONNECTION){
 				if(!function_exists("mysql_pconnect")){
-					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Mysql not configured properly"));
+					$err = "Mysql not configured properly";
+					if($defaultsettings){
+						throw new \AsyncWeb\Exceptions\FatalException($err);
+					}else{
+						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+					}
 				}
 				if(!$this->link = @mysql_pconnect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
-					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
+					$err = "Failed to connect to the database";
+					if($defaultsettings){
+						throw new \AsyncWeb\Exceptions\FatalException($err);
+					}else{
+						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+					}
 				}
 			}else{
 				if(!function_exists("mysql_connect")){
-					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Mysql not configured properly"));
+					$err = "Mysql not configured properly";
+					if($defaultsettings){
+						throw new \AsyncWeb\Exceptions\FatalException($err);
+					}else{
+						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+					}
 				}
 				if(!$this->link = @mysql_connect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
-					throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
+					$err = "Failed to connect to the database";
+					if($defaultsettings){
+						throw new \AsyncWeb\Exceptions\FatalException($err);
+					}else{
+						throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+					}
 				}
 			}
 			
@@ -89,17 +109,37 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			$this->defaultDB = $db;
 			// do not try to do persistent on second connecitons MysqlServer::$PERSISTENT_CONNECTION
 			if(!function_exists("mysql_connect")){
-				throw new \AsyncWeb\Exceptions\FatalException(Language::get("Mysql not configured properly"));
+				$err = "Mysql not configured properly";
+				if($defaultsettings){
+					throw new \AsyncWeb\Exceptions\FatalException($err);
+				}else{
+					throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+				}
 			}
 			if(!$this->link = @mysql_connect($this->defaultServer,$this->defaultLogin,$this->defaultPass)){
-				throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
+				$err = "Failed to connect to the database";
+				if($defaultsettings){
+					throw new \AsyncWeb\Exceptions\FatalException($err);
+				}else{
+					throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+				}
 			}
 		}
 		if(!@mysql_select_db($this->defaultDB, $this->link)){
-			throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to the database"));
+			$err = "Failed to select the database";
+			if($defaultsettings){
+				throw new \AsyncWeb\Exceptions\FatalException($err);
+			}else{
+				throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+			}
 		}
 		if(!@mysql_query("SET NAMES utf8")){
-			throw new \AsyncWeb\Exceptions\FatalException(Language::get("Failed to connect to set up charset"));
+			$err = "Failed to connect to set up charset";
+			if($defaultsettings){
+				throw new \AsyncWeb\Exceptions\FatalException($err);
+			}else{
+				throw new \AsyncWeb\Exceptions\DBException(Language::get($err));
+			}
 		}
 		MysqlServer::$instance = $this;
 	}
