@@ -56,7 +56,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			$this->defaultPass = MysqlServer::$PASS;
 			$this->defaultDB = MysqlServer::$DB;
 			 
-			if(!$this->defaultLogin){ // backward compatibility
+			if((!$this->defaultLogin || $this->defaultLogin == "userlogin") && \AsyncWeb\IO\File::exists("config/db.php")){ // backward compatibility
 				include("config/db.php");
 				$this->defaultServer = $DB_SERVER;
 				$this->defaultLogin = $DB_L;

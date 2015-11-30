@@ -36,12 +36,12 @@ class URLParser{
 		foreach($arr as $item){
 			if(!$item) continue;
 			if($p = strpos($item,"=")){
-				$ret["var"][substr($item,0,$p)] = substr($item,$p+1);
+				$ret["var"][substr($item,0,$p)] = urldecode(substr($item,$p+1));
 			}else{
 				if($p = strpos($item,":")){
-					$ret["tmpl"][substr($item,0,$p)] = substr($item,$p+1);
+					$ret["tmpl"][substr($item,0,$p)] = urldecode(substr($item,$p+1));
 				}else{
-					$ret["tmpl"][$item] = $item;
+					$ret["tmpl"][$item] = urldecode($item);
 				}
 			}
 		}

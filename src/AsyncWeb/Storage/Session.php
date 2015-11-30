@@ -25,8 +25,10 @@ define("__SESSION_max_life_var","__SESSION_MAX_LIFE");
   public static $timeout = 3600;
   public static $max_life = 86000;
   public static $checkip = true;
+  public static $initializing = false;
   
   private function __construct($force=true){
+	  
 	Session::set_cookie_params();
    @session_start();
    \AsyncWeb\HTTP\Header::send("Cache-Control: private");
@@ -34,13 +36,18 @@ define("__SESSION_max_life_var","__SESSION_MAX_LIFE");
    if(\AsyncWeb\Security\Auth::controllerIsRegistered('\AsyncWeb\Security\TrustedIPController')){
     Session::$checkip = false;
    }
+   Session::$initializing=false;
   }
   public static function init($force=false){
 	if(!isset($_COOKIE["PHPSESSID"]) && $force==false){return;}
-	if(!Session::$inst) Session::$inst = new Session($force);
+	
+	if(!Session::$inst){
+		if(Session::$initializing) return;
+		Session::$initializing = true;
+		Session::$inst = new Session($force);
+	}
   }
   public static function initialized(){
-	Session::init();
 	if(Session::$inst) return true;
 	return false;
   }
@@ -281,8 +288,4 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
   }
 
   
- }
-if(isset($debug) && $debug){
- echo "<div>Session:".(microtime(true) - $t1)."</div>";
 }
-
