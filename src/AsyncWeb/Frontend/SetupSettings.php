@@ -23,15 +23,14 @@ class SetupSettings{
 		if(URLParser::v("dbpass") !== null) $dbpass = URLParser::v("dbpass");
 		if(URLParser::v("dbdb") !== null) $dbdb = URLParser::v("dbdb");
 		if(URLParser::v("googleon") !== null) $googleon = URLParser::v("googleon");
-		if(URLParser::v("googleid") !== null) $googleid = URLParser::v("googleid");
-		if(URLParser::v("googlesecret") !== null) $googlesecret = URLParser::v("googlesecret");
+		if(URLParser::v("goauthid") !== null) $goauthid = URLParser::v("goauthid");
+		if(URLParser::v("goauthsecret") !== null) $goauthsecret = URLParser::v("goauthsecret");
 		$googleonvalue = "";
 		if($googleon) $googleonvalue = ' checked="checked"';
 		if(URLParser::v("mainmenuon") !== null) $mainmenuon = URLParser::v("mainmenuon");
 		$mainmenuonvalue = "";
 		if($mainmenuon) $mainmenuonvalue = ' checked="checked"';
 		
-		var_dump(URLParser::v("dbtype"));exit;
 		
 		$setup = false;
 		if(URLParser::v("setup") !== null) $setup = URLParser::v("setup");
@@ -39,13 +38,32 @@ class SetupSettings{
 		
 		if($setup){
 			if(!is_dir($blockspath)){
-				$err .= "Blocks path does not exists!<br/>";
+				if(!mkdir($blockspath)){
+					$err .= "Blocks path '$blockspath' does not exists and I am unable to create it!<br/>";
+				}
 			}
 			if(!is_dir($templatespath)){
-				$err .= "Templates path does not exists!<br/>";
+				if(!mkdir($templatespath)){
+					$err .= "Templates path '$templatespath' does not exists and I am unable to create it!<br/>";
+				}
 			}
-			if(!is_writable(".")){
-				$err .= "Root path is not writable for installation script!<br/>";
+			
+			if(isset($_SERVER['APPLICATION_ENV']) && $_SERVER['APPLICATION_ENV']){
+				if(is_file($defaultconf=($defaultpath="../conf/".$_SERVER['APPLICATION_ENV'])."/settings.php")){
+					$err .= "Settings file already exists!<br/>";
+				}
+			}else{
+				$defaultpath="../conf/";
+				$defaultconf=$defaultpath."/settings.php";
+			}
+			if(!is_dir($defaultpath)){
+				if(!mkdir($defaultpath)){
+					$err .= "Config path does not exists!<br/>";
+				}
+			}
+			
+			if(!is_writable($defaultpath)){
+				$err .= "Config path ".$defaultpath." is not writable!<br/>";
 			}
 			
 			if(is_file("../conf/settings.php")){
@@ -54,6 +72,7 @@ class SetupSettings{
 			if(is_file("settings.php")){
 				$err .= "Settings file already exists!<br/>";
 			}
+			
 			if(!$err){
 				$file = "";
 				$use[] = "\AsyncWeb\Frontend\BlockManagement";
@@ -61,6 +80,9 @@ class SetupSettings{
 				$file.="#templates setup\n";
 				$file.= "\AsyncWeb\Frontend\Block::\$BLOCK_PATH='".$blockspath."';\n";
 				$file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='".$templatespath."';\n\n";
+				
+
+				
 				switch($dbtype){
 					case "mysql":
 						$file.="#DB setup\n";
@@ -92,31 +114,33 @@ class SetupSettings{
 				}
 				
 				if($googleon){
-					$file='
+					$file.='
 					
-					# Google oAuth
-					$storage = new \AsyncWeb\Storage\OAuthLibSession();
+# Google oAuth
+$storage = new \AsyncWeb\Storage\OAuthLibSession();
 
-					$credentials = new OAuth\Common\Consumer\Credentials(
-						"'.$googleid.'",
-						"'.$googlesecret.'",
-						"https://".$_SERVER["HTTP_HOST"]."/go=Google"
-					);
+$credentials = new OAuth\Common\Consumer\Credentials(
+	"'.$goauthid.'",
+	"'.$goauthsecret.'",
+	"https://".$_SERVER["HTTP_HOST"]."/go=Google"
+);
 
-					$serviceFactory = new \OAuth\ServiceFactory();
-					$serviceFactory->setHttpClient(new OAuth\Common\Http\Client\CurlClient());
-					$googleService = $serviceFactory->createService("google", $credentials, $storage, array("userinfo_email", "userinfo_profile"));
-					$googleService->setAccessType("offline");
+$serviceFactory = new \OAuth\ServiceFactory();
+$serviceFactory->setHttpClient(new OAuth\Common\Http\Client\CurlClient());
+$googleService = $serviceFactory->createService("google", $credentials, $storage, array("userinfo_email", "userinfo_profile"));
+$googleService->setAccessType("offline");
 
-					$oauth = new \AsyncWeb\Security\AuthServicePHPoAuthLib();
-					$oauth->registerService("Google",$googleService,"https://www.googleapis.com/oauth2/v1/userinfo");
-					\AsyncWeb\Security\Auth::register($oauth);
-					';
+$oauth = new \AsyncWeb\Security\AuthServicePHPoAuthLib();
+$oauth->registerService("Google",$googleService,"https://www.googleapis.com/oauth2/v1/userinfo");
+\AsyncWeb\Security\Auth::register($oauth);
+';
 				}
+
 				foreach($use as $u) $file = "use $u;\n".$file;
 				$file = "<?php\n".$file;
 				if(!$err){
-					$size = file_put_contents("../conf/settings.php",$file);
+					
+					$size = file_put_contents($defaultconf,$file);
 					if(!$size){
 						$err.='I was unable to save the config file!<br/>';
 					}
@@ -134,7 +158,7 @@ class SetupSettings{
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
-		<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+		<script src="//code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
         <script async type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
         <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 	</head>
@@ -234,4 +258,3 @@ class SetupSettings{
 		exit;
 	}
 }
-
