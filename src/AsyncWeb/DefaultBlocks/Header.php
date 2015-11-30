@@ -14,7 +14,7 @@ class Header extends \AsyncWeb\Frontend\Block{
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a href="/" class="logo"><img src="/img/logo.gif" alt="Logo" height="42"></a>
+      <a href="/" class="logo"><i style="font-size:40px; margin:3px 20px 3px 0" class="fa fa-rocket"></i></a>
     </div>
     <nav class="collapse navbar-collapse bs-navbar-collapse">
 	{{{TopMenu}}}
