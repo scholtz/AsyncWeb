@@ -21,7 +21,7 @@ class Auth{
 		if($auth && is_array($auth)){
 			foreach($auth as $service){
 				if(!Auth::$services[$service["id"]]){
-					throw new \AsyncWeb\Exceptions\SecurityException("Service provider is not registered! 0x9319510");
+					throw new \AsyncWeb\Exceptions\SecurityException("Service provider (".$service["id"].") is not registered! 0x9319510");
 				}
 				if(!Auth::$services[$service["id"]]->check($service)){
 					throw new \AsyncWeb\Exceptions\SecurityException("Out of date data! 0x9319511");
