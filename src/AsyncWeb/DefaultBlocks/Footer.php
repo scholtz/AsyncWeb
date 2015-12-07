@@ -28,6 +28,6 @@ class Footer extends \AsyncWeb\Frontend\Block{
 				$content = "{{Set up Auth service in your settings}}";
 			}
 		}
-		$this->template = '<footer><div class="container"><div class="well">'.$content.'</div></div></footer>';
+		$this->template = '<footer><div class="well">'.$content.'</div></footer>';
 	}
 }

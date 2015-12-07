@@ -42,9 +42,9 @@ class Index extends \AsyncWeb\Frontend\Block{
 {{{SideBar}}}
 <div class="container page-content-wrapper">
 {{{Cat}}}
-</div>
-</div>
 {{{Footer}}}
+</div>
+</div>
 </body>
 </html>';
 	}

@@ -21,11 +21,14 @@ define("__SESSION_max_life_var","__SESSION_MAX_LIFE");
  */
 
  
- class Session{
-  public static $timeout = 3600;
-  public static $max_life = 86000;
-  public static $checkip = true;
-  public static $initializing = false;
+class Session{
+  public static $SESSION_TIMEOUT = 3600; 	// how long is inactive session held
+  public static $MAX_SESSION_LIFE = 86000; 	// maximum time for one session to be held
+  public static $CHECK_IP = false;			// Verify against change of IP address
+  public static $USES_LONG_TIMEOUT = true;	// Uses long timeout
+  public static $USE_DOMAIN_LEVEL_COOOKIE = false; // Use subdomains for the same auth session
+
+  protected static $initializing = false;
   
   private function __construct($force=true){
 	  
@@ -34,7 +37,7 @@ define("__SESSION_max_life_var","__SESSION_MAX_LIFE");
    \AsyncWeb\HTTP\Header::send("Cache-Control: private");
    Session::check_timeout();
    if(\AsyncWeb\Security\Auth::controllerIsRegistered('\AsyncWeb\Security\TrustedIPController')){
-    Session::$checkip = false;
+    Session::$CHECK_IP = false;
    }
    Session::$initializing=false;
   }
@@ -88,7 +91,7 @@ define("__SESSION_max_life_var","__SESSION_MAX_LIFE");
 //   var_dump($_SESSION);
 //   var_dump($_SERVER);
 
-	if(Session::$checkip){
+	if(Session::$CHECK_IP){
 
     if(@$_SESSION["SESSION_STEALING__IP"] != @$_SERVER['REMOTE_ADDR'] ||
      @$_SESSION["SESSION_STEALING__UA"]   != @$_SERVER['HTTP_USER_AGENT'] ||
@@ -155,12 +158,14 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
    if(!Session::check_checksum()) return "";
    return @$_SESSION[$var];
   }
-  public static $uses_long_timeout = true;
   private static function set_cookie_params(){
 	if(isset($_SERVER["HTTP_HOST"])){
-		$domain = ".php.net";
-		$doma = explode(".",$_SERVER["HTTP_HOST"]);
-		$domain = ".".$doma[count($doma)-2].".".$doma[count($doma)-1];
+		if(Session::$USE_DOMAIN_LEVEL_COOOKIE){
+			$doma = explode(".",$_SERVER["HTTP_HOST"]);
+			$domain = ".".$doma[count($doma)-2].".".$doma[count($doma)-1];
+		}else{
+			$domain = $_SERVER["HTTP_HOST"];
+		}
 		session_set_cookie_params(0,"/",$domain,false,true);
 	}
   }
@@ -173,7 +178,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
   	}
   	if(!\AsyncWeb\Security\Auth::$CHECKING && \AsyncWeb\Security\Auth::userId()){
 		if(array_key_exists(__SESSION_max_life_var,$_SESSION)){
-			if($_SESSION[__SESSION_max_life_var] + Session::$max_life < $ctime){
+			if($_SESSION[__SESSION_max_life_var] + Session::$MAX_SESSION_LIFE < $ctime){
 				$id = session_id();
 				@session_destroy();
 				
@@ -186,9 +191,9 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 			}
 		}
 	}
-	if(Session::$uses_long_timeout){
+	if(Session::$USES_LONG_TIMEOUT){
 		if(!\AsyncWeb\Security\Auth::$CHECKING && \AsyncWeb\Security\Auth::userId()){
-			if($time < ($ctime - Session::$timeout)){
+			if($time < ($ctime - Session::$SESSION_TIMEOUT)){
 				
 				@session_destroy();
 				@session_start();
