@@ -44,6 +44,7 @@ class BlockManagement{
 	}
 	public static function get($name,$tid=""){
 		//var_dump("BlockManagement::get:$name;$tid");
+		$name = Block::normalizeName($name);
 		try{
 			if(isset(BlockManagement::$instances[$name][$tid])){
 				return BlockManagement::$instances[$name][$tid];

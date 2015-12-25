@@ -28,7 +28,11 @@ class Block{
 	public static function removeBlockPath($namespace){
 		if(isset(Block::$BLOCKS_PATHS[$namespace])) unset(Block::$BLOCKS_PATHS[$namespace]);
 	}
+	public static function normalizeName($name){
+		return str_replace("_",'\\',$name);
+	}
 	public static function exists($name,$checkBlockOnly=false){
+		$name = Block::normalizeName($name);
 		
 		$BLOCK_PATH = Block::$BLOCK_PATH;
 		if(substr($BLOCK_PATH,-1)!="/") $BLOCK_PATH.="/";
@@ -61,6 +65,7 @@ class Block{
 		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$name.".html") || $blockready;
 	}
 	public static function create($name = "", $tid = "", $template=""){
+		$name = Block::normalizeName($name);
 		if($file = Block::exists($name,true)){
 			if($file === true){
 				foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
@@ -77,7 +82,8 @@ class Block{
 		return new Block($name,$tid,$tmplate);
 	}
 	public function __construct($name = "", $tid = "", $template=""){
-		
+		$name = Block::normalizeName($name);
+
 		$this->template = $template;
 		$this->tid = $tid;
 		
@@ -104,7 +110,7 @@ class Block{
 	}
 	protected $name = "";
 	public function name(){
-		return $this->name;
+		return Block::normalizeName($this->name);
 	}
 	protected $rendered = false;
 	public function isRendered(){
