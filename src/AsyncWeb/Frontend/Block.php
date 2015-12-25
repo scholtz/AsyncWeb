@@ -36,8 +36,8 @@ class Block{
 		
 		$BLOCK_PATH = Block::$BLOCK_PATH;
 		if(substr($BLOCK_PATH,-1)!="/") $BLOCK_PATH.="/";
-		
-		if($blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH.$name.".php")){
+
+		if($blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH.str_replace('\\',DIRECTORY_SEPARATOR,$name).".php")){
 			return $blockready;
 		}
 		foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
