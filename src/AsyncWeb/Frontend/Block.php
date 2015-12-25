@@ -44,19 +44,7 @@ class Block{
 			if (class_exists($n=$namespace.$name)){
 				return true;
 			}
-			
 		}
-		/*
-		
-		
-		if(\AsyncWeb\DefaultBlocks\Settings::$USE_DEFAULT_BLOCKS){
-			if (class_exists($n="\\AsyncWeb\\DefaultBlocks\\".$name)){
-				if(\AsyncWeb\DefaultBlocks\Settings::$USE_DEFAULT_BLOCKS && $n::$USE_BLOCK){
-					return true;
-				}
-			}
-		}
-		/**/
 		if($checkBlockOnly){
 			return false;
 		}
@@ -91,15 +79,13 @@ class Block{
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
 		$this->data = array(""=>array());
-		if(!$this->template){
+		if($this->template === null){
 			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html")){
 				echo "Template ".$name." not found!\n";
 				throw new \Exception("Template ".$name." not found!");
 			}
-			
 			$this->template = file_get_contents($f,true);
 		}
-		
 		$this->init();
 	}
 	protected function init(){

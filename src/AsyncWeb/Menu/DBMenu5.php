@@ -23,6 +23,10 @@ Setup use of DBMenu5 in the settings file:
 /**/
 
 class DBMenu5 extends MenuBuilder{
+	public static $USES = false;
+	public function __construct(){
+		DBMenu5::$USES = true;
+	}
 	private function spracuj(&$row){		
 		if(!$row) return $row;
 		foreach(MainMenu::getLangs() as $k=>$lang){

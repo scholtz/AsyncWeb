@@ -15,7 +15,7 @@ class Index extends \AsyncWeb\Frontend\Block{
 <div id="wrapper">
 {{{Layout_SideBar}}}
 <div class="container page-content-wrapper">
-{{{Cat}}}
+{{{Content_Cat}}}
 {{{Layout_Footer}}}
 </div>
 </div>
