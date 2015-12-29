@@ -144,6 +144,9 @@ class Auth{
 		foreach(Auth::$services as $service){
 			$ret.=$service->loginForm();
 		}
+		if($ret){
+			$ret='<fieldset><legend>'.\AsyncWeb\System\Language::get("Log in using").'</legend>'.$ret.'</fieldset>';
+		}
 		return $ret;
 	}
 }
