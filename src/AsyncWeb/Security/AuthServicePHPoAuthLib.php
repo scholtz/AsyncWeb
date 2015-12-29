@@ -11,10 +11,12 @@ class AuthServicePHPoAuthLib implements AuthService{
 	protected $services = array();
 	protected $info = array();
 	protected $name = "AuthServicePHPoAuthLib";
-	public function registerService($name,\OAuth\OAuth2\Service\AbstractService $service,$info){
+	protected $icon = null;
+	public function registerService($name,\OAuth\OAuth2\Service\AbstractService $service,$info,$faicon=""){
 		$this->name=$name;
 		$this->services[$name] = $service;
 		$this->info[$name] = $info;
+		if($faicon) $this->icon = $faicon;
 	}
 
 	public function check(Array $data=array()){
@@ -31,12 +33,16 @@ class AuthServicePHPoAuthLib implements AuthService{
 			
 			$url = \AsyncWeb\System\Path::make(array("go"=>$class));
 			$text = "Login with ".$class."!";
-			if($class=="Google"){
-				$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-google"></i></div>';
-			}		
-			if($class=="Vkontakte"){
-				$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-vk"></i></div>';
-			}				
+			if($icon){
+				$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-'.$this->icon.'"></i></div>';
+			}else{
+				if($class=="Google"){
+					$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-google"></i></div>';
+				}		
+				if($class=="Vkontakte"){
+					$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-vk"></i></div>';
+				}		
+			}			
 			$ret.="<a href='$url'>".$text."</a>";
 		}
 		
