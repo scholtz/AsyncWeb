@@ -102,6 +102,12 @@ class User{
 		$usr = User::get($id2);
 		return @$usr["email"];
 	}
+	public static function getEmailOrId($id2=null){
+		$email = User::getEmail($id2);
+		if($email) return $email;
+		if($id2) return $id2;
+		return User::id();
+	}
 	public static function getName($id2){
 		$row = User::get($id2);
 		return $row["login"];
