@@ -54,6 +54,9 @@ class Block{
 	}
 	public static function create($name = "", $tid = "", $template=""){
 		$name = Block::normalizeName($name);
+		if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
+			$name = "\\".$name;
+		}
 		if($file = Block::exists($name,true)){
 			if($file === true){
 				foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
@@ -64,6 +67,11 @@ class Block{
 				}
 			}else{
 				include_once($file);
+			}
+			
+			
+			if(!class_exists($name)){
+				throw new Exception(Language::get("Block %name% does not exists!",array("%name%"=>$name)));
 			}
 			return new $name($name,$tid,$template);
 		}
