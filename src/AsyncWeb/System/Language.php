@@ -32,8 +32,7 @@ class Language{
 	public static function getDefaultLang(){
 		
 		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$arr){
-			
-			if($arr == Language::getDomain() || $arr["domain"] == Language::getDomain()){
+			if($arr == Language::getDomain() || (isset($arr["domain"]) && $arr["domain"] == Language::getDomain())){
 				return $lang;
 			}
 		}
@@ -420,4 +419,3 @@ class Language{
 	}
 	
 }
-?>
