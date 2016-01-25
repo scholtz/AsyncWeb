@@ -13,11 +13,17 @@ class BlockManagement{
 	}
 	public static function renderWeb(){
 		if(BlockManagement::$defaultBlock == null){
-			if(Block::exists("Index")){
-				$def = Block::create("Index");
+			$index = "Index";
+			$url = URLParser::parse();
+			if(isset($url["tmpl"]["Index"])){
+				$index = $url["tmpl"]["Index"];
+			}
+			
+			if(Block::exists($index)){
+				$def = Block::create($index);
 				BlockManagement::setDefaultBlock($def);
 			}else{
-				echo "Please set up the default block in the settings file or create index block!";exit;
+				throw new Exception(Language::get("Please set up the default block in the settings file or create index block!"));
 			}
 		}
 		
