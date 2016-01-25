@@ -1,5 +1,5 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content;
 
 use \AsyncWeb\DB\DB;
 use \AsyncWeb\View\MakeForm;

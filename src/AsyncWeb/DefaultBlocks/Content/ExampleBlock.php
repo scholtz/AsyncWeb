@@ -1,9 +1,8 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content;
 
 
 class ExampleBlock extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
 	protected function initTemplate(){
 		$this->template = '<i>MY EXAMPLE BLOCK with data "{{data}}".</i>';
 	}

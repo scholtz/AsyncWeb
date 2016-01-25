@@ -1,9 +1,8 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Layout;
 
 
 class SideBar extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
 	protected function initTemplate(){
 		if(!\AsyncWeb\Menu\MainMenu::countBuilders()){
 			$this->template = " ";

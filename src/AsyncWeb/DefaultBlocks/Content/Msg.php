@@ -1,5 +1,5 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content;
 
 class Msg extends \AsyncWeb\Frontend\Block{
 	public function initTemplate(){

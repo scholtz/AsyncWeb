@@ -1,5 +1,5 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Layout;
 
 class Form extends \AsyncWeb\Frontend\Block{
 	protected $formSettings = array();

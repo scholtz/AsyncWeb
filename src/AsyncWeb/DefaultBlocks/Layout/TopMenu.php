@@ -1,8 +1,7 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Layout;
 
 class TopMenu extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
 	protected function initTemplate(){
 		$menu = \AsyncWeb\Menu\MainMenu::showTopMenu();
 		$this->template = " ".$menu;

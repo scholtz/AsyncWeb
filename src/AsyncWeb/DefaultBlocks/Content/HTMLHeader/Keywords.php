@@ -1,7 +1,7 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content\HTMLHeader;
 
-class HeaderKeywords extends \AsyncWeb\Frontend\Block{
+class Keywords extends \AsyncWeb\Frontend\Block{
 	public function overRideOuterBlock(){
 		return true;
 	}

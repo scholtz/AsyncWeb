@@ -1,9 +1,8 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content\Admin;
 use AsyncWeb\System\Language;
 
-class AdminManageUsers extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
+class ManageUsers extends \AsyncWeb\Frontend\Block{
 	public static $DICTIONARY = array(
 		"sk-SK"=>array(
 			"Users"=>"Užívatelia",

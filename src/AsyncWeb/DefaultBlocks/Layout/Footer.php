@@ -1,9 +1,8 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Layout;
 
 
 class Footer extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
 	public static $DICTIONARY = array(
 		"sk-SK"=>array(
 			"You are logged as"=>"Ste prihlásený ako",

@@ -836,7 +836,13 @@ class MakeForm{
 	  if(isset($item["data"]["allowed"])) $allowedExt = $item["data"]["allowed"];
 	  
 	  $name = $formName."_".$colname;
+	  
+	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && (!isset($_FILES[$name]['name']) || !$_FILES[$name]['name'])){
+		 $data[$colname] = null;
+	  }else{
+	  
       $newFilename = $_FILES[$name]['name'];
+	  
 	  $info = pathinfo($_FILES[$name]['name']);
 	  $ext = $info["extension"];
 	  if(!in_array($ext,$allowedExt)){
@@ -868,7 +874,7 @@ class MakeForm{
       }	  
       DB::u($table,$pid = md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$name]['type'],"name"=>$_FILES[$name]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
       $data[$colname] = $value = $pid;
-	  
+	  }
      break;
     }
 	  	  
@@ -1102,6 +1108,10 @@ class MakeForm{
 	  $allowedExt = array("jpg","png","gif","pdf","xls","xlsx","doc","docx","txt","zip","rar");
 	  if(isset($item["data"]["allowed"])) $allowedExt = $item["data"]["allowed"];
 
+	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && (!isset($_FILES[$n]['name']) || !$_FILES[$n]['name'])){
+		 $data[$colname] = null;
+	  }else{
+	  
   	  $info = pathinfo($_FILES[$n]['name']);
 	  
 	  $ext = $info["extension"];
@@ -1155,6 +1165,7 @@ class MakeForm{
 	  
       DB::u($tableF,$id2=md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$n]['type'],"name"=>$_FILES[$n]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
       $cols[$colname] = $colValue = $id2;
+	  }
 	 break;
     }
    

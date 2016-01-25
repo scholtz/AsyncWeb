@@ -1,9 +1,8 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content;
 
 
 class Main extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
 	public static $DICTIONARY = array(
 		"sk-SK"=>array(
 			"Your new website"=>"Vaša nová webstránka",
@@ -13,7 +12,7 @@ class Main extends \AsyncWeb\Frontend\Block{
 		),
 	);
 	protected function initTemplate(){
-		$this->template = '<h1>{{Your new website}}</h1><p>This is your <b>example</b> main page with data "{{data}}". This is examle of inner block: {{{ExampleBlock}}}</p>';
+		$this->template = '<h1>{{Your new website}}</h1><p>This is your <b>example</b> main page with data "{{data}}". This is examle of inner block: {{{Content_ExampleBlock}}}</p>';
 	}
 	
 	public function init(){

@@ -1,5 +1,5 @@
 <?php
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Layout;
 
 
 class Header extends \AsyncWeb\Frontend\Block{
@@ -17,8 +17,8 @@ class Header extends \AsyncWeb\Frontend\Block{
       <a href="/" class="logo"><i style="font-size:40px; margin:3px 20px 3px 0" class="fa fa-rocket"></i></a>
     </div>
     <nav class="collapse navbar-collapse bs-navbar-collapse">
-	{{{TopMenu}}}
-	{{{LangMenu}}}
+	{{{Layout_TopMenu}}}
+	{{{Layout_LangMenu}}}
     </nav>
   </div>
 </header>';

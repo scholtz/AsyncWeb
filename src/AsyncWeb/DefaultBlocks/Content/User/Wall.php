@@ -1,10 +1,9 @@
 <?php
 
-namespace AsyncWeb\DefaultBlocks;
+namespace AsyncWeb\DefaultBlocks\Content\User;
 use \BT\Base;$load = new \BT\Base;
 
-class UserManagement extends \AsyncWeb\Frontend\Block{
-	public static $USE_BLOCK = true;
+class Wall extends \AsyncWeb\Frontend\Block{
 	public static $DICTIONARY = array(
 		"sk-SK"=>array(
 			"Text"=>"TextSK",

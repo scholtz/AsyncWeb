@@ -28,31 +28,23 @@ class Block{
 	public static function removeBlockPath($namespace){
 		if(isset(Block::$BLOCKS_PATHS[$namespace])) unset(Block::$BLOCKS_PATHS[$namespace]);
 	}
+	public static function normalizeName($name){
+		return str_replace("_",'\\',$name);
+	}
 	public static function exists($name,$checkBlockOnly=false){
+		$name = Block::normalizeName($name);
 		
 		$BLOCK_PATH = Block::$BLOCK_PATH;
 		if(substr($BLOCK_PATH,-1)!="/") $BLOCK_PATH.="/";
-		
-		if($blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH.$name.".php")){
+
+		if($blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH.str_replace('\\',DIRECTORY_SEPARATOR,$name).".php")){
 			return $blockready;
 		}
 		foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
 			if (class_exists($n=$namespace.$name)){
 				return true;
 			}
-			
 		}
-		/*
-		
-		
-		if(\AsyncWeb\DefaultBlocks\Settings::$USE_DEFAULT_BLOCKS){
-			if (class_exists($n="\\AsyncWeb\\DefaultBlocks\\".$name)){
-				if(\AsyncWeb\DefaultBlocks\Settings::$USE_DEFAULT_BLOCKS && $n::$USE_BLOCK){
-					return true;
-				}
-			}
-		}
-		/**/
 		if($checkBlockOnly){
 			return false;
 		}
@@ -61,6 +53,10 @@ class Block{
 		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$name.".html") || $blockready;
 	}
 	public static function create($name = "", $tid = "", $template=""){
+		$name = Block::normalizeName($name);
+		if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
+			$name = "\\".$name;
+		}
 		if($file = Block::exists($name,true)){
 			if($file === true){
 				foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
@@ -72,12 +68,18 @@ class Block{
 			}else{
 				include_once($file);
 			}
+			
+			
+			if(!class_exists($name)){
+				throw new Exception(Language::get("Block %name% does not exists!",array("%name%"=>$name)));
+			}
 			return new $name($name,$tid,$template);
 		}
 		return new Block($name,$tid,$tmplate);
 	}
 	public function __construct($name = "", $tid = "", $template=""){
-		
+		$name = Block::normalizeName($name);
+
 		$this->template = $template;
 		$this->tid = $tid;
 		
@@ -85,15 +87,13 @@ class Block{
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
 		$this->data = array(""=>array());
-		if(!$this->template){
+		if($this->template === null){
 			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html")){
 				echo "Template ".$name." not found!\n";
 				throw new \Exception("Template ".$name." not found!");
 			}
-			
 			$this->template = file_get_contents($f,true);
 		}
-		
 		$this->init();
 	}
 	protected function init(){
@@ -104,7 +104,7 @@ class Block{
 	}
 	protected $name = "";
 	public function name(){
-		return $this->name;
+		return Block::normalizeName($this->name);
 	}
 	protected $rendered = false;
 	public function isRendered(){
