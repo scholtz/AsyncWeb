@@ -4,6 +4,7 @@ namespace AsyncWeb\DefaultBlocks\Layout;
 
 class Header extends \AsyncWeb\Frontend\Block{
 	public static $USE_BLOCK = true;
+	public $blockElement = "head";
 	protected function initTemplate(){
 		$this->template = '<header class="navbar navbar-default navbar-inverse" id="top" role="banner">
   <div class="container">

@@ -6,9 +6,7 @@ class Index extends \AsyncWeb\Frontend\Block{
 	protected function initTemplate(){
 		$this->template = '<!DOCTYPE html>
 <html lang="{{LANG}}">
-<head>
 {{{Layout_Head}}}
-</head>
 <body>
 <div class="page">
 {{{Layout_Header}}}
