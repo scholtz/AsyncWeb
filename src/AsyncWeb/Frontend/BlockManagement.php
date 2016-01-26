@@ -12,6 +12,7 @@ class BlockManagement{
 		self::$needToRerender = true;
 	}
 	public static function renderWeb(){
+		if(\AsyncWeb\System\Router::run()) return;
 		if(BlockManagement::$defaultBlock == null){
 			$index = "Index";
 			$url = URLParser::parse();
