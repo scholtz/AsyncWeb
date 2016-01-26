@@ -110,7 +110,7 @@ class URLParser{
 	public static function addVariablesAndBlocks(Array $vars,Array $blocks, $merge = true,$passVariables=true){	
 		
 		$arr = URLParser::parse(URLParser::getCurrent());
-		if($passVariables){
+		if(!$passVariables){
 			if(isset($arr["var"])) unset($arr["var"]);
 		}
 		foreach($param as $k=>$v){
