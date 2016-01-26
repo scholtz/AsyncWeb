@@ -113,7 +113,7 @@ class URLParser{
 		if(!$passVariables){
 			if(isset($arr["var"])) unset($arr["var"]);
 		}
-		foreach($param as $k=>$v){
+		foreach($vars as $k=>$v){
 			if("".$v===""){
 				if(isset($arr["var"][$k])) unset($arr["var"][$k]);
 			}else{
