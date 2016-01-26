@@ -3,7 +3,7 @@ namespace AsyncWeb\Menu;
 
 class MenuItemBuilder{
 	public static $DEFAULT_TYPE = "category";
-	public static function get($id2,$text,$path,$visible="1",$langs=array(),$run="",$fa=>""){
+	public static function get($id2,$text,$path,$visible="1",$langs=array(),$run="",$fa=""){
 		if(!$langs){
 			foreach(MainMenu::getLangs() as $k=>$v){
 				$langs[$k] = $path;
