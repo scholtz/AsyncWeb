@@ -310,8 +310,9 @@ class MainMenu{
 		return Language::$SUPPORTED_LANGUAGES;
 	}
 	public static function isSubmenuOfCurrent(&$menu){
-		$cur = MainMenu::getCurrent();
 		if(!isset($menu["id2"])) return false;// special buttons
+		$cur = MainMenu::getCurrent();
+		if(!isset($cur["id2"])) return false;// current is special button
 		if($cur["id2"] == $menu["id2"]){ return true;}
 //		var_dump($cur);
 		if(isset($menu["submenu"])){
