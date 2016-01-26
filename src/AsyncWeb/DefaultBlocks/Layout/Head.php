@@ -2,6 +2,7 @@
 namespace AsyncWeb\DefaultBlocks\Layout;
 
 class Head extends \AsyncWeb\Frontend\Block{
+	public $blockElement = "head";
 	protected function initTemplate(){
     $this->template = '<meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -193,7 +193,7 @@ class Block{
 						if($itemcl->overRideOuterBlock()){
 							$dataToRender[$item] = $itemcl->get();
 						}else{
-							$dataToRender[$item] = '<'.$this->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$this->blockElement.'>';
+							$dataToRender[$item] = '<'.$itemcl->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$itemcl->blockElement.'>';
 						}
 					}
 				}catch(Exception $exc){

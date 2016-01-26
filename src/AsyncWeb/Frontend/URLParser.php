@@ -107,6 +107,32 @@ class URLParser{
 			return $arr;
 		}
 	}
+	public static function addVariablesAndBlocks(Array $vars,Array $blocks, $merge = true,$passVariables=true){	
+		
+		$arr = URLParser::parse(URLParser::getCurrent());
+		if($passVariables){
+			if(isset($arr["var"])) unset($arr["var"]);
+		}
+		foreach($param as $k=>$v){
+			if("".$v===""){
+				if(isset($arr["var"][$k])) unset($arr["var"][$k]);
+			}else{
+				$arr["var"][$k] = $v;
+			}
+		}
+		foreach($blocks as $k=>$v){
+			if("".$v===""){
+				if(isset($arr["tmpl"][$k])) unset($arr["tmpl"][$k]);
+			}else{
+				$arr["tmpl"][$k] = $v;
+			}
+		}
+		if($merge){
+			return URLParser::merge($arr);
+		}else{
+			return $arr;
+		}
+	}
 	public static function noVariables(){
 		$arr = URLParser::parse(URLParser::getCurrent());
 		if(isset($arr["var"])) unset($arr["var"]);
