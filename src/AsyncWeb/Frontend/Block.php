@@ -21,9 +21,10 @@ class Block{
 	public function overRideOuterBlock(){
 		return false;
 	}
-	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>true);
-	public static function registerBlockPath($namespace){
-		Block::$BLOCKS_PATHS[$namespace] = true;
+	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>10000);
+	public static function registerBlockPath($namespace,$level=1){
+		Block::$BLOCKS_PATHS[$namespace] = $level;
+		asort(Block::$BLOCKS_PATHS);
 	}
 	public static function removeBlockPath($namespace){
 		if(isset(Block::$BLOCKS_PATHS[$namespace])) unset(Block::$BLOCKS_PATHS[$namespace]);

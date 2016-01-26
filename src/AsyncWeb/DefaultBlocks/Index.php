@@ -20,6 +20,7 @@ class Index extends \AsyncWeb\Frontend\Block{
 </div>
 </div>
 </div>
+{{{Layout_Scripts}}}
 </body>
 </html>';
 	}
