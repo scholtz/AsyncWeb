@@ -228,8 +228,14 @@ class MainMenu{
         </li></ul>';
 	}
 	private static function makeLangPath(&$cur,$lang=false){
-		$path = $cur["langs"][$lang];
-		$path = "/".MainMenu::$CATEGORY_TAG_NAME.":".$path;
+		if(!$cur){
+			$path = "/";
+		}elseif(isset($cur["langs"][$lang])){
+			$path = $cur["langs"][$lang];
+			$path = "/".MainMenu::$CATEGORY_TAG_NAME.":".$path;
+		}else{
+			$path = $cur["path"];
+		}
 		if($lang && $lang != Language::getLang()){
 			$protocol = "http";
 			if($_SERVER["SERVER_PORT"] == 443){
