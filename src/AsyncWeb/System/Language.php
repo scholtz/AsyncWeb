@@ -186,7 +186,9 @@ class Language{
 	public static $USE_PHP_LANG_FILES = true;
 	public static $USE_CSV_LANG_FILES = true;
 	public static $USE_DB_DICTIONARY = true;
-	
+	public static function registerLangPath($path){
+		$LANG_DIRS[] = $path;
+	}
 	protected static function build($lang,$D=false){
 		
 		$L = array();
@@ -200,9 +202,17 @@ class Language{
 		$dirs = Language::$LANG_DIRS;
 		if($D) $dirs = array($D);
 		foreach($dirs as $dir){
+			$dir=rtrim($dir,"/");
 			if(!is_dir($dir)) continue;
+			
+			if(Language::$USE_CSV_LANG_FILES){
+				if(file_exists($p = $dir."/".$lang.".csv")){
+					$L = array_merge($L,Language::buildFromCSV($p));
+				}
+			}
+			
 			if(!$D){
-				$dir=rtrim($dir,"/")."/".$lang;
+				$dir = $dir."/".$lang;
 			}
 			foreach(scandir($dir) as $file){
 				if($file == "." || $file == "..") continue;
@@ -258,7 +268,7 @@ class Language{
 	protected static function buildFromCSV($file){
 		$L = array();
 		if (($handle = fopen($file, "r")) !== FALSE) {
-			while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+			while (($data = fgetcsv($handle, 1000000, ",")) !== FALSE) {
 				$L[$data[0]] = $L[$data[1]];
 			}
 			fclose($handle);
