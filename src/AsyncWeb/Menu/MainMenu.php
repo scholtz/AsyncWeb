@@ -468,7 +468,7 @@ class MainMenu{
 	}
 	public static function showLeftMenu(){
 		$cur = MainMenu::getCurrent();
-
+		if(!isset($cur["id2"])) $cur["id2"] = "";
 		$key = "LeftMenuMain_l:".Language::getLang()."_c:".$cur["id2"]."_u:".\AsyncWeb\Security\Auth::userId()."_p:".MainMenu::$PAGE;
 		if($menu = Cache::get($key,"menu")){
 				return $menu;

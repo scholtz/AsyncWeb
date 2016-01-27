@@ -204,9 +204,8 @@ class Language{
 		foreach($dirs as $dir){
 			$dir=rtrim($dir,"/");
 			if(!is_dir($dir)) continue;
-			
 			if(Language::$USE_CSV_LANG_FILES){
-				if(file_exists($p = $dir."/".$lang.".csv")){
+				if(file_exists($p = $dir."/".str_replace("-","_",$lang).".csv")){
 					$L = array_merge($L,Language::buildFromCSV($p));
 				}
 			}
@@ -269,7 +268,7 @@ class Language{
 		$L = array();
 		if (($handle = fopen($file, "r")) !== FALSE) {
 			while (($data = fgetcsv($handle, 1000000, ",")) !== FALSE) {
-				$L[$data[0]] = $L[$data[1]];
+				$L[$data[0]] = $data[1];
 			}
 			fclose($handle);
 		}
