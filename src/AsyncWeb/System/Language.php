@@ -187,7 +187,7 @@ class Language{
 	public static $USE_CSV_LANG_FILES = true;
 	public static $USE_DB_DICTIONARY = true;
 	public static function registerLangPath($path){
-		$LANG_DIRS[] = $path;
+		Language::$LANG_DIRS[] = $path;
 	}
 	protected static function build($lang,$D=false){
 		
