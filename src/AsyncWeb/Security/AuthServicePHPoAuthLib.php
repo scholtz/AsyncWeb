@@ -12,11 +12,13 @@ class AuthServicePHPoAuthLib implements AuthService{
 	protected $info = array();
 	protected $name = "AuthServicePHPoAuthLib";
 	protected $icon = null;
-	public function registerService($name,\OAuth\OAuth2\Service\AbstractService $service,$info,$faicon=""){
+	protected $require_email = true;
+	public function registerService($name,\OAuth\OAuth2\Service\AbstractService $service,$info,$faicon="",$require_email=true){
 		$this->name=$name;
 		$this->services[$name] = $service;
 		$this->info[$name] = $info;
 		if($faicon) $this->icon = $faicon;
+		$this->require_email = $require_email;
 	}
 
 	public function check(Array $data=array()){
@@ -33,14 +35,15 @@ class AuthServicePHPoAuthLib implements AuthService{
 			
 			$url = \AsyncWeb\System\Path::make(array("go"=>$class));
 			$text = "Login with ".$class."!";
-			if($icon){
-				$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-'.$this->icon.'"></i></div>';
+			$style = 'border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;';
+			if($this->icon){
+				$text = '<div style="'.$style.'" title="Login with '.$class.'"><i style="" class="fa fa-'.$this->icon.'"></i></div>';
 			}else{
 				if($class=="Google"){
-					$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-google"></i></div>';
+					$text = '<div style="'.$style.'" title="Login with '.$class.'"><i style="" class="fa fa-google"></i></div>';
 				}		
 				if($class=="Vkontakte"){
-					$text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with '.$class.'"><i style="" class="fa fa-vk"></i></div>';
+					$text = '<div style="'.$style.'" title="Login with '.$class.'"><i style="" class="fa fa-vk"></i></div>';
 				}		
 			}			
 			$ret.="<a href='$url'>".$text."</a>";
@@ -67,7 +70,7 @@ class AuthServicePHPoAuthLib implements AuthService{
 					$service->requestAccessToken($_GET['code']);
 					// Send a request with it
 					$result = json_decode($service->request($this->info[$provider]), true);
-					if(!$result["email"]){
+					if(!$result["email"] && $this->require_email){
 						throw new \AsyncWeb\Exceptions\SecurityException("Authorisation service did not provide your email address!");
 					}
 					
@@ -85,7 +88,9 @@ class AuthServicePHPoAuthLib implements AuthService{
 					
 					$result["active"] = "1";
 					$result["last_access"] = \AsyncWeb\Date\Time::get();
-
+					foreach($result as $k=>$v){
+						if(is_array($v)) unset($result[$k]);
+					}
 					\AsyncWeb\DB\DB::u(AuthServicePHPoAuthLib::$DB_TABLE_USERS,$id2,$result);
 					
 					

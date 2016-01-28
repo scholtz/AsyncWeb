@@ -1579,7 +1579,7 @@ class TSAjax{
 			return $ret;
 			//$THViewCell->getDVC()->generateFilterBox($THViewCell->getKey());
 		}//alert(JSON.stringify($(this).position()));
-		return '$(\'#menuboxbox_'.$DataTableId.'\').css({\'position\':\'absolute\',\'top\':($(this).position().top + $(this).height() + 6) + \'px\',\'left\':($(this).position().left-$(\'#menuboxbox_'.$DataTableId.'\').width()+$(this).width()+8) + \'px\',}).toggle();return true;';
+		return '$(\'#menuboxbox_'.$DataTableId.'\').css({\'position\':\'absolute\',\'top\':($(this).position().top + $(this).height() + 6) + \'px\',\'left\':($(this).position().left+4) + \'px\',}).toggle();return true;';
 		//return "return showMenuBox('".$DataTableId."','".\AsyncWeb\System\Path::make(array('showmenubox'=>md5($DataTableId),"AJAX"=>""))."');";
 		//return showFilterBox(\''.$parentid.'\',\''.md5($this->key).'\');
 	}

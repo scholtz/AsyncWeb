@@ -131,15 +131,10 @@ class Path{
   }
   
  }
- public static function m(Array $var=array(),Array $tmpl=array()){
-	 return \AsyncWeb\Frontend\URLParser::addVariablesAndBlocks($var,$tmpl,true);
- }
- public static function c(Array $tmpl){
-	return \AsyncWeb\Frontend\URLParser::addVariablesAndBlocks($var=array(),$tmpl,true,false);
- } 
+ 
  public static function makeAW($params=array(),$moveparams=true,$uri=null,$paramsAreSafe=false,$getIsSafe=false,$js=false){
   //if(!$uri){$uria = explode("/",$_SERVER["REQUEST_URI"]);$uri = $uria[0];}
-  if(class_exists("\\AsyncWeb\\Frontend\\URLParser")){
+  if(class_exists("AsyncWeb\Frontend\URLParser")){
 	  if(isset($params["REMOVE_VARIABLES"]) && $params["REMOVE_VARIABLES"] == "1"){
 		  $ret = \AsyncWeb\Frontend\URLParser::noVariables();
 	  }else{

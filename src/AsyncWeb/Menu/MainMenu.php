@@ -228,14 +228,8 @@ class MainMenu{
         </li></ul>';
 	}
 	private static function makeLangPath(&$cur,$lang=false){
-		if(!$cur){
-			$path = "/";
-		}elseif(isset($cur["langs"][$lang])){
-			$path = $cur["langs"][$lang];
-			$path = "/".MainMenu::$CATEGORY_TAG_NAME.":".$path;
-		}else{
-			$path = $cur["path"];
-		}
+		$path = $cur["langs"][$lang];
+		$path = "/".MainMenu::$CATEGORY_TAG_NAME.":".$path;
 		if($lang && $lang != Language::getLang()){
 			$protocol = "http";
 			if($_SERVER["SERVER_PORT"] == 443){
@@ -316,9 +310,7 @@ class MainMenu{
 		return Language::$SUPPORTED_LANGUAGES;
 	}
 	public static function isSubmenuOfCurrent(&$menu){
-		if(!isset($menu["id2"])) return false;// special buttons
 		$cur = MainMenu::getCurrent();
-		if(!isset($cur["id2"])) return false;// current is special button
 		if($cur["id2"] == $menu["id2"]){ return true;}
 //		var_dump($cur);
 		if(isset($menu["submenu"])){
@@ -348,19 +340,18 @@ class MainMenu{
 		}
 		$active = "";
 		if(MainMenu::isSubmenuOfCurrent($row)) $active = "active ";
+
 		$ret.='<li class="'.$active.$class.' '.@$row["class"].'">';
 		if(!$row["type"]) $row["type"] = "category";
 		if($row["type"] == "category" && !$row["text"]){$row["text"] = "?";}
-		//if($type == "left" || $type == "nav") $row["type"] = "category";
-//var_dump($row);
+		if($type == "left" || $type == "nav") $row["type"] = "category";
 
 		$fa = "";if(isset($row["fa"]) && $row["fa"]) $fa = '<i class="fa fa-'.$row["fa"].'"></i>';
-		//var_dump($row);exit;
 		switch($row["type"]){
 			case "image": $ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><img src="'.$row["img"].'" width="'.$row["imgwidth"].'" height="'.$row["imgheight"].'" alt="'.$row["imgalt"].'" title="'.($row["text"]).'" />'.$dropdowncaret.'</a>';break;
 			case "text":$ret.= '<span class="menutext">'.$fa.($row["text"]).'</span>';break;
 			case "category":$ret.= '<a'.$adddropdown.' href="/'.MainMenu::$CATEGORY_TAG_NAME.":".$row["path"].'"><span class="menutext">'.$fa.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
-			case "src":$ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><span class="menutext">'.$fa.$row["text"].'</span>'.$dropdowncaret.'</a>';break;
+			case "src":$ret.= '<a href="'.$row["path"].'"><span class="menutext">'.$fa.($row["text"]).'</span></a>';break;
 		}
 
 		$sub = "";
@@ -370,7 +361,7 @@ class MainMenu{
 			if(isset($row["submenu"]) && is_array($row["submenu"])){
 				ksort($row["submenu"]);
 				foreach($row["submenu"] as $k=>$row1){$i++;
-					if($k.""=="submenu") continue;
+					if($k=="submenu") continue;
 					$sub.=MainMenu::showMenuItem($row1,$recursive,$class,$subclass,$showsubmenu,$showeditor,$type);
 				}
 				
@@ -474,7 +465,7 @@ class MainMenu{
 	}
 	public static function showLeftMenu(){
 		$cur = MainMenu::getCurrent();
-		if(!isset($cur["id2"])) $cur["id2"] = "";
+
 		$key = "LeftMenuMain_l:".Language::getLang()."_c:".$cur["id2"]."_u:".\AsyncWeb\Security\Auth::userId()."_p:".MainMenu::$PAGE;
 		if($menu = Cache::get($key,"menu")){
 				return $menu;
@@ -583,9 +574,9 @@ $ret='
 			$title = "";
 		}
 		
-		\AsyncWeb\Frontend\BlockManagement::get("Content_HTMLHeader_Title")->changeData(array("title"=>$ret["title"]));;
-		\AsyncWeb\Frontend\BlockManagement::get("Content_HTMLHeader_Description")->changeData(array("description"=>$ret["description"]));;
-		\AsyncWeb\Frontend\BlockManagement::get("Content_HTMLHeader_Keywords")->changeData(array("keywords"=>$ret["keywords"]));;
+		\AsyncWeb\Frontend\BlockManagement::get("HeaderTitle")->changeData(array("title"=>$ret["title"]));;
+		\AsyncWeb\Frontend\BlockManagement::get("HeaderDescription")->changeData(array("description"=>$ret["description"]));;
+		\AsyncWeb\Frontend\BlockManagement::get("HeaderKeywords")->changeData(array("keywords"=>$ret["keywords"]));;
 		
 		MainMenu::$current = $ret;
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}

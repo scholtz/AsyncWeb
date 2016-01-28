@@ -104,7 +104,6 @@ class Translate{
 		 
 		$data = curl_exec(Translate::$translatech);
 
-		
 		$data = str_replace(",,",',"",',$data);
 		$data = str_replace(",,",',"",',$data);
 		$data = str_replace(",,",',"",',$data);

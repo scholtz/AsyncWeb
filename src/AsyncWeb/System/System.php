@@ -2,6 +2,7 @@
 namespace AsyncWeb\System;
 
 class System{
+	
 	public static function getOS(){
 		if(PHP_OS == "Linux") return "linux";
 		if(substr(strtoupper(PHP_OS),0,3) == "WIN") return "win";
@@ -28,3 +29,5 @@ class System{
 		return "http://".System::getDomain();
 	}
 }
+
+?>

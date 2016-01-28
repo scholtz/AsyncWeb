@@ -12,19 +12,12 @@ class BlockManagement{
 		self::$needToRerender = true;
 	}
 	public static function renderWeb(){
-		if(\AsyncWeb\System\Router::run()) return;
 		if(BlockManagement::$defaultBlock == null){
-			$index = "Index";
-			$url = URLParser::parse();
-			if(isset($url["tmpl"]["Index"])){
-				$index = $url["tmpl"]["Index"];
-			}
-			
-			if(Block::exists($index)){
-				$def = Block::create($index);
+			if(Block::exists("Index")){
+				$def = Block::create("Index");
 				BlockManagement::setDefaultBlock($def);
 			}else{
-				throw new Exception(Language::get("Please set up the default block in the settings file or create index block!"));
+				echo "Please set up the default block in the settings file or create index block!";exit;
 			}
 		}
 		
@@ -52,8 +45,6 @@ class BlockManagement{
 	public static function get($name,$tid=""){
 		//var_dump("BlockManagement::get:$name;$tid");
 		try{
-			$name = Block::normalizeName($name);
-			
 			if(isset(BlockManagement::$instances[$name][$tid])){
 				return BlockManagement::$instances[$name][$tid];
 			}else{

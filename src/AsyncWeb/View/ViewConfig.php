@@ -23,7 +23,7 @@ define("DV_BINDING_RB_OR","pzor");
 define("DV_BINDING_NONE","not");
 
 class ViewConfig{
-	public static $useFontAwesome = true;
+	public static $useFontAwesome = false;
 	private $config = array();
 	public function __construct($config=array()){
 		$this->config = $config;
