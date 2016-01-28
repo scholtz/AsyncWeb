@@ -1,5 +1,5 @@
 <?php
-namespace \AsyncWeb\Helpers;
+namespace AsyncWeb\Helpers;
 
 class ValueObject{
 	protected $value = "";
