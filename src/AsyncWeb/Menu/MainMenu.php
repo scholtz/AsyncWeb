@@ -359,7 +359,9 @@ class MainMenu{
 		switch($row["type"]){
 			case "image": $ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><img src="'.$row["img"].'" width="'.$row["imgwidth"].'" height="'.$row["imgheight"].'" alt="'.$row["imgalt"].'" title="'.($row["text"]).'" />'.$dropdowncaret.'</a>';break;
 			case "text":$ret.= '<span class="menutext">'.$fa.($row["text"]).'</span>';break;
-			case "category":$ret.= '<a'.$adddropdown.' href="/'.MainMenu::$CATEGORY_TAG_NAME.":".$row["path"].'"><span class="menutext">'.$fa.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
+			case "category":
+				$path = \AsyncWeb\System\Path::c(array(MainMenu::$CATEGORY_TAG_NAME=>$row["path"]));
+				$ret.= '<a'.$adddropdown.' href="'.$path.'"><span class="menutext">'.$fa.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
 			case "src":$ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><span class="menutext">'.$fa.$row["text"].'</span>'.$dropdowncaret.'</a>';break;
 		}
 
@@ -541,18 +543,19 @@ $ret='
 		MainMenu::build();
 		
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
-		
 		$url = \AsyncWeb\Frontend\URLParser::parse();
+		
+		
 		if(isset($url["tmpl"][MainMenu::$CATEGORY_TAG_NAME]) && $url["tmpl"][MainMenu::$CATEGORY_TAG_NAME]){
 			$path = $url["tmpl"][MainMenu::$CATEGORY_TAG_NAME];
 		}else{
-			$path = "Main";
+			$path = "Content_Main";
 		}
-//		$path = urldecode($_SERVER["REQUEST_URI"]);
+
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
-		//var_dump(MainMenu::$menu);
-		//var_dump($path);
+		
 		$ret= MainMenu::findMenuItem(MainMenu::$menu,$path);
+		
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
 		if(!$ret){
 		if($dbg){echo Timer1::show()."MainMenu:getCurrent:".($dbgi++).":\n";}
