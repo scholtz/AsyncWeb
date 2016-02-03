@@ -1,4 +1,5 @@
 <?php
+namespace AsyncWeb\Date;
 
 class DateInterval extends \DateInterval {
     public
