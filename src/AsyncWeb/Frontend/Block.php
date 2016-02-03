@@ -105,7 +105,7 @@ class Block{
 		$n = str_replace("\\","/",$name);
 		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$n.".html") || $blockready;
 	}
-	public static function create($name = "", $tid = "", $template=""){
+	public static function create($name = "", $tid = "", $template=null){
 		Block::initTemplatePath();
 		$name = Block::normalizeName($name);
 		if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
@@ -136,7 +136,7 @@ class Block{
 
 		$this->template = $template;
 		$this->tid = $tid;
-		
+
 		$this->initTemplate();
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
