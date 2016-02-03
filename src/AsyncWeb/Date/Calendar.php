@@ -4,8 +4,9 @@ This class manages the callendar and holidays
 
 28.4.2013 	modules/Time.php compliant
 */
+namespace AsyncWeb\Date;
+
 use AsyncWeb\Date\Time;
-namespace AsyncWeb\System\Date;
 
 class Calendar{
 	private $month = 1;
