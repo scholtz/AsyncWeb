@@ -29,10 +29,53 @@ class Block{
 	public static function removeBlockPath($namespace){
 		if(isset(Block::$BLOCKS_PATHS[$namespace])) unset(Block::$BLOCKS_PATHS[$namespace]);
 	}
+	
+	public static $TEMPLATE_PATHS = array();
+	protected static $TEMPLATE_PATH_INITIALIZED = false;
+	public static function registerTemplatePath($dir,$level=1){
+		if(!$dir || !is_dir($dir)){
+			throw new \Exception("Directory for templates does not exists!");
+		}
+		Block::$TEMPLATE_PATHS[$dir] = $level;
+		asort(Block::$TEMPLATE_PATHS);
+	}
+	public static function removeTemplatePath($dir){
+		if(isset(Block::$TEMPLATE_PATHS[$dir])) unset(Block::$TEMPLATE_PATHS[$dir]);
+	}
+	
+	
 	public static function normalizeName($name){
 		return str_replace("_",'\\',$name);
 	}
+	public static function templateHasPriorityOverBlock($name){
+		$name = Block::normalizeName($name);
+		$merged = array_merge(Block::$BLOCKS_PATHS,Block::$TEMPLATE_PATHS);
+		asort($merged);
+		foreach($merged as $namespace=>$t){
+			if(isset(Block::$BLOCKS_PATHS[$namespace])){
+				if (class_exists($n=$namespace.$name)){
+					return false;
+				}
+			}
+			if(isset(Block::$TEMPLATE_PATHS[$namespace])){
+				$n = str_replace("\\","/",$name);	
+				if ($file = \AsyncWeb\IO\File::exists($f = $namespace."/".$n.".html")){
+					return $file;
+				}
+			}
+		}
+	}
+	protected static function initTemplatePath(){
+		if(!Block::$TEMPLATE_PATH_INITIALIZED){
+			$dir=realpath($p1= (__DIR__ . "/../DefaultTemplates"));
+			if(is_dir($dir)){
+				Block::$TEMPLATE_PATHS[$dir]=10000;
+			}
+			Block::$TEMPLATE_PATH_INITIALIZED = true;
+		}
+	}
 	public static function exists($name,$checkBlockOnly=false){
+		Block::initTemplatePath();
 		$name = Block::normalizeName($name);
 		
 		$BLOCK_PATH = Block::$BLOCK_PATH;
@@ -49,16 +92,26 @@ class Block{
 		if($checkBlockOnly){
 			return false;
 		}
+		
+		
+		foreach(Block::$TEMPLATE_PATHS as $dir=>$t){
+			$n = str_replace("\\","/",$name);
+			if ($file = \AsyncWeb\IO\File::exists($f = $dir."/".$n.".html")){
+				return $file;
+			}
+		}
 		$TEMPLATES_PATH = Block::$TEMPLATES_PATH;
 		if(substr($TEMPLATES_PATH,-1)!="/") $TEMPLATES_PATH.="/";
-		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$name.".html") || $blockready;
+		$n = str_replace("\\","/",$name);
+		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$n.".html") || $blockready;
 	}
 	public static function create($name = "", $tid = "", $template=""){
+		Block::initTemplatePath();
 		$name = Block::normalizeName($name);
 		if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
 			$name = "\\".$name;
 		}
-		if($file = Block::exists($name,true)){
+		if($file = Block::exists($name,true) && !Block::templateHasPriorityOverBlock($name)){
 			if($file === true){
 				foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
 					if (class_exists($n=$namespace.$name)){
@@ -76,9 +129,9 @@ class Block{
 			}
 			return new $name($name,$tid,$template);
 		}
-		return new Block($name,$tid,$tmplate);
+		return new Block($name,$tid,$template);
 	}
-	public function __construct($name = "", $tid = "", $template=""){
+	public function __construct($name = "", $tid = "", $template=null){
 		$name = Block::normalizeName($name);
 
 		$this->template = $template;
@@ -88,10 +141,19 @@ class Block{
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
 		$this->data = array(""=>array());
+		
+		$n = str_replace("\\","/",$name);
 		if($this->template === null){
-			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$name.".html")){
-				echo "Template ".$name." not found!\n";
-				throw new \Exception("Template ".$name." not found!");
+			foreach(Block::$TEMPLATE_PATHS as $dir=>$t){
+				if ($this->template === null && $file = \AsyncWeb\IO\File::exists($f = $dir."/".$n.".html")){
+					$this->template = file_get_contents($f,true);
+				}
+			}
+		}
+		if($this->template === null){
+			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$n.".html")){
+				echo "Template ".$n." not found!\n";
+				throw new \Exception("Template ".$n." not found!");
 			}
 			$this->template = file_get_contents($f,true);
 		}
@@ -203,7 +265,7 @@ class Block{
 			}
 		}
 		
-		
+		$dataToRender["LANG"] = \AsyncWeb\System\Language::getLang();
 		if($dataToRender["USER_ID"] = \AsyncWeb\Security\Auth::userId()){
 			
 			if(\AsyncWeb\Security\Auth::checkControllers() === true){

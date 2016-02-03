@@ -9,7 +9,7 @@ class File{
 	 
 		foreach ($paths as $path) {
 			// Formulate the absolute path
-			$fullpath = $path . DIRECTORY_SEPARATOR . $file;
+			$fullpath = realpath($path) . DIRECTORY_SEPARATOR . $file;
 	 
 			// Check it
 			if (file_exists($fullpath)) {
@@ -28,4 +28,3 @@ class File{
 		return file_put_contents($file,$content,$options);
 	}
 }
-?>
