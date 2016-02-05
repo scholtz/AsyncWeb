@@ -47,6 +47,12 @@ class Block{
 	public static function normalizeName($name){
 		return str_replace("_",'\\',$name);
 	}
+	public static function normalizeTemplatePath($name){
+		$name = Block::normalizeName($name);
+		$path = str_replace("\\","/",$name);
+		$path = trim($path,"/");
+		return $path;
+	}
 	public static function templateHasPriorityOverBlock($name){
 		$name = Block::normalizeName($name);
 		$merged = array_merge(Block::$BLOCKS_PATHS,Block::$TEMPLATE_PATHS);
@@ -58,7 +64,7 @@ class Block{
 				}
 			}
 			if(isset(Block::$TEMPLATE_PATHS[$namespace])){
-				$n = str_replace("\\","/",$name);	
+				$n = Block::normalizeTemplatePath($name);	
 				if ($file = \AsyncWeb\IO\File::exists($f = $namespace."/".$n.".html")){
 					return $file;
 				}
@@ -95,14 +101,14 @@ class Block{
 		
 		
 		foreach(Block::$TEMPLATE_PATHS as $dir=>$t){
-			$n = str_replace("\\","/",$name);
+			$n = Block::normalizeTemplatePath($name);
 			if ($file = \AsyncWeb\IO\File::exists($f = $dir."/".$n.".html")){
 				return $file;
 			}
 		}
 		$TEMPLATES_PATH = Block::$TEMPLATES_PATH;
 		if(substr($TEMPLATES_PATH,-1)!="/") $TEMPLATES_PATH.="/";
-		$n = str_replace("\\","/",$name);
+		$n = Block::normalizeTemplatePath($name);
 		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$n.".html") || $blockready;
 	}
 	public static function create($name = "", $tid = "", $template=null){
@@ -142,7 +148,7 @@ class Block{
 		$this->name = $name;
 		$this->data = array(""=>array());
 		
-		$n = str_replace("\\","/",$name);
+		$n = Block::normalizeTemplatePath($name);
 		if($this->template === null){
 			foreach(Block::$TEMPLATE_PATHS as $dir=>$t){
 				if ($this->template === null && $file = \AsyncWeb\IO\File::exists($f = $dir."/".$n.".html")){
