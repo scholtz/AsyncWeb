@@ -333,7 +333,12 @@ class MakeDBView{
 		}
 		
 		if(@$data["useForms"] && @$data["allowInsert"] && $showinsert){
-		  $menuitems[] =  new TableMenuItemIconHref(Path::make(array('insert_data_'.$data["uid"]=>1,"showmenubox"=>"")),Language::get("New item"),"/img/icons/new.png");;
+			if(isset($data["texts"]["newItem"])){
+				$newItemText = $data["texts"]["newItem"];
+			}else{
+				$newItemText = Language::get("New item");
+			}
+		  $menuitems[] =  new TableMenuItemIconHref(Path::make(array('insert_data_'.$data["uid"]=>1,"showmenubox"=>"")),$newItemText,"/img/icons/new.png");;
 		}
 
 		

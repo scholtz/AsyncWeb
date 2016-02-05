@@ -720,7 +720,12 @@ echo '">';
 					  }
 					  }
 		 if(@$data["useForms"] && @$data["allowInsert"] && $showinsert){
-		  $menu.= '<div class="menuitem"><a href="'.\AsyncWeb\System\Path::make(array('insert_data_'.$data["uid"]=>1,"AJAX"=>"")).'">'.Language::get("New item").'</a></div>';
+			if(isset($data["texts"]["newItem"])){
+				$newItemText = $data["texts"]["newItem"];
+			}else{
+				$newItemText = Language::get("New item");
+			}
+		  $menu.= '<div class="menuitem"><a href="'.\AsyncWeb\System\Path::make(array('insert_data_'.$data["uid"]=>1,"AJAX"=>"")).'">'.$newItemText.'</a></div>';
 		 }
 		 
 		 
