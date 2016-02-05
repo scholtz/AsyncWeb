@@ -125,7 +125,7 @@ class Block{
 			
 			
 			if(!class_exists($name)){
-				throw new Exception(Language::get("Block %name% does not exists!",array("%name%"=>$name)));
+				throw new \Exception(Language::get("Block %name% does not exists!",array("%name%"=>$name)));
 			}
 			return new $name($name,$tid,$template);
 		}
@@ -212,7 +212,7 @@ class Block{
 					if($itemcl = BlockManagement::get($templateid,$tid)){
 						$ret[] = $itemcl;
 					}
-				}catch(Exception $exc){
+				}catch(\Exception $exc){
 				}
 			}
 		}
@@ -258,7 +258,7 @@ class Block{
 							$dataToRender[$item] = '<'.$itemcl->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$itemcl->blockElement.'>';
 						}
 					}
-				}catch(Exception $exc){
+				}catch(\Exception $exc){
 					
 				}
 				
@@ -283,6 +283,22 @@ class Block{
 			$dataToRender["PREAUTH"] = false;
 		}
 		$dataToRender["TEMPLATE_START_DELIMITER"] = "{{{";
+		
+		
+		$pos = 0;
+		while(($pos = strpos($this->template,"{{",$pos)) !== false){
+			$pos+=2;
+			$pos2 = strpos($this->template,"}}",$pos);
+			$item = trim(substr($this->template,$pos,$pos2-$pos));
+			
+			if(substr($item,0,1)=="{") continue;
+			if(isset($dataToRender[$item])) continue;
+			
+			if(\AsyncWeb\System\Language::is_set($item)){
+				$dataToRender[$item] = \AsyncWeb\System\Language::get($item);
+			}
+		}
+		
 		$this->rendered = true;
 		$ret= Block::$MustacheEngine->render($this->template,$dataToRender);
 		return $ret;

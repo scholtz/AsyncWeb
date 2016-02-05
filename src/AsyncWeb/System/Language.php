@@ -2,10 +2,15 @@
 namespace AsyncWeb\System;
 
 class Language{
+	/**
+		Change your default lang in your settings file:
+		
+		\AsyncWeb\System\Language::$DEFAULT_LANGUAGE = "de-DE";
+	*/
+	public static $DEFAULT_LANGUAGE = "en-US";
 	public static $SUPPORTED_LANGUAGES = array("en-US"=>"");
 	//public static $LANG_DIR = "../dictionary/";
 	protected static $LANG_DIRS = array("../dictionary/","../vendor/scholtz/async-web/lang/");
-	protected static $defaultLang = "en-US";
 	protected static $lang = "en-US";
 	protected static $dictionary = array();
 	protected static $reversedictionary = array();
@@ -21,7 +26,7 @@ class Language{
 			$lang = Language::getDefaultLang();
 		}
 		if(!isset(Language::$SUPPORTED_LANGUAGES[$lang])){
-			$lang = Language::$defaultLang;
+			$lang = Language::$DEFAULT_LANGUAGE;
 		}
 
 		Language::$lang = $lang;
@@ -46,7 +51,7 @@ class Language{
 		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$d){
 			return $lang;
 		}
-		return "en-US";
+		return Language::$DEFAULT_LANGUAGE;
 	}
 	public static function getLang(){
 		return Language::$lang;
@@ -192,11 +197,10 @@ class Language{
 	protected static function build($lang,$D=false){
 		
 		$L = array();
-		
-		if(!$D && $lang != "en-US"){
-			if(!isset(Language::$SUPPORTED_LANGUAGES["en-US"])){
+		if(!$D && $lang != Language::$DEFAULT_LANGUAGE){
+			if(isset(Language::$SUPPORTED_LANGUAGES[Language::$DEFAULT_LANGUAGE])){
 				// we want to make sure that at least in english each dictionary item is available
-				$L = Language::build("en-US");
+				$L = Language::build(Language::$DEFAULT_LANGUAGE);
 			}
 		}
 		$dirs = Language::$LANG_DIRS;
