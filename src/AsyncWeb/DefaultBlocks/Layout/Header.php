@@ -4,9 +4,10 @@ namespace AsyncWeb\DefaultBlocks\Layout;
 
 class Header extends \AsyncWeb\Frontend\Block{
 	public static $USE_BLOCK = true;
+	public static $USE_FLUID = false;
 	protected function initTemplate(){
 		$this->template = '<header class="navbar navbar-default navbar-inverse" id="top" role="banner">
-  <div class="container">
+  <div class="container'.(Header::$USE_FLUID?'-fluid':'').'">
     <div class="navbar-header">
       <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
