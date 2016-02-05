@@ -1682,7 +1682,7 @@ class MakeForm{
 	 
 	 if(isset($this->data["bootstrap"])){
 		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.Language::get("Help").'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
+		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
 		}
 	 }
 	 
@@ -1799,7 +1799,7 @@ class MakeForm{
 	 
 	 if(isset($this->data["bootstrap"])){
 		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.Language::get("Help").'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
+		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
 		}
 	 }
 	 

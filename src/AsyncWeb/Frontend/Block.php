@@ -232,6 +232,11 @@ class Block{
 		$dataToRender = array();
 		if(isset($this->data[$namespace])) $dataToRender = $this->data[$namespace];
 		
+		if(isset(static::$DICTIONARY[\AsyncWeb\System\Language::$DEFAULT_LANGUAGE])){
+			foreach(static::$DICTIONARY[\AsyncWeb\System\Language::$DEFAULT_LANGUAGE] as $k=>$v){
+				$dataToRender[$k] = $v;
+			}
+		}
 		if(isset(static::$DICTIONARY[\AsyncWeb\System\Language::get()])){
 			foreach(static::$DICTIONARY[\AsyncWeb\System\Language::get()] as $k=>$v){
 				$dataToRender[$k] = $v;
