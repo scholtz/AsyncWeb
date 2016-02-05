@@ -1959,10 +1959,10 @@ class MakeForm{
 	  
 	 }
 	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"]){
-	   if(isset($item["texts"]["allowNull"]) && $item["texts"]["allowNull"]){
+	   if(isset($item["texts"]["nullValue"]) && $item["texts"]["nullValue"]){
         $reto = '<option value="0">'.strip_tags($this->getText($item["texts"]["nullValue"])).'</option>'.$reto;
 	   }else{
-       $reto = '<option value="0">'.$this->getText("nullValue").'</option>'.$reto;
+        $reto = '<option value="0">'.$this->getText("nullValue").'</option>'.$reto;
 	   }
       }
 	  
@@ -2873,7 +2873,7 @@ $theme = "simple";
 	 }
 	 	 
 	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"]){
-	   if(isset($item["texts"]["allowNull"]) && $item["texts"]["allowNull"]){
+	   if(isset($item["texts"]["nullValue"]) && $item["texts"]["nullValue"]){
         $reto = '<option value="0">'.strip_tags($this->getText($item["texts"]["nullValue"])).'</option>'.$reto;
 	   }else{
 		   $text = $this->getText("nullValue");
