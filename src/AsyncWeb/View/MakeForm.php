@@ -2105,28 +2105,34 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-offset-2 col-lg-10 MFFormColumn"><div class="radio inline">';
+		 $inline = "";
+		 if(isset($this->item["form"]["inline"]) && $this->item["form"]["inline"]) $inline = " inline";
+		$ret.='<div class="col-lg-10 MFFormColumn">';
 	 }
 	 $value = "";
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      if(isset($item["texts"]["value"])) $value = $this->getText($item["texts"]["value"]);
 	 if(isset($item["filter"]["option"])){
 	  foreach($item["filter"]["option"] as $k=>$v){
-	   $ret.="<label for=\"${name}_${k}\">".' <input value="'.$k.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'_'.$k.'" name="'.$name.'"';
+	   $ret.="<div class=\"radio".$inline."\"><label for=\"${name}_${k}\">".' <input value="'.$k.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'_'.$k.'" name="'.$name.'"';
         if($form_submitted){
          if($colValue==$k){
           $ret.= ' checked="checked"';
          }
         }else{
-         if(isset($item["data"]["selected"]) && $item["data"]["selected"]){
+         if(isset($item["data"]["selected"]) && $item["data"]["selected"] == $k){
           $ret.= ' checked="checked"';
          }
         }
-       $ret .= "/>".$v."</label> ";
+       if(isset($item["editable"]) && !$item["editable"]){
+        $ret.=' disabled="disabled"';
+       }
+       $ret .= "/>".$v."</label></div> ";
 	   
 	  }
 	 }else{
-      $ret.=' <input value="'.$value.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'" name="'.$name.'"';
+		 
+      $ret.=' <label for="'.$name.'"><input value="'.$value.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'" name="'.$name.'"';
       if($form_submitted){
        if($colValue==$value){
         $ret.= ' checked="checked"';
@@ -2136,12 +2142,20 @@ $theme = "simple";
         $ret.= ' checked="checked"';
        }
       }
+       if(isset($item["editable"]) && !$item["editable"]){
+        $ret.=' disabled="disabled"';
+       }
       $ret .= "/>";
+	  
+	  if(isset($item["texts"]["optionText"])){
+		$ret .= $this->getText($item["texts"]["optionText"]);
+	  }
+	  $ret.='</label>';
 	 }
 	 if(!isset($this->data["bootstrap"])){
 		$ret .= '</td>'."\n".'     </tr>'."\n";
 	 }else{
-		$ret.='</div></div></div>'."\n";
+		$ret.='</div></div>'."\n";
 	 }
     break;
     case 'part':
@@ -2548,7 +2562,7 @@ $theme = "simple";
 	 
 	 if(isset($this->data["bootstrap"])){
 		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.Language::get("Help").'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
+		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
 		}
 	 }
 	 
@@ -2652,7 +2666,7 @@ $theme = "simple";
 	 
 	 if(isset($this->data["bootstrap"])){
 		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.Language::get("Help").'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
+		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
 		}
 	 }
 	 
@@ -3049,21 +3063,52 @@ $theme = "simple";
 	 }else{
 		$ret.='<div class="col-lg-10 MFFormColumn">';
 	 }
-     $value = $this->getText($item["texts"]["value"]);
-     $ret.=' <input class="MFRadio form-control'.$addclass.'" value="$value" type="radio" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if($form_submitted){
-      if($colValue==$value){
-       $ret.= ' checked="checked"';
+	 
+	 $value = "";
+	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
+     if(isset($item["texts"]["value"])) $value = $this->getText($item["texts"]["value"]);
+	 if(isset($item["filter"]["option"])){
+	  foreach($item["filter"]["option"] as $k=>$v){
+	   $ret.="<div class=\"radio".$inline."\"><label for=\"${name}_${k}\">".' <input value="'.$k.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'_'.$k.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
+        if($form_submitted){
+         if($colValue==$k){
+          $ret.= ' checked="checked"';
+         }
+        }else{
+         if(isset($item["data"]["selected"]) && $item["data"]["selected"] == $k){
+          $ret.= ' checked="checked"';
+         }
+        }
+       if(isset($item["editable"]) && !$item["editable"]){
+        $ret.=' disabled="disabled"';
+       }
+       $ret .= "/>".$v."</label></div> ";
+	   
+	  }
+	 }else{
+		 
+      $ret.=' <label for="'.$name.'"><input value="'.$value.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
+      if($form_submitted){
+       if($colValue==$value){
+        $ret.= ' checked="checked"';
+       }
+      }else{
+       if(isset($item["data"]["selected"]) && $item["data"]["selected"]){
+        $ret.= ' checked="checked"';
+       }
       }
-     }else{
-      if($row[$col] == $value){
-       $ret.= ' checked="checked"';
+      if(isset($item["editable"]) && !$item["editable"]){
+       $ret.=' disabled="disabled"';
       }
-     }
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret .= "/>";
+      $ret .= "/>";
+	  
+	  if(isset($item["texts"]["optionText"])){
+		$ret .= $this->getText($item["texts"]["optionText"]);
+	  }
+	  $ret.='</label>';
+	 }
+	 
+	 
      if(!isset($this->data["bootstrap"])){
 		$ret .= '</td>'."\n".'      </tr>'."\n";
 	 }else{
