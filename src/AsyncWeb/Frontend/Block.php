@@ -224,6 +224,7 @@ class Block{
 		}
 		return $ret;
 	}
+	protected $requiresAuthenticatedUser = false;
 	public function get($namespace=""){
 		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
@@ -242,7 +243,11 @@ class Block{
 				$dataToRender[$k] = $v;
 			}
 		}
-		
+		if($this->requiresAuthenticatedUser){
+			if(!\AsyncWeb\Security\Auth::check()){
+				$this->template = '{{{LoginForm}}}';
+			}
+		}
 
 		$pos = 0;
 		while(($pos = strpos($this->template,"{{{",$pos)) !== false){
