@@ -173,11 +173,13 @@ class MakeDBView{
 				$dvc= new BasicDataViewCell();
 			}elseif(@$info["filter"]["type"] == "option"){
 				$dvc= new SelectionDataViewCell($info["filter"]["option"]);
+			}elseif(@$info["filter"]["type"] == "radio"){
+				$dvc= new SelectionDataViewCell($info["filter"]["option"]);
 			}elseif(@$info["form"]["type"] == "tinyMCE"){
 				$dvc= new TextDataViewCell();
 			}else{
-				echo "nemam DVC";exit;
 				$dvc = new BasicDataViewCell();
+				//echo "nemam DVC";exit;
 			}
 			
 			$config=new THViewCellConfig($col,$name,$display,$sortable,$filterable,$exportable,$dvc);

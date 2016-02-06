@@ -4,6 +4,8 @@
 // Created & designed by Ludovit Scholtz
 // ludovit __ AT __ scholtz.sk
 //
+// 6.2.2016	 	Added variables $form->BT_WIDTH_OF_LABEL and $form->BT_SIZE
+//
 // 14.4.2015	{ is replaced by &#123; in textareas so that templates are not executed in forms 
 //
 // 23.2.2015 	Captcha moved to dependency recaptcha/php5-v2
@@ -154,6 +156,9 @@ use AsyncWeb\Frontend\URLParser;
 
 class MakeForm{
  public static $redirectAfterSuccess = "?";
+ public $BT_SIZE = "md";
+ public $BT_WIDTH_OF_LABEL = 2;
+ 
  public $merged = false;
  private $data = array();
  private $xmlData;
@@ -1246,8 +1251,12 @@ class MakeForm{
     }
    }
    if(!$this->merged){
-	   $text = $this->getText("updateSucces");
-	   if(!$text || $text = "updateSucces") $text = Language::get("Item has been successfully updated");
+		if(isset($this->data["texts"]["updateSucces"])){
+			$text = $this->getText($this->data["texts"]["updateSucces"]);
+		}else{
+			$text = $this->getText("updateSucces");
+		}
+	   if(!$text || $text == "updateSucces") $text = Language::get("Item has been successfully updated");
 	   Messages::getInstance()->mes($text);//
 	   Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___UPDATE2"=>"",$this->data["uid"]."___UPDATE1"=>""));exit;
 	   exit;
@@ -1341,7 +1350,11 @@ class MakeForm{
 	   }
 	   
 		if(!$this->merged){
-		   $text = $this->getText("deleteSucces");
+			if(isset($this->data["texts"]["deleteSucces"])){
+				$text = $this->getText($this->data["texts"]["deleteSucces"]);
+			}else{
+				$text = $this->getText("deleteSucces");
+			}
 		   if(!$text || $text == "deleteSucces") $text = Language::get("Deletion has been successfully commited");
 		   Messages::getInstance()->mes($text);//$this->data["uid"]."___DELETE"
 		   Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___DELETE"=>""));exit;
@@ -1488,7 +1501,7 @@ class MakeForm{
   if(isset($item["name"])) $text.=$this->getText($item["name"]);
   if($text){
   $ret.='
-   <label for="'.$id.'" class="col-lg-2 control-label">'.$text.'</label>
+   <label for="'.$id.'" class="col-'.$this->BT_SIZE.'-'.$this->BT_WIDTH_OF_LABEL.' control-label">'.$text.'</label>
    ';
   }
   if(!isset($this->data["bootstrap"])){
@@ -1642,7 +1655,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
      $ret.= '<td class="MFFormColumn">';
 	 }else{
-	 $ret.= '<div class="col-lg-10 MFFormColumn">';
+	 $ret.= '<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 
      $type = @$item["data"]["datatype"];
@@ -1725,7 +1738,7 @@ class MakeForm{
 	 if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $ret .= '<object type="application/x-xstandard" id="'.$item["data"]["editorName"].'" width="'.$item["data"]["width"].'" height="'.$item["data"]["height"].'';
      if(isset($item["editable"]) && !$item["editable"]){
@@ -1757,7 +1770,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $err=null;
 	 
@@ -1783,7 +1796,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
@@ -1821,7 +1834,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.= ' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'"';
@@ -1864,7 +1877,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.= ' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'[]"';
@@ -1906,7 +1919,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'"';
@@ -1984,7 +1997,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
@@ -2010,7 +2023,7 @@ class MakeForm{
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
@@ -2072,7 +2085,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'"';
@@ -2107,7 +2120,7 @@ $theme = "simple";
 	 }else{
 		 $inline = "";
 		 if(isset($this->item["form"]["inline"]) && $this->item["form"]["inline"]) $inline = " inline";
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $value = "";
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
@@ -2183,7 +2196,7 @@ $theme = "simple";
 	 if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
      if(isset($item["data"]["maxFileSize"])) $ret .= '<input type="hidden" name="MAX_FILE_SIZE" value="'.$item["data"]["maxFileSize"].'" />'."\n";
      
@@ -2205,7 +2218,7 @@ $theme = "simple";
 	 if(!isset($this->data["bootstrap"])){
      $ret.= '<td class="MFFormColumn">';
 	 }else{
-	 $ret.='<div class="col-lg-offset-2 col-lg-10 MFFormColumn">';
+	 $ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
 	 
@@ -2227,7 +2240,7 @@ $theme = "simple";
 	 if(!isset($this->data["bootstrap"])){
      $ret.= '<td class="MFFormColumn">';
 	 }else{
-	 $ret.='<div class="col-lg-offset-2 col-lg-10 MFFormColumn">';
+	 $ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
@@ -2250,7 +2263,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
      $ret.= '<td class="MFFormColumn">';
 	 }else{
-	 $ret.='<div class="col-lg-offset-2 col-lg-10 MFFormColumn">';
+	 $ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
@@ -2550,7 +2563,7 @@ $theme = "simple";
 	 if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
@@ -2592,7 +2605,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 		
 		$err=null;
@@ -2617,7 +2630,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	$prepend = false;
 	$after = false;
@@ -2708,7 +2721,7 @@ $theme = "simple";
 	 if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $ret .= '<object type="application/x-xstandard" id="'.(string)$item->settings->editorName.'" width="'.(string)$item->settings->width.'" height="'.(string)$item->settings->height.'">';
 	 $ret .= '<param name="CSS" value="'.(string)$item->settings->cssSubor.'" />';
@@ -2745,7 +2758,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
@@ -2793,7 +2806,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'[]" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
@@ -2841,7 +2854,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
      $ret.=' <select class="MFSelect form-control'.$addclass.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true" class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'"';
@@ -2918,7 +2931,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
      if(isset($item["editable"]) && !$item["editable"]){
@@ -2953,7 +2966,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
      $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
      if(isset($item["editable"]) && !$item["editable"]){
@@ -3024,7 +3037,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
      $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
      if($form_submitted){
@@ -3061,7 +3074,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 
 	 $value = "";
@@ -3139,7 +3152,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
      if(isset($item->data["data"]["maxFileSize"])) $ret .= '<input type="hidden" name="MAX_FILE_SIZE" value="'.$item->data["data"]["maxFileSize"].'" />'."\n";
      $ret .= '<input class="MFFile" type="file" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
@@ -3163,7 +3176,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-offset-2 col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
 	 
@@ -3187,7 +3200,7 @@ $theme = "simple";
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<td class="MFFormColumn">';
 	 }else{
-		$ret.='<div class="col-lg-offset-2 col-lg-10 MFFormColumn">';
+		$ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
 	 
