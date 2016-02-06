@@ -179,7 +179,6 @@ class MakeDBView{
 				$dvc= new TextDataViewCell();
 			}else{
 				$dvc = new BasicDataViewCell();
-				//echo "nemam DVC";exit;
 			}
 			
 			$config=new THViewCellConfig($col,$name,$display,$sortable,$filterable,$exportable,$dvc);
@@ -224,6 +223,9 @@ class MakeDBView{
 
 		$thr = new THDataViewRow($cols);
 		$c = array("id"=>$data["uid"]);
+		if(isset($data["texts"]["no_data"])) $c["no_data"] = $data["texts"]["no_data"];
+		if(isset($data["no_data"])) $c["no_data"] = $data["no_data"];
+		
 		if(@$data["iter"]["per_page"]) $c["rows"] = $data["iter"]["per_page"];
 		$config = new ViewConfig($c);
 		$sort = new DataSort();
