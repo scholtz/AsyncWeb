@@ -423,13 +423,13 @@ class MainMenu{
 	
 		MainMenu::build();
 		if(!MainMenu::$menu) return false;
+		
 		$ret= '<ul id="menu" class="nav navbar-nav">';
 		$sub = "";
 		$i = 0;
-		
 		ksort(MainMenu::$menu);
 		foreach(MainMenu::$menu as $k=>$row){$i++;
-			if($k=="submenu") continue;
+			if($k.""=="submenu") continue;
 			$t = MainMenu::showMenuItem($row);
 			if($t){
 				//if(MainMenu::$showsep && $i>MainMenu::$showsepfrom) $sub.='<li>|</li>';
