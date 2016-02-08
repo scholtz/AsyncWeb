@@ -224,7 +224,18 @@ class Block{
 		}
 		return $ret;
 	}
+	/**
+	 $requiresAuthenticatedUser true|false Current block requires logged in user 
+	*/
 	protected $requiresAuthenticatedUser = false;
+	/**
+	 $requiresAnyGroup Array List of group id3. If any matches Block can be displayed. If none match, block will not be shown.
+	*/
+	protected $requiresAnyGroup = array();
+	/**
+	 $requiresAllGroups Array List of group id3. All must match in order for block to be displayed.
+	*/
+	protected $requiresAllGroups = array();
 	public function get($namespace=""){
 		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
@@ -243,9 +254,33 @@ class Block{
 				$dataToRender[$k] = $v;
 			}
 		}
-		if($this->requiresAuthenticatedUser){
+		if($this->requiresAuthenticatedUser || $this->requiresAnyGroup || $this->requiresAllGroups){
 			if(!\AsyncWeb\Security\Auth::check()){
 				$this->template = '{{{LoginForm}}}';
+			}
+		}
+		if(is_array($this->requiresAnyGroup) && count($this->requiresAnyGroup) > 0){
+			$show = false;
+			foreach($this->requiresAnyGroup as $group){
+				if(\AsyncWeb\Objects\Group::is_in_group($group)){
+					$show = true;
+					break;
+				}
+			}
+			if(!$show){
+				return '';
+			}
+		}
+		if(is_array($this->requiresAllGroups) && count($this->requiresAllGroups) > 0){
+			$show = true;
+			foreach($this->requiresAllGroups as $group){
+				if(!\AsyncWeb\Objects\Group::is_in_group($group)){
+					$show = false;
+					break;
+				}
+			}
+			if(!$show){
+				return '';
 			}
 		}
 
