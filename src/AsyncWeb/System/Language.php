@@ -217,6 +217,8 @@ class Language{
 			if(!$D){
 				$dir = $dir."/".$lang;
 			}
+			
+			if(is_dir($dir))
 			foreach(scandir($dir) as $file){
 				if($file == "." || $file == "..") continue;
 				$path = $dir."/".$file;
