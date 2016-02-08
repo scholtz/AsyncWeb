@@ -22,7 +22,7 @@ class FAQ extends \AsyncWeb\Frontend\Block{
 					"col" => array( 
 						array("name"=>"Question","data"=>array("col"=>"question","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
 						array("name"=>"Answer","form"=>array("type"=>"tinyMCE","theme"=>"advanced"),"data"=>array("col"=>"answer","dictionary"=>true),"usage"=>array("MFi","MFu","MFd","DBVe")),
-						array("name"=>"Order","data"=>array("col"=>"order"),"texts"=>array("default"=>'PHP::\'AsyncWeb\\DefaultBlocks\\Content\\FAQ::getNextFAQOrder'),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
+						array("name"=>"Order","data"=>array("col"=>"order"),"texts"=>array("default"=>'PHP::\\AsyncWeb\\DefaultBlocks\\Content\\FAQ::getNextFAQOrder'),"usage"=>array("MFi","MFu","MFd","DBVs","DBVe")),
 						array("form"=>array("type"=>"value"),"data"=>array("col"=>"created"),"texts"=>array("text"=>"PHP::time()"),"usage"=>array("MFi",)),
 					),
 					 "bootstrap"=>"1",
