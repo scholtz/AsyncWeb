@@ -131,7 +131,7 @@ class Block{
 			
 			
 			if(!class_exists($name)){
-				throw new \Exception(Language::get("Block %name% does not exists!",array("%name%"=>$name)));
+				throw new \Exception(\AsyncWeb\System\Language::get("Block %name% does not exists!",array("%name%"=>$name)));
 			}
 			return new $name($name,$tid,$template);
 		}
