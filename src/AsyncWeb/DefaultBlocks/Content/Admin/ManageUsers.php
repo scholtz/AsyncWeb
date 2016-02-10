@@ -3,6 +3,7 @@ namespace AsyncWeb\DefaultBlocks\Content\Admin;
 use AsyncWeb\System\Language;
 
 class ManageUsers extends \AsyncWeb\Frontend\Block{
+	protected $requiresAllGroups = array("admin");
 	public static $DICTIONARY = array(
 		"sk-SK"=>array(
 			"Users"=>"Užívatelia",
