@@ -815,8 +815,12 @@ echo '">';
 			}
 			if(!$res){
 				\AsyncWeb\Storage\Log::log("MakeDBView Error",$err);
-				return Language::get("Error occured 0x01020457 Table probably does not contain valid columns as defined in DBView schema. Set MakeDBViewDirect::\$repair for autofix.");
 				
+				if(MakeDBViewDirect::$repair){
+					return Language::get("Error occured 0x01020458 Table probably does not contain valid columns as defined in DBView schema. Autofix was not able to repair the issue!");
+				}else{
+					return Language::get("Error occured 0x01020457 Table probably does not contain valid columns as defined in DBView schema. Set MakeDBViewDirect::\$repair for autofix.");
+				}
 			}
 		}
 	
@@ -1149,6 +1153,11 @@ echo '">';
 		if(!MakeDBViewDirect::$repair) return;
 		$update = array();
 		$cols = array();
+		if(isset($data["usecols"])){
+			foreach($data["usecols"] as $col){
+				$update[$col] = "0";
+			}
+		}
 		foreach($data["col"] as $col=>$arr){
 			if(@$arr["function"]) continue;
 			if(isset($arr["data"]["col"])) $col = $arr["data"]["col"];

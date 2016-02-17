@@ -248,7 +248,11 @@ class MakeDBView{
 			}
 			if(!$res){
 				\AsyncWeb\Storage\Log::log("MakeDBView Error",$err);
-				return Language::get("Error occured 0x01010457 Table probably does not contain valid columns as defined in DBView schema.  Set MakeDBView::\$repair for autofix.");
+				if(MakeDBView::$repair){
+					return Language::get("Error occured 0x01010458 Table probably does not contain valid columns as defined in DBView schema.  Autofix was not able to repair the issue!");
+				}else{
+					return Language::get("Error occured 0x01010457 Table probably does not contain valid columns as defined in DBView schema.  Set MakeDBView::\$repair for autofix.");
+				}
 			}
 		}
 		
@@ -519,6 +523,11 @@ class MakeDBView{
 		if(!MakeDBView::$repair) return;
 		$update = array();
 		$cols = array();
+		if(isset($data["usecols"])){
+			foreach($data["usecols"] as $col){
+				$update[$col] = "0";
+			}
+		}
 		foreach($data["col"] as $col=>$arr){
 			if(@$arr["function"]) continue;
 			if(isset($arr["data"]["col"])) $col = $arr["data"]["col"];
