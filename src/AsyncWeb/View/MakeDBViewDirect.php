@@ -240,7 +240,7 @@ class MakeDBViewDirect{
 		$res = DB::g($data["table"],$where,$offset=null,$count=null,$order,$cols);
 
 		if(!$res){
-			return "nastala chyba 0x00023847";
+			return Language::get("Error occured 0x00023847 Unable to load data from DB.");
 		}
 		while($row = DB::fetch_assoc($res)){
 			if(isset($data["rowwhere"])){
@@ -310,7 +310,7 @@ class MakeDBViewDirect{
 		$order = MakeDBViewDirect::makeOrder($data);
 		$res = DB::g($data["table"],$where,$offset=null,$count=null,$order,$cols);
 		if(!$res){
-			return "nastala chyba 0x00023847";
+			return Language::get("Error occured 0x00023848 Unable to load data from DB.");
 		}
 		while($row = DB::fetch_assoc($res)){
 			if(isset($data["rowwhere"])){
@@ -424,7 +424,7 @@ echo '">';
 		$res = DB::g($data["table"],$where,$offset=null,$count=null,$order,$cols);
 
 		if(!$res){
-			return "nastala chyba 0x00020439";
+			return Language::get("Error occured 0x00020439 Unable to load data from DB.");
 		}
 		while($row = DB::fetch_assoc($res)){
 			if(isset($data["rowwhere"])){
@@ -815,7 +815,8 @@ echo '">';
 			}
 			if(!$res){
 				\AsyncWeb\Storage\Log::log("MakeDBView Error",$err);
-				return "nastala chyba 0x00010457";
+				return Language::get("Error occured 0x01020457 Table probably does not contain valid columns as defined in DBView schema. Set MakeDBViewDirect::\$repair for autofix.");
+				
 			}
 		}
 	

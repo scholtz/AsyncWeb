@@ -275,10 +275,7 @@ class WebMining3{
 		
 		$expl_a = explode($filter["explode"],$data);
 		$data = @$expl_a[$filter["explode_iter"]];
-//		if(!array_key_exists($filter["explode_iter"],$expl_a)){
-//			echo "asi chyba: $data;";
-//			file_put_contents("test004.html",$this->text);
-//		}
+
 		if(@$filter["filter"]){
 			$data = $this->filter($data,$filter["filter"]);
 		}

@@ -237,7 +237,7 @@ class Email{
   		}elseif(@imap_mail($email,$subject,$message,$headers)){
 		   $ret = true;
   		}else{
-   			\AsyncWeb\Storage\Log::log("Email","Nastala chyba pri odosielani emailu : to :: $email",ML__MEDIUM_PRIORITY);
+   			\AsyncWeb\Storage\Log::log("Email","Error occured while sending email : to :: $email",ML__MEDIUM_PRIORITY);
    			\AsyncWeb\Text\Msg::err(Language::get("Email error"));
    			$ret = false;
 		}

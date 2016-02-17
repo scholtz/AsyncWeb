@@ -248,7 +248,7 @@ class MakeDBView{
 			}
 			if(!$res){
 				\AsyncWeb\Storage\Log::log("MakeDBView Error",$err);
-				return "nastala chyba 0x01010457";
+				return Language::get("Error occured 0x01010457 Table probably does not contain valid columns as defined in DBView schema.  Set MakeDBView::\$repair for autofix.");
 			}
 		}
 		

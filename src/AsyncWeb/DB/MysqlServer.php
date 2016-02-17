@@ -492,7 +492,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		$rows = $this->affected_rows();
 
 		if($err = $this->error()){
-			\AsyncWeb\Storage\Log::log("MYSQL ERR","vyskytla sa chyba pri pridavani dotazu.. (".addslashes($query).")");
+			\AsyncWeb\Storage\Log::log("MYSQL ERR","Error occured while inserting row into the DB.. (".addslashes($query).")");
 			// zachrana polozky
 
 	  $table = str_replace("`","",$table);
