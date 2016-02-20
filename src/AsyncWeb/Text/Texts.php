@@ -2,6 +2,16 @@
 namespace AsyncWeb\Text;
 
 class Texts{
+	/**
+		This function does the substr function, but does not end the string in the middle of the word if the end is between min and max length.
+	*/
+	public static function word_substr($text,$from,$minlength,$maxlength){
+		$p1 = strpos($text,' ', $from+$minlength);
+		if($p1 > 0 && $p1 <= $from + $maxlength){
+			return mb_substr($text, $from, $p1 - $from);
+		}
+		return mb_substr($text, $from, $maxlength);
+	}
 	public static function clear_($text){
 		return str_replace("-","_",Texts::clear($text));
 	}
@@ -30,6 +40,8 @@ class Texts{
 		
 		$url = str_replace('•',"",$url);
 		$url = str_replace('‹',"",$url);
+		$url = str_replace('<',"",$url);
+		$url = str_replace('>',"",$url);
 		$url = str_replace('`',"",$url);
 		$url = str_replace('´',"",$url);	
 		$url = str_replace('!',"",$url);	
@@ -152,6 +164,8 @@ class Texts{
 		
 		$url = str_replace('•',"",$url);
 		$url = str_replace('‹',"",$url);
+		$url = str_replace('<',"",$url);
+		$url = str_replace('>',"",$url);
 		$url = str_replace('`',"",$url);
 		$url = str_replace('´',"",$url);	
 		$url = str_replace('!',"",$url);	
