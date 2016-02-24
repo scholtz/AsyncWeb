@@ -6,11 +6,12 @@ class Texts{
 		This function does the substr function, but does not end the string in the middle of the word if the end is between min and max length.
 	*/
 	public static function word_substr($text,$from,$minlength,$maxlength){
-		$p1 = strpos($text,' ', $from+$minlength);
-		if($p1 > 0 && $p1 <= $from + $maxlength){
-			return mb_substr($text, $from, $p1 - $from);
+		$text = mb_substr($text, $from, $maxlength);
+		$p1 = strrpos($text,' ');
+		if($p1 >= $minlength){
+			return mb_substr($text, 0, $p1);
 		}
-		return mb_substr($text, $from, $maxlength);
+		return $text;
 	}
 	public static function clear_($text){
 		return str_replace("-","_",Texts::clear($text));
@@ -345,4 +346,3 @@ class Transliterate
      */
     public $string; 
 }
-?>

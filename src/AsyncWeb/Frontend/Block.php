@@ -112,38 +112,47 @@ class Block{
 		return \AsyncWeb\IO\File::exists($f = $TEMPLATES_PATH."/".$n.".html") || $blockready;
 	}
 	public static function create($name = "", $tid = "", $template=null){
-		Block::initTemplatePath();
-		$name = Block::normalizeName($name);
-		if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
-			$name = "\\".$name;
-		}
-		if($file = Block::exists($name,true) && !Block::templateHasPriorityOverBlock($name)){
-			if($file === true){
-				foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
-					if (class_exists($n=$namespace.$name)){
-						$name = $n;
-						break;
+		try{
+			Block::initTemplatePath();
+			$name = Block::normalizeName($name);
+			if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
+				$name = "\\".$name;
+			}
+			if($file = Block::exists($name,true) && !Block::templateHasPriorityOverBlock($name)){
+				if($file === true){
+					foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
+						if (class_exists($n=$namespace.$name)){
+							$name = $n;
+							break;
+						}
 					}
+				}else{
+					include_once($file);
 				}
-			}else{
-				include_once($file);
+				
+				
+				if(!class_exists($name)){
+					throw new \Exception(\AsyncWeb\System\Language::get("Block %name% does not exists!",array("%name%"=>$name)));
+				}
+				return new $name($name,$tid,$template);
 			}
-			
-			
-			if(!class_exists($name)){
-				throw new \Exception(\AsyncWeb\System\Language::get("Block %name% does not exists!",array("%name%"=>$name)));
-			}
-			return new $name($name,$tid,$template);
+			return new Block($name,$tid,$template);
+		}catch(\Exception $exc){
+			\AsyncWeb\Text\Msg::err($exc->getMessage());
 		}
-		return new Block($name,$tid,$template);
+		return null;
 	}
 	public function __construct($name = "", $tid = "", $template=null){
 		$name = Block::normalizeName($name);
 
 		$this->template = $template;
 		$this->tid = $tid;
-
-		$this->initTemplate();
+		try{
+			$this->initTemplate();
+		}catch(\Exception $exc){
+			$this->template = "";
+			\AsyncWeb\Text\Msg::err($exc->getMessage());
+		}
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
 		$this->data = array(""=>array());
@@ -219,6 +228,7 @@ class Block{
 						$ret[] = $itemcl;
 					}
 				}catch(\Exception $exc){
+					\AsyncWeb\Text\Msg::err($exc->getMessage());
 				}
 			}
 		}
@@ -310,6 +320,7 @@ class Block{
 						}
 					}
 				}catch(\Exception $exc){
+					\AsyncWeb\Text\Msg::err($exc->getMessage());
 					
 				}
 				
@@ -368,9 +379,6 @@ class Block{
 			echo "notify: $data\n";
 			if($client){
 				$r = $client->send($data);
-				//echo "result from sending:";
-				//var_dump($r);
-				//exit;
 			}
 		}
 	}

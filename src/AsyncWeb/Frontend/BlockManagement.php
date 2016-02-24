@@ -46,14 +46,13 @@ class BlockManagement{
 	protected static $personalized = array();
 	protected static $instances = array();
 	public static function getTid($blockname){
-		$block = BlockManagement::get($blockname, "");
+		$block = BlockManagement::get($blockname);
 		return $tid = URLParser::selectParameters($block->getUsesParams());
 	}
 	public static function get($name,$tid=""){
 		//var_dump("BlockManagement::get:$name;$tid");
 		try{
 			$name = Block::normalizeName($name);
-			
 			if(isset(BlockManagement::$instances[$name][$tid])){
 				return BlockManagement::$instances[$name][$tid];
 			}else{
