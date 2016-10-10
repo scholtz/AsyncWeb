@@ -6,6 +6,7 @@ namespace AsyncWeb\Security;
  
  created by Ludovit Scholtz, 12. july 2011 ludovit __at__ scholtz __dot__ sk
  
+20161002	Moved correctly to AsyncWeb framework 
  
 20120828 	Login::is_in_group() moze obsahovat array() skupin.. ak je aspon v jednej z tych skupin, vrati true. inak vrati false.
 			Pouzitie: npr Login::requiredLoggedIn2(array("CEO","COO"));
@@ -44,7 +45,7 @@ class Group{
  public static function getMySkupiny($usr = null){
   if(isset(Group::$getMySkupinyCache[$usr])) return Group::$getMySkupinyCache[$usr];
   $ret = array();
-  if(!$usr){ require_once("modules/Login.php"); $usr = Login::getUserId();}
+  if(!$usr){ $usr = Auth::userId();}
   if(!$usr) return $ret;
   $res = DB::g("users_in_groups",array("users"=>$usr));
   while($row = DB::fetch_assoc($res)){
@@ -73,10 +74,9 @@ class Group{
   */
  public static function is_in_group($string,$usr = null){
  
-  if(!$usr){ require_once("modules/Login.php"); $usr = Login::getUserId();}
+  if(!$usr){ $usr = Auth::userId();}
   if(!$usr) return false;
-  require_once("modules/Login.php"); 
-  $my_groups = Login::getMySkupinyNames($usr);
+  $my_groups = Group::getMySkupinyNames($usr);
   if(is_array($string)){
 	foreach($string as $str){
 	 if(Group::is_in_group($str,$usr)) return true;
@@ -90,10 +90,9 @@ class Group{
   }
  }
  public static function isInGroupId($id,$usr = null){
-  if(!$usr){ require_once("modules/Login.php"); $usr = Login::getUserId();}
+  if(!$usr){ $usr = Auth::userId();}
   if(!$usr) return false;
-  require_once("modules/Login.php"); 
-  $my_groups = Login::getMySkupiny($usr);
+  $my_groups = Group::getMySkupiny($usr);
   if(isset($my_groups[$id])) return true;
   return false;
  }
@@ -108,8 +107,7 @@ class Group{
 	$row = Group::getByName($groupName);
   }
   if($grp = $row["id2"]){
-   require_once("modules/Login.php");
-   if(!$usr) $usr = Login::getUserId();
+   if(!$usr) $usr = Auth::userId();
    if($usr){
     if(!Group::is_in_group($grp,$usr)){
 	 Group::resetCache();
@@ -131,5 +129,3 @@ class Group{
   return false;
  }
 }
-
-?>

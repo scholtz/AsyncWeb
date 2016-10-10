@@ -47,6 +47,9 @@ class BlockManagement{
 	protected static $instances = array();
 	public static function getTid($blockname){
 		$block = BlockManagement::get($blockname);
+		if(!$block){
+			throw new \Exception("Block not found: $blockname");
+		}
 		return $tid = URLParser::selectParameters($block->getUsesParams());
 	}
 	public static function get($name,$tid=""){

@@ -18,6 +18,7 @@ class Email{
 	public static $debuginplace = false;
 	public static $defaulttheme = null;
 	public static $defaultprepend = null;
+	public static $defaultSenderEmail = "";
 	
 	public static function send(){
 		//$to,$subject,$message,$from = "",$attachment=array(),$sendAs='text/plain; charset="utf-8"',$sign=array(),$dbg=false
@@ -89,6 +90,7 @@ class Email{
 		}
 		if(!$prepend) $prepend = Email::$defaultprepend;
 		if($prepend) $subject = $prepend.": ".$subject;
+		if(!$from) $from = Email::$defaultSenderEmail;
 		
 		if(!$theme) $theme = Email::$defaulttheme;
 		if($dbg){

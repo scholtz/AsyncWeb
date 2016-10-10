@@ -230,6 +230,106 @@ class DB{
   if(!$row) return false;
   return $row["id"];
  }
+ /*
+  Function returns N2M difference between original and new array. It returns new, update, and delete values to be performed on the database.
+ */
+ public static function diff($original,$tobe){
+	 $ret= array();
+	 foreach($tobe as $id){
+		 if(isset($original[$id])){
+			 $ret["update"][$id] = $id;
+		 }else{
+			 $ret["new"][$id] = $id;
+		 }
+	 }
+	 foreach($original as $id){
+		 if(isset($tobe[$id])){
+			 $ret["update"][$id] = $id;
+		 }else{
+			 $ret["delete"][$id] = $id;
+		 }
+	 }
+	 return $ret;
+ }
+ /**
+ example
+ input:
+ $original[] = array("id2"=>"id1","col1"=>"1","col2"=>"1","col3"=>"1");
+ $original[] = array("id2"=>"id2","col1"=>"2","col2"=>"2","col3"=>"2");
+ $original[] = array("id2"=>"id3","col1"=>"3","col2"=>"3","col3"=>"3");
+ $original[] = array("id2"=>"id4","col1"=>"4","col2"=>"4","col3"=>"4");
+ $original[] = array("id2"=>"id5","col1"=>"1","col2"=>"1","col3"=>"1");
+ 
+ 
+ $tobe[] = array("col1"=>"1","col2"=>"1","col3"=>"1");
+ $tobe[] = array("col1"=>"2","col2"=>"2","col3"=>"3");
+ $tobe[] = array("col1"=>"5","col2"=>"5","col3"=>"5");
+ 
+ result:
+ 
+ var_dump(DB::diffData($original,$tobe));
+ 
+ $ret["new"][] = array("col1"=>"5","col2"=>"5","col3"=>"5");
+ $ret["new"][] = array("col1"=>"2","col2"=>"2","col3"=>"3");
+ $ret["update"][] = array("id2"=>"id1");
+ $ret["delete"][] = array("id2"=>"id2");
+ $ret["delete"][] = array("id2"=>"id3");
+ $ret["delete"][] = array("id2"=>"id4");
+ $ret["delete"][] = array("id2"=>"id5");
+ 
+ var_dump(DB::diffData($original,$tobe));
+ 
+ notes: 
+ update may or may not be run later through db.. depends on the logic.. this only checks primary keys, so depends if more data are sent
+ 
+ 
+ */
+ public static function diffData($original,$tobe){
+	 $ret = array();
+	 $reverse = array();
+	 $orig2 = array();
+	 $tobe2 = array();
+	 foreach($original as $keys){
+		 $hash = DB::diffDataHash($keys);
+		 if(!isset($reverse[$hash])){
+			 $reverse[$hash] = $keys;
+			 $orig2[$hash] = $hash;
+		 }else{
+			$ret["delete"][] = $keys["id2"];
+		 }
+	 }
+	 foreach($tobe as $keys){
+		 $hash = DB::diffDataHash($keys);
+	     $tobe2[$hash] = $hash;
+		 if(!isset($reverse[$hash])){
+			 $reverse[$hash] = $keys;
+		 }
+	 }
+	 $result = DB::diff($orig2,$tobe2);
+	 if(isset($result["new"])){
+		 foreach($result["new"] as $id){
+			 $ret["new"][] = $reverse[$id];
+		 }
+	 }else{$ret["new"] = array();}
+	 if(isset($result["update"])){
+		 foreach($result["update"] as $id){
+			 $ret["update"][] = $reverse[$id]["id2"];
+		 }
+	 }else{$ret["update"] = array();}
+	 if(isset($result["delete"])){
+		 foreach($result["delete"] as $id){
+			 $ret["delete"][] = $reverse[$id]["id2"];
+		 }
+	 }else{$ret["delete"] = array();}
+	 return $ret;
+ }
+ public static function diffDataHash($data){
+	 $ret = "";
+	 asort($data);
+	 foreach($data as $k=>$v){
+		 if($k == "id2") continue;
+		 $ret = md5($ret."-".$k."-".$v);
+	 }
+	 return $ret;
+ }
 }
-
-?>

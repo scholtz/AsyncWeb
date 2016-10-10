@@ -121,9 +121,7 @@ class MakeDBView{
 	}
 	private static function makeTableView($data){
 		$ret = "";
-		
 			try{
-		
 		$cols = array();
 		foreach ($data["col"] as $col=>$info){
 			if(isset($info["data"]["col"])) $col = $info["data"]["col"];
@@ -133,6 +131,7 @@ class MakeDBView{
 					$info["data"]["col"] = $col;
 			}
 			
+			TableView::$INIT = true;//init TableView
 			
 			$display = false;
 			$exportable = false;
@@ -152,8 +151,6 @@ class MakeDBView{
 			$datatype = @$info["data"]["type"];
 			if(!$datatype) $datatype = @$info["data"]["datatype"];
 			$dvc = null;
-			TableView::$INIT = true;//init TableView
-			
 			if($info["form"]["type"] == "checkbox"){
 				$dvc = new CheckBoxDataViewCell($info["filter"]["option"]);
 			}elseif(@$info["data"]["datatype"] == "number"){

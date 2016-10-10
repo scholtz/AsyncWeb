@@ -348,7 +348,9 @@ class MainMenu{
 		}
 		$active = "";
 		if(MainMenu::isSubmenuOfCurrent($row)) $active = "active ";
-		$ret.='<li class="'.$active.$class.' '.@$row["class"].'">';
+		if($row["type"] != "plaintext"){
+			$ret.='<li class="'.$active.$class.' '.@$row["class"].'">';
+		}
 		if(!$row["type"]) $row["type"] = "category";
 		if($row["type"] == "category" && !$row["text"]){$row["text"] = "?";}
 		//if($type == "left" || $type == "nav") $row["type"] = "category";
@@ -359,6 +361,7 @@ class MainMenu{
 		switch($row["type"]){
 			case "image": $ret.= '<a'.$adddropdown.' href="'.$row["path"].'"><img src="'.$row["img"].'" width="'.$row["imgwidth"].'" height="'.$row["imgheight"].'" alt="'.$row["imgalt"].'" title="'.($row["text"]).'" />'.$dropdowncaret.'</a>';break;
 			case "text":$ret.= '<span class="menutext">'.$fa.($row["text"]).'</span>';break;
+			case "plaintext":$ret.= ''.$fa.($row["text"]).'';break;
 			case "category":
 				$path = \AsyncWeb\System\Path::c(array(MainMenu::$CATEGORY_TAG_NAME=>$row["path"]));
 				$ret.= '<a'.$adddropdown.' href="'.$path.'"><span class="menutext">'.$fa.($row["text"]).'</span>'.$dropdowncaret.'</a>';break;
@@ -384,8 +387,9 @@ class MainMenu{
 				}
 			}
 		}
-		$ret.='</li>';
-		
+		if($row["type"] != "plaintext"){
+			$ret.='</li>';
+		}
 		return $ret;
 	}
 	public static function showNavigatorItem(&$row){

@@ -116,6 +116,12 @@ class User{
 		$row = DB::gr("users_settings",array("users"=>$id2,"name"=>$name));
 		return $row["value"];
 	}
+	public static function getSetting($name){
+		return User::getUserSetting(\AsyncWeb\Security\Auth::userId(),$name);
+	}
+	public static function setSetting($name,$value){
+		return User::setUserSetting(\AsyncWeb\Security\Auth::userId(),$name,$value);
+	}
 	public static function setUserSetting($id2,$name,$value){
 		return DB::u("users_settings",md5("u-$id2-$name"),array("users"=>$id2,"name"=>$name,"value"=>$value));
 	}

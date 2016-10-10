@@ -3,6 +3,6 @@ namespace AsyncWeb\DefaultBlocks\Content;
 
 class Msg extends \AsyncWeb\Frontend\Block{
 	public function initTemplate(){
-		$this->template = \AsyncWeb\Text\Messages::getInstance()->show()." ";
+		$this->template = '<div class="messages">'.\AsyncWeb\Text\Messages::getInstance()->show()."</div>";
 	}
 }

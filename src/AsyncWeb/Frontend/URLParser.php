@@ -156,7 +156,20 @@ class URLParser{
 			 Converts all input to htmlspecialchars. in DB all input should be converted (f.e. " &quot;
 			 it is prevention against XSS
 			*/
-			if(isset($_REQUEST[$name])) return htmlspecialchars($_REQUEST[$name],ENT_COMPAT | ENT_HTML5, 'UTF-8');
+			if(isset($_REQUEST[$name])){
+				if(is_array($_REQUEST[$name])){
+					foreach($_REQUEST[$name] as $k=>$v){
+						if(is_array($v)){
+							unset($_REQUEST[$name][$k]);// level 2 arrays are not allowed
+						}else{
+							$_REQUEST[$name][$k] = htmlspecialchars($v,ENT_COMPAT | ENT_HTML5, 'UTF-8');
+						}
+					}
+					return $_REQUEST[$name];
+				}else{
+					return htmlspecialchars($_REQUEST[$name],ENT_COMPAT | ENT_HTML5, 'UTF-8');
+				}
+			}
 			return null;
 		}
 		return $data["var"][$name];

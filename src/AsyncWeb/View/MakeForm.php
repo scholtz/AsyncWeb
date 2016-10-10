@@ -4,6 +4,8 @@
 // Created & designed by Ludovit Scholtz
 // ludovit __ AT __ scholtz.sk
 //
+// 6.9.2016	 	Unified texts section for fule management
+//
 // 6.2.2016	 	Added variables $form->BT_WIDTH_OF_LABEL and $form->BT_SIZE
 //
 // 14.4.2015	{ is replaced by &#123; in textareas so that templates are not executed in forms 
@@ -339,8 +341,11 @@ class MakeForm{
  /**
   * Checks for insert update or delete
   */
+  protected $checked = false;
  public function check_update(){
 	try{
+		if($this->checked) return;
+		$this->checked = true;
 		if(isset($this->data["where"]) && is_array($this->data["where"])){
 			foreach ($this->data["where"] as $k=>$v){
 			  $this->where[$k] = $this->filters($v,null,false);
@@ -355,6 +360,11 @@ class MakeForm{
 	   return $doo;
 	}catch(\Exception $e){
 		$this->exception = $e;
+	}
+	if($this->exception){
+		\AsyncWeb\Text\Msg::err($this->exception->getMessage());
+		Header::s("reload",array($this->data["uid"]."___INSERT"=>"","insert_data_".$this->data["uid"]=>"",$this->data["uid"]."___CANCEL"=>"",$this->data["uid"]."___ID"=>"",$this->data["uid"]."___UPDATE2"=>"",$this->data["uid"]."___UPDATE1"=>"",$this->data["uid"]."___ID"=>"",$this->data["uid"]."___DELETE"=>""));
+		exit;
 	}
 	return false;
  }
@@ -378,7 +388,6 @@ class MakeForm{
  */
  private function getExceptionText(&$item,$exception){
   $text = "";
-  
   switch($exception){
    case 'dataTypeException':
     if(isset($item["texts"]["exception-$exception"]) && $item["texts"]["exception-$exception"]) return $this->getText($item["texts"]["exception-$exception"]);
@@ -481,16 +490,28 @@ class MakeForm{
 		$form_type = $item["form"]["type"];
 	}
 	if($form_type == "captcha"){
-		$captcha = new \reCaptcha\Captcha();
-		$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
-		$captcha->setPublicKey(MakeForm::$captchaPublickey);
-		$response = $captcha->check();
+
+		if(class_exists("\\ReCaptcha\\ReCaptcha")){
+			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
+			$resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
+			if (!$resp->isSuccess()){
+				$error = $resp->error;
+				\AsyncWeb\Storage\Log::log("CaptchaError",$error);
+				throw new \Exception($this->getExceptionText($item,"captchaTypeException"));
+			}
+		}elseif(class_exists("\\reCaptcha\\Captcha")){
+			$captcha = new \reCaptcha\Captcha();
+			$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
+			$captcha->setPublicKey(MakeForm::$captchaPublickey);
+			$response = $captcha->check();
+			if (!$response->isValid()) {
+				$error = $resp->error;
+				\AsyncWeb\Storage\Log::log("CaptchaError",$error);
+				throw new \Exception($this->getExceptionText($item,"captchaTypeException"));
+			}
+		}
+
 		
-		if (!$response->isValid()) {
-            $error = $resp->error;
-			\AsyncWeb\Storage\Log::log("CaptchaError",$error);
-			throw new \Exception($this->getExceptionText($item,"captchaTypeException"));
-        }
 	}
 	if(!$data_type) return;
     // zkontroluj ci ma spravny format
@@ -706,7 +727,7 @@ class MakeForm{
 	 }
 	}catch(\Exception $exc){
 	 $this->exception = $exc;
-	 return false;
+	 throw $exc;
 	}
    }
   }
@@ -715,14 +736,15 @@ class MakeForm{
   $includedCols = array();
 
   foreach($this->data["col"] as $colname=>$item){
+	  
    if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
    $usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
   
 	if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
 	$n = $formName."_".$colname;
-	$colValue = URLParser::v($n);
 	
 	if(isset($item["data"]["var"])) $n = $item["data"]["var"];
+	$colValue = URLParser::v($n);
 
     if($in=$this->inWhere($colname)){
 	 $colValue = $in["value"];
@@ -771,6 +793,10 @@ class MakeForm{
      break;
      case 'password':
       	$data[$colname] = hash('sha256',URLParser::v($name1));
+		if(isset($item["data"]["cohash"])){
+			$data[$colname] = hash('sha256',$item["data"]["cohash"].$data[$colname]);
+		}
+		
      case 'htmlText':
      case 'tinyMCE':
 	  
@@ -851,7 +877,9 @@ class MakeForm{
 	  $info = pathinfo($_FILES[$name]['name']);
 	  $ext = $info["extension"];
 	  if(!in_array($ext,$allowedExt)){
-		throw new \Exception($this->getText("fileNotAllowed"));
+		$text = "fileNotAllowed";
+		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
+		throw new \Exception($this->getText($text));
 	  }
 	  if(!is_dir($item["data"]["dir"])){
 		mkdir($item["data"]["dir"],true);
@@ -869,13 +897,17 @@ class MakeForm{
        if($item["data"]["overwrite"]){
         //DB::query("delete from `$table` where (name = '$newFilename' and ".$this->aditional_where.")");
        }else{
-        throw new \Exception($this->getText("fileExistsException"));
+ 		$text = "fileExistsException";
+		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
+        throw new \Exception($this->getText($text));
        }
       }
 	  
       $uploadfile = $item["data"]["dir"].$newFilename;
       if(!move_uploaded_file($_FILES[$name]['tmp_name'], $uploadfile)){
-        throw new \Exception($this->getText("errorWhileMovingFile"));
+ 		$text = "errorWhileMovingFile";
+		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
+        throw new \Exception($this->getText($text));
       }	  
       DB::u($table,$pid = md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$name]['type'],"name"=>$_FILES[$name]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
       $data[$colname] = $value = $pid;
@@ -944,10 +976,12 @@ class MakeForm{
    if(!$this->merged){
 	if(isset($this->data["texts"]["insertSucces"])){
 		$text = $this->getText($this->data["texts"]["insertSucces"]);
+	}elseif(isset($this->data["texts"]["insertSuccess"])){
+		$text = $this->getText($this->data["texts"]["insertSuccess"]);
 	}else{
 		$text = $this->getText("insertSucces");
 	}
-    if(!$text || $text == "insertSucces") $text = Language::get("New item has been successfully inserted");
+    if(!$text || $text == "insertSucces" || $text == "insertSuccess") $text = Language::get("New item has been successfully inserted");
     Messages::getInstance()->mes($text);
 	Header::s("reload",array($this->data["uid"]."___INSERT"=>"","insert_data_".$this->data["uid"]=>""));exit;
 	}
@@ -992,7 +1026,7 @@ class MakeForm{
 	 }
 	}catch(\Exception $exc){
 	 $this->exception = $exc;
-	 return false;
+	 throw $exc;
 	}
    }
   }
@@ -1004,8 +1038,8 @@ class MakeForm{
    if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
    $name = $colname;
    $n = $formName."_".$name;
-   $colValue = URLParser::v($n);
    if(isset($item["data"]["var"])) $n = $item["data"]["var"];
+   $colValue = URLParser::v($n);
    if($in=$this->inWhere($colname)){
 	 $colValue = $in["value"];
 	 $item["editable"] = false;
@@ -1035,6 +1069,9 @@ class MakeForm{
      break;
 	 case 'password':
       $colValue = hash('sha256',$colValue);
+		if(isset($item["data"]["cohash"])){
+			$data[$colname] = hash('sha256',$item["data"]["cohash"].$data[$colname]);
+		}
 	 case 'tinyMCE':
 	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
 	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
@@ -1121,7 +1158,9 @@ class MakeForm{
 	  
 	  $ext = $info["extension"];
 	  if(!in_array($ext,$allowedExt)){
-		throw new \Exception($this->getText("fileNotAllowed"));
+		  $text = "fileNotAllowed";
+		  if(isset($this->data["texts"][$text])) $text=$this->data["texts"][$text];
+		throw new \Exception($this->getText($text));
 	  }
 
       $newFilename = $_FILES[$n]['name'];
@@ -1134,14 +1173,18 @@ class MakeForm{
 	  
 	  $info = pathinfo($newFilename);
 	  if(!in_array($info["extension"],$allowedExt)){
-	   throw new \Exception($this->getText("fileNotAllowed"));
+ 		$text = "fileNotAllowed";
+		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
+	    throw new \Exception($this->getText($text));
 	  }
 	  
 	  if(is_file($item["data"]["dir"].$newFilename)){
        if($item["data"]["overwrite"]){
         //DB::query("delete from `$table` where (name = '$newFilename' and ".$this->aditional_where.")");
        }else{
-        throw new \Exception($this->getText("fileExistsException"));
+ 		$text = "fileExistsException";
+		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
+        throw new \Exception($this->getText($text));
        }
       }
 	  
@@ -1163,7 +1206,9 @@ class MakeForm{
 	  
 	  $uploadfile = $item["data"]["dir"].$newFilename;
 	  if(!move_uploaded_file($_FILES[$n]['tmp_name'], $uploadfile)){
-        throw new \Exception($this->getText("errorWhileMovingFile"));
+ 		$text = "errorWhileMovingFile";
+		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
+        throw new \Exception($this->getText($text));
       }
       // vloz novy subor do db
 	  
@@ -1251,12 +1296,14 @@ class MakeForm{
     }
    }
    if(!$this->merged){
-		if(isset($this->data["texts"]["updateSucces"])){
+		if(isset($this->data["texts"]["updateSuccess"])){
+			$text = $this->getText($this->data["texts"]["updateSuccess"]);
+		}elseif(isset($this->data["texts"]["updateSucces"])){
 			$text = $this->getText($this->data["texts"]["updateSucces"]);
 		}else{
 			$text = $this->getText("updateSucces");
 		}
-	   if(!$text || $text == "updateSucces") $text = Language::get("Item has been successfully updated");
+	   if(!$text || $text == "updateSucces" || $text == "updateSuccess") $text = Language::get("Item has been successfully updated");
 	   Messages::getInstance()->mes($text);//
 	   Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___UPDATE2"=>"",$this->data["uid"]."___UPDATE1"=>""));exit;
 	   exit;
@@ -1350,13 +1397,16 @@ class MakeForm{
 	   }
 	   
 		if(!$this->merged){
-			if(isset($this->data["texts"]["deleteSucces"])){
+			if(isset($this->data["texts"]["deleteSuccess"])){
+				$text = $this->getText($this->data["texts"]["deleteSuccess"]);
+			}elseif(isset($this->data["texts"]["deleteSucces"])){
 				$text = $this->getText($this->data["texts"]["deleteSucces"]);
 			}else{
 				$text = $this->getText("deleteSucces");
 			}
 		   if(!$text || $text == "deleteSucces") $text = Language::get("Deletion has been successfully commited");
 		   Messages::getInstance()->mes($text);//$this->data["uid"]."___DELETE"
+
 		   Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___DELETE"=>""));exit;
 		   exit;
 	   }
@@ -1364,8 +1414,13 @@ class MakeForm{
    }else{
    
 		if(!$this->merged){
-		   $text = $this->getText("deleteNotSucces");
-		   if(!$text || $text == "deleteNotSucces") $text = Language::get("Error occured while deleting the item");
+			$text = "";
+		   if(isset($this->data["texts"]["deleteNotSuccess"])){
+			$text = $this->getText("deleteNotSuccess");
+		   }elseif(isset($this->data["texts"]["deleteNotSucces"])){
+			$text = $this->getText("deleteNotSucces");
+		   }
+		   if(!$text || $text == "deleteNotSucces"|| $text == "deleteNotSuccess") $text = Language::get("Error occured while deleting the item");
 		   Messages::getInstance()->err($text);
 	   }
 	   return false;
@@ -1773,11 +1828,16 @@ class MakeForm{
 		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
 	 }
 	 $err=null;
-	 
-		$captcha = new \reCaptcha\Captcha();
-		$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
-		$captcha->setPublicKey(MakeForm::$captchaPublickey);
-		$ret.=$captcha->html();
+		if(class_exists("\\ReCaptcha\\ReCaptcha")){
+			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
+			$ret.='<div class="g-recaptcha" data-sitekey="'.MakeForm::$captchaPublickey.'"></div>';
+			$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
+		}elseif(class_exists("\\reCaptcha\\Captcha")){
+			$captcha = new \reCaptcha\Captcha();
+			$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
+			$captcha->setPublicKey(MakeForm::$captchaPublickey);
+			$ret.=$captcha->html();
+		}
 
      if(!isset($this->data["bootstrap"])){
 		$ret .= '</td>'."\n".'     </tr>'."\n";
@@ -2268,9 +2328,11 @@ $theme = "simple";
 	 }
 	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
 	 
+	 $textCancel = "Cancel";
+	 if(isset($item["texts"]["cancel"])) $textCancel= $item["texts"]["cancel"];
      $ret.= '<input class="MFSubmit btn btn-primary'.$addclass.'" type="submit" value="'.$this->getText($item["texts"]["insert"]).'" />
      <input class="MFSubmit btn btn-default" type="reset" value="'.$this->getText($item["texts"]["reset"]).'" />
-	 <a href="'.Path::make(array($this->data["uid"]."___CANCEL"=>"1")).'" class="btn btn-default">'.$this->getText("Cancel").'</a>';
+	 <a href="'.Path::make(array($this->data["uid"]."___CANCEL"=>"1")).'" class="btn btn-default">'.$this->getText($textCancel).'</a>';
 	 if(!isset($this->data["bootstrap"])){
 		$ret .= '</td>'."\n".'     </tr>'."\n";
 	 }else{
@@ -2487,7 +2549,11 @@ $theme = "simple";
   if(!$row){
   	Messages::message(Language::get("Error while selecting information from the database"));
   	\AsyncWeb\Storage\Log::log("MakeForm","update2 no row selected",ML__HIGH_PRIORITY);
-  	Header::s("location",MakeForm::$redirectAfterSuccess);
+	if(MakeForm::$redirectAfterSuccess == "?"){	
+		Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___UPDATE2"=>"",$this->data["uid"]."___UPDATE1"=>""));
+	}else{
+		Header::s("location",MakeForm::$redirectAfterSuccess);
+	}
   	exit;
   }
 
@@ -2609,10 +2675,17 @@ $theme = "simple";
 	 }
 		
 		$err=null;
-		$captcha = new \reCaptcha\Captcha();
-		$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
-		$captcha->setPublicKey(MakeForm::$captchaPublickey);
-		$ret.=$captcha->html();
+		if(class_exists("\\ReCaptcha\\ReCaptcha")){
+			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
+			$ret.='<div class="g-recaptcha" data-sitekey="'.MakeForm::$captchaPublickey.'"></div>';
+			$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
+		}elseif(class_exists("\\reCaptcha\\Captcha")){
+			$captcha = new \reCaptcha\Captcha();
+			$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
+			$captcha->setPublicKey(MakeForm::$captchaPublickey);
+			$ret.=$captcha->html();
+		}
+
 
      if(!isset($this->data["bootstrap"])){
 		$ret .= '</td>'."\n".'      </tr>'."\n";

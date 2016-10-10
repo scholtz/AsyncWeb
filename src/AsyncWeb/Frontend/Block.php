@@ -6,6 +6,7 @@ class Block{
 	public static $BLOCK_PATH = "../templates/";
 	public static $DICTIONARY = array();
 	public $blockElement = "div";
+	public $blockAttrs = array();
 	protected static $i = 1;
 	protected static $MustacheEngine = null;
 	protected $template = "";
@@ -138,13 +139,13 @@ class Block{
 			}
 			return new Block($name,$tid,$template);
 		}catch(\Exception $exc){
-			\AsyncWeb\Text\Msg::err($exc->getMessage());
+			throw $exc;
+			//\AsyncWeb\Text\Msg::err($exc->getMessage());
 		}
 		return null;
 	}
 	public function __construct($name = "", $tid = "", $template=null){
 		$name = Block::normalizeName($name);
-
 		$this->template = $template;
 		$this->tid = $tid;
 		try{
@@ -162,15 +163,31 @@ class Block{
 			foreach(Block::$TEMPLATE_PATHS as $dir=>$t){
 				if ($this->template === null && $file = \AsyncWeb\IO\File::exists($f = $dir."/".$n.".html")){
 					$this->template = file_get_contents($f,true);
+				}elseif ($this->template === null){
+					$nparent = Block::normalizeTemplatePath(get_parent_class($this));
+					$file = \AsyncWeb\IO\File::exists($f = $dir."/".$nparent.".html");
+					if($file){
+						$this->template = file_get_contents($f,true);
+					}
 				}
+				
 			}
 		}
+		
+		
 		if($this->template === null){
 			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$n.".html")){
-				echo "Template ".$n." not found!\n";
-				throw new \Exception("Template ".$n." not found!");
+		
+				$nparent = Block::normalizeTemplatePath(get_parent_class($this));
+				if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$nparent.".html")){
+					//echo "Template ".$n." not found!\n";
+					throw new \Exception("Template ".$n." not found!");
+				}else{
+					$this->template = file_get_contents($f,true);
+				}
+			}else{
+				$this->template = file_get_contents($f,true);
 			}
-			$this->template = file_get_contents($f,true);
 		}
 		$this->init();
 	}
@@ -246,6 +263,7 @@ class Block{
 	 $requiresAllGroups Array List of group id3. All must match in order for block to be displayed.
 	*/
 	protected $requiresAllGroups = array();
+	protected $firstRun = true;
 	public function get($namespace=""){
 		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
@@ -308,6 +326,7 @@ class Block{
 				try{
 
 					$tid = BlockManagement::getTid($templateid);
+					
 					if($itemcl = BlockManagement::get($templateid,$tid)){
 						$itemid = $item;
 						if($p = strpos($item,":")){
@@ -316,11 +335,18 @@ class Block{
 						if($itemcl->overRideOuterBlock()){
 							$dataToRender[$item] = $itemcl->get();
 						}else{
-							$dataToRender[$item] = '<'.$itemcl->blockElement.' id="T_'.$itemid.'">'.$itemcl->get().'</'.$itemcl->blockElement.'>';
+							$dataToRender[$item] = '<'.$itemcl->blockElement.' id="T_'.$itemid.'"';
+							foreach($itemcl->blockAttrs as $k=>$v){
+								$dataToRender[$item] .=' '.$k.'="'.$v.'"';	
+							}
+							$dataToRender[$item] .='>'.$itemcl->get().'</'.$itemcl->blockElement.'>';
 						}
 					}
 				}catch(\Exception $exc){
-					\AsyncWeb\Text\Msg::err($exc->getMessage());
+					if($this->firstRun){
+						\AsyncWeb\Text\Msg::err($exc->getMessage());
+					}
+					$this->firstRun = false;
 					
 				}
 				
@@ -360,7 +386,6 @@ class Block{
 				$dataToRender[$item] = \AsyncWeb\System\Language::get($item);
 			}
 		}
-		
 		$this->rendered = true;
 		$ret= Block::$MustacheEngine->render($this->template,$dataToRender);
 		return $ret;
