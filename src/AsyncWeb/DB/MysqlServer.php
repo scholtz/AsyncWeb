@@ -486,8 +486,9 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 
 		$query = "insert into $t ($cols) values ($rows)";
 		
-		$this->query("update $t set `$do` = '".Time::get()."' where (`$id2` = '$myId2' and (do <= 0 or do >= '$t'))");
+		$this->query("update $t set `$do` = '".Time::get()."' where (`$id2` = '$myId2' and (do <= 0))");
 		$rows = $this->affected_rows();
+		if(!$rows) return false;
 		$this->query($query);
 		$rows = $this->affected_rows();
 
@@ -868,6 +869,20 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		return $this->get($table,$where,$offset,$count,$time,$order,"od","do","id2",$cols,$groupby,$having,$distinct,$fast);
 	}
 	public function get($table,$where=array(),$offset=null,$count=null,$time = null,$order=array(),$od="od",$do="do",$id2="id2",$cols=array(),$groupby=array(),$having=array(),$distinct=false,$fast=false){
+		if($cols && $order){
+			
+			foreach($order as $k=>$v){
+				$incol = false;
+				foreach($cols as $name => $col){
+					if($col == $k) $incol = true;
+					break;
+				}
+				if(!$incol){
+					$cols[$col] = $col; 
+				}
+			}
+		}
+
 		$this->checkIndex($table,$where,$order);
 		if(!$offset) $offset = 0;
 		$add = "";

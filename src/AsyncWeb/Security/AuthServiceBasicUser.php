@@ -41,7 +41,7 @@ class AuthServiceBasicUser implements AuthService{
 			<div class="form-group row">
 			  <label for="uname9" class="col-md-3 control-label">User Name</label>
 			  <div class="col-md-9">
-				<input class="form-control" name="uname9" id="uname9" placeholder="Your user name">
+				<input type="text" class="form-control" name="uname9" id="uname9" placeholder="Your user name">
 			  </div>
 			</div>
 			

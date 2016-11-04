@@ -284,7 +284,7 @@ class DB{
  
  
  */
- public static function diffData($original,$tobe){
+ public static function diffData($original,$tobe,$idcol = "id2"){
 	 $ret = array();
 	 $reverse = array();
 	 $orig2 = array();
@@ -295,7 +295,7 @@ class DB{
 			 $reverse[$hash] = $keys;
 			 $orig2[$hash] = $hash;
 		 }else{
-			$ret["delete"][] = $keys["id2"];
+			$ret["delete"][] = $keys[$idcol];
 		 }
 	 }
 	 foreach($tobe as $keys){
@@ -313,12 +313,12 @@ class DB{
 	 }else{$ret["new"] = array();}
 	 if(isset($result["update"])){
 		 foreach($result["update"] as $id){
-			 $ret["update"][] = $reverse[$id]["id2"];
+			 $ret["update"][] = $reverse[$id][$idcol];
 		 }
 	 }else{$ret["update"] = array();}
 	 if(isset($result["delete"])){
 		 foreach($result["delete"] as $id){
-			 $ret["delete"][] = $reverse[$id]["id2"];
+			 $ret["delete"][] = $reverse[$id][$idcol];
 		 }
 	 }else{$ret["delete"] = array();}
 	 return $ret;

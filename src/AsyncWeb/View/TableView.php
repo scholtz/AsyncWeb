@@ -4,6 +4,8 @@ use AsyncWeb\View\ViewConfig;
 namespace AsyncWeb\View;
 
 /*
+20.10.2016 Table view fully customized for bootstrap & font-awesome
+
 14.1.2015 Zrušený AJAX, aby to bolo kompatibilné s AsyncWeb
 
 15.7.2014 BugFix SelectionDataViewCell ked je rovnaky nazov stlpca ako option, tak vybere stale jednu hodnotu
@@ -75,12 +77,12 @@ class BasicDataViewCell implements DataViewCell{
 	}
 	protected function makeFilterValue($trid,$key,$default=null){
 		$DataTableId = $this->getTableId();
-		$ret= '<input title="'.\AsyncWeb\System\Language::get("Condition").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" />';
+		$ret= '<input class="form-control" title="'.\AsyncWeb\System\Language::get("Condition").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" />';
 		return $ret;
 	}
 	public function makeFilterOperant($trid,$key,$selected=null){
 		$DataTableId = $this->getTableId();
-		$ret= '<select title="'.\AsyncWeb\System\Language::get("Operator").'" id="FilterOperant_'.$trid.'" name="FilterOperant['.$DataTableId.']['.$key.']['.$trid.']" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);">';
+		$ret= '<select class="form-control" title="'.\AsyncWeb\System\Language::get("Operator").'" id="FilterOperant_'.$trid.'" name="FilterOperant['.$DataTableId.']['.$key.']['.$trid.']" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);">';
 		foreach($this->allowFilter() as $filterType){
 			switch($filterType){
 				case DV_OP_EQUAL: $ret.= '<option value="'.$filterType.'"';if($selected==$filterType)$ret.=' selected="selected"';$ret.='>=</option>';break;
@@ -101,9 +103,15 @@ class BasicDataViewCell implements DataViewCell{
 	protected function generateEmptyFilterRow($key){
 		$DataTableId = $this->getTableId();
 		$ret="";
-		$ret .= '<tr id="tr%trid%"><td><input title="'.\AsyncWeb\System\Language::get("Use condition").'" name="FilterCH['.$DataTableId.']['.$key.'][%trid%]" id="ch%trid%" type="checkbox" />';
+		$ret .= '<tr id="tr%trid%"><td><input class="form-control" title="'.\AsyncWeb\System\Language::get("Use condition").'" name="FilterCH['.$DataTableId.']['.$key.'][%trid%]" id="ch%trid%" type="checkbox" />';
 		$ret.='<script type="text/javascript">$("#ch%trid%").change(function() {if($(this).is(\\\':checked\\\')){$(\\\'#FilterValue_%trid%\\\').prop(\\\'disabled\\\', false);$(\\\'#FilterOperant_%trid%\\\').prop(\\\'disabled\\\', false);}else{$(\\\'#FilterValue_%trid%\\\').prop(\\\'disabled\\\', true);$(\\\'#FilterOperant_%trid%\\\').prop(\\\'disabled\\\', true);}});</script>';
-		$ret.='</td><td>'.addslashes($this->makeFilterOperant('%trid%',$key)).'</td><td>'.addslashes($this->makeFilterValue('%trid%',$key)).'</td><td><img class="clickable" onclick="$(\\\'#tr%trid%\\\').remove();" src="/img/delete.png" width="20" height="20" alt="X" /></td></tr>';
+		$ret.='</td><td>'.addslashes($this->makeFilterOperant('%trid%',$key)).'</td><td>'.addslashes($this->makeFilterValue('%trid%',$key)).'</td><td>';
+		if(ViewConfig::$useFontAwesome){
+			$ret.='<button class="btn btn-default btn-xs" onclick="$(\\\'#tr%trid%\\\').remove();"><i class="fa fa-times" aria-hidden="true"></i></button>';
+		}else{
+			$ret.='<img class="clickable" onclick="$(\\\'#tr%trid%\\\').remove();" src="/img/delete.png" width="20" height="20" alt="X" />';
+		}
+		$ret.='</td></tr>';
 		
 		$ret = htmlentities($ret,ENT_QUOTES|ENT_HTML401,"UTF-8");
 		$ret = str_replace("%trid%","'+trid+'",$ret);
@@ -111,7 +119,7 @@ class BasicDataViewCell implements DataViewCell{
 	}
 	public function generateFilterBox($key){	
 		$DataTableId = $this->getTableId();
-		$ret = '<form onsubmit="return false;" id="form_'.($DataTableId).'"><table class="filterbox" id="'.($tid=md5(uniqid())).'">';
+		$ret = '<form onsubmit="return false;" id="form_'.($DataTableId).'"><div class="panel panel-default"><table class="filterbox table" id="'.($tid=md5(uniqid())).'">';
 		$filter = \AsyncWeb\Storage\Session::get("DV_filter");
 		
 		if(!$filter) $filter = array();
@@ -121,19 +129,33 @@ class BasicDataViewCell implements DataViewCell{
 				if($k != $key) continue;
 				foreach($rows as $row){
 					$i++;
-						$ret .= '<tr id="tr'.($trid=md5(uniqid())).'"><td><input title="'.\AsyncWeb\System\Language::get("Use condition").'" checked="checked" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
+						$ret .= '<tr id="tr'.($trid=md5(uniqid())).'"><td><input class="form-control" title="'.\AsyncWeb\System\Language::get("Use condition").'" checked="checked" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
 						$ret.= '<script type="text/javascript">$("#ch'.$trid.'").change(function() {if($(this).is(\':checked\')){$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', false);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', false);}else{$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', true);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', true);}});</script>';
-						$ret.= '</td><td>'.$this->makeFilterOperant($trid,$key,$row["op"]).'</td><td>'.$this->makeFilterValue($trid,$key,$row["value"]).'</td><td><img class="clickable" onclick="$(\'#tr'.$trid.'\').remove();" src="/img/delete.png" width="20" height="20" alt="X" /></td></tr>';
+						$ret.= '</td><td>'.$this->makeFilterOperant($trid,$key,$row["op"]).'</td><td>'.$this->makeFilterValue($trid,$key,$row["value"]).'</td><td>';
+						if(ViewConfig::$useFontAwesome){
+							$ret.='<button class="btn btn-default btn-xs" onclick="$(\'#tr'.$trid.'\').remove();"><i class="fa fa-times" aria-hidden="true"></i></button>';
+						}else{
+							$ret.= '<img class="clickable" onclick="$(\'#tr'.$trid.'\').remove();" src="/img/delete.png" width="20" height="20" alt="X" />';
+						}
+						
+						$ret.= '</td></tr>';
 				}
 			}
 		}
 		if(!$i){
-			$ret .= '<tr id="tr'.($trid = md5(uniqid())).'"><td><input title="'.\AsyncWeb\System\Language::get("Use condition").'" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
+			$ret .= '<tr id="tr'.($trid = md5(uniqid())).'"><td><input class="form-control" title="'.\AsyncWeb\System\Language::get("Use condition").'" name="FilterCH['.$DataTableId.']['.$key.']['.$trid.']" id="ch'.$trid.'" type="checkbox" />';
 			$ret.= '<script type="text/javascript">$("#ch'.$trid.'").change(function() {if($(this).is(\':checked\')){$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', false);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', false);}else{$(\'#FilterValue_'.$trid.'\').prop(\'disabled\', true);$(\'#FilterOperant_'.$trid.'\').prop(\'disabled\', true);}});</script>';
-			$ret.= '</td><td>'.$this->makeFilterOperant($trid,$key).'</td><td>'.$this->makeFilterValue($trid,$key).'</td><td><img class="clickable" onclick="$(\'#tr'.$trid.'\').remove();" src="/img/delete.png" width="20" height="20" alt="X" /></td></tr>';
+			$ret.= '</td><td>'.$this->makeFilterOperant($trid,$key).'</td><td>'.$this->makeFilterValue($trid,$key).'</td><td>';
+			if(ViewConfig::$useFontAwesome){
+				$ret.='<button class="btn btn-default btn-xs" onclick="$(\'#tr'.$trid.'\').remove();"><i class="fa fa-times" aria-hidden="true"></i></button>';
+			}else{
+				$ret.= '<img class="clickable" onclick="$(\'#tr'.$trid.'\').remove();" src="/img/delete.png" width="20" height="20" alt="X" />';
+			}
+			$ret.= '</td></tr>';
 		}
-		$ret .= '<tr><td></td><td><input style="width:100%; min-width:150px" type="submit" value="'.\AsyncWeb\System\Language::get("New condition").'" onclick="trid = Math.round(Math.random()*100000); $(\'#'.$tid.' tr:last\').before(\''.$this->generateEmptyFilterRow($key).'\');return false;"  /></td><td><input type="submit" value="'.\AsyncWeb\System\Language::get("Apply filter").'" onclick="'.TSAjax::applyFilterScript($key,$DataTableId).'" style="width:100%; min-width:150px"/></td><td colspan="10"></td></tr>';
-		$ret.= '</table>';
+		$ret .= '<tr><td></td><td><input class="btn btn-default btn-xs" style="width:100%; min-width:150px" type="submit" value="'.\AsyncWeb\System\Language::get("New condition").'" onclick="trid = Math.round(Math.random()*100000); $(\'#'.$tid.' tr:last\').before(\''.$this->generateEmptyFilterRow($key).'\');return false;"  /></td>';
+		$ret.= '<td><input class="btn btn-primary btn-xs" type="submit" value="'.\AsyncWeb\System\Language::get("Apply filter").'" onclick="'.TSAjax::applyFilterScript($key,$DataTableId).'" style="width:100%; min-width:150px"/></td><td colspan="10"></td></tr>';
+		$ret.= '</table></div>';
 		return $ret;
 		
 	}
@@ -286,7 +308,7 @@ class DateDataViewCell extends BasicDataViewCell{
 	protected function makeFilterValue($trid,$key,$default=null){
 		$DataTableId = $this->getTableId();
 		if(!$default) $default = date("d.m.Y");
-		$ret= '<input title="'.\AsyncWeb\System\Language::get("Condition").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" /></td><td>';
+		$ret= '<input class="form-control" title="'.\AsyncWeb\System\Language::get("Condition").'" id="FilterValue_'.$trid.'" name="FilterValue['.$DataTableId.']['.$key.']['.$trid.']" value="'.$default.'" onchange="$(\'#ch'.$trid.'\').attr(\'checked\', true);" /></td><td>';
 		
 		if(ViewConfig::$useFontAwesome){
 			$ret.='<i class="fa fa-calendar"></i>';
@@ -806,7 +828,7 @@ class BasicTHViewCell implements THViewCell{
 					$icon = '<img src="/img/icons/filter_on.png" width="20" height="20" alt=" '.\AsyncWeb\System\Language::get("Filter").'" title=" '.\AsyncWeb\System\Language::get("Filter is on").'" />';
 				}
 			}
-			$ret.='<a id="filter_'.$this->config->getKey().'" onclick="'.TSAjax::makeFilterScript($this).'" class="button clickable">'.$icon.'</a><span id="filterbox_'.$this->getTableId().'_'.$this->config->getKey().'" class="filterboxdiv">'.TSAjax::makeFilterScript($this,true).'</span>';
+			$ret.='&nbsp;<a id="filter_'.$this->config->getKey().'" onclick="'.TSAjax::makeFilterScript($this).'" class="button clickable">'.$icon.'</a><span id="filterbox_'.$this->getTableId().'_'.$this->config->getKey().'" class="filterboxdiv collapse">'.TSAjax::makeFilterScript($this,true).'</span>';
 		}
 		if($islast){
 			if(count($this->getTableView()->getTableMenuItems()) > 0){
@@ -817,7 +839,7 @@ class BasicTHViewCell implements THViewCell{
 					$icon = '<img src="/img/icons/folder.png" width="20" height="20" alt=" '.\AsyncWeb\System\Language::get("Menu").'" title="'.\AsyncWeb\System\Language::get("Table menu").'" />';
 				}
 				
-				$ret.='<a id="menuboxicon_'.$parentid.'" onclick="'.TSAjax::makeTableMenuScript($this).'"  class="clickable float_right button" title="'.\AsyncWeb\System\Language::get("Table menu").'">'.$icon.'</a>'.'<div class="menuboxbox" id="menuboxbox_'.$parentid.'">'.TSAjax::makeTableMenuScript($this,true).'</div>';
+				$ret.='&nbsp;<a id="menuboxicon_'.$parentid.'" onclick="'.TSAjax::makeTableMenuScript($this).'"  class="clickable float_right button" title="'.\AsyncWeb\System\Language::get("Table menu").'">'.$icon.'</a>'.'<div class="menuboxbox collapse" id="menuboxbox_'.$parentid.'">'.TSAjax::makeTableMenuScript($this,true).'</div>';
 			}
 		}
 		$ret.='</th>';
@@ -1564,7 +1586,7 @@ class TSAjax{
 		$DataTableId = $THViewCell->getTableId();
 		$ret = "";
 		if($showmenu){
-			$ret.='<div class="menubox">';
+			$ret.='<div class="menubox panel panel-default"><div class="panel-body">';
 			$tv = $THViewCell->getTableView();
 			$i=0;
 			if($tv){
@@ -1575,7 +1597,7 @@ class TSAjax{
 			if(!$ret){
 				$ret.=\AsyncWeb\System\Language::get("Menu does not contain any item");
 			}
-			$ret.= '</div>';
+			$ret.= '</div></div>';
 			return $ret;
 			//$THViewCell->getDVC()->generateFilterBox($THViewCell->getKey());
 		}//alert(JSON.stringify($(this).position()));
@@ -2126,7 +2148,7 @@ class TableView implements View{
 		if(!isset($_REQUEST["ITER_${iterid}_PAGE"])) $iter->reset();
 		$this->datasource->setLimits($iter->getStart(),$iter->getPerPage());
 				
-		$ret = '<table class="TableView ui-responsive table-stroke" id="'.$this->id.'"';
+		$ret = '<table class="table TableView ui-responsive table-stroke" id="'.$this->id.'"';
 		if($this->mobile) $ret.= ' data-role="table" data-mode="columntoggle"';
 		$ret.= '>';
 		$c = 0;

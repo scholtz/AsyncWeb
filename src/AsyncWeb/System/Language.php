@@ -397,10 +397,16 @@ class Language{
 			}
 		return false;
 	}
-	public static function db_dict_find_by_value($value,$lang=false){
+	public static function db_dict_find_by_value($value,$lang=false,$exact = true){
 		if(!$lang) $lang= Language::$lang;
-		$res = \AsyncWeb\DB\DB::g("dictionary",array("value"=>$value,"lang"=>$lang));
+		if($exact){
+			$where = array(array("col"=>"value","op"=>"like","value"=>"%$value%"),array("col"=>"lang","op"=>"eq","value"=>$lang));
+		}else{
+			$where = array("value"=>$value,"lang"=>$lang);
+		}
+		$res = \AsyncWeb\DB\DB::g("dictionary",$where);
 		$ret=array();
+		if($exact) return $ret;
 		while($row=\AsyncWeb\DB\DB::f($res)){
 			$ret[] = $row["key"];
 		}

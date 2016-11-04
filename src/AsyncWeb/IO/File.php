@@ -5,17 +5,27 @@ namespace AsyncWeb\IO;
 class File{
 	public static function exists($file,$dbg=false)
 	{
+		
 		$paths = explode(PATH_SEPARATOR, get_include_path());
 	 
 		foreach ($paths as $path) {
+			$real = realpath($path);
 			// Formulate the absolute path
-			$fullpath = realpath($path) . DIRECTORY_SEPARATOR . $file;
-	 
+			
+			$pos = strrpos($real,"/");
+			if($pos <= 0) $pos = strlen($real);
+			if(substr($file,0,$pos) == substr($real,0,$pos)){
+				$fullpath =  $file;
+			}else{
+				$fullpath =  $real . DIRECTORY_SEPARATOR . $file;
+			}
+			
 			// Check it
 			if (file_exists($fullpath)) {
 				return $fullpath;
 			}
 		}
+		
 		return false;
 	}
 	public static function get($file){

@@ -310,6 +310,10 @@ class MakeDBView{
 							$row[$col]=$r[$info["data"]["fromColumn"]];
 							if(@$info["data"]["dictionary"]) $row[$col] = Language::get($row[$col]);
 						}
+					}else{
+						if(isset($info["texts"]["no_data"])){
+							$row[$col] = $info["texts"]["no_data"];
+						}
 					}
 				}
 				if(@$info["filter"]) $row[$col] = MakeDBView::filter($row[$col],$info["filter"],$origrow);
