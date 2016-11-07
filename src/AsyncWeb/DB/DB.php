@@ -9,8 +9,10 @@ namespace AsyncWeb\DB;
  * 
  * 
  * @author Ludovit Scholtz
- * @version 1.0.1.20150129
- * 
+ * @version 1.1.0.20161107
+ *
+ * 1.1.0 2016-11-07 			mysqli as default for php7
+ * 1.0.2 2016-10-07 			DB::diff() support
  * 1.0.1 2015-01-29				update to use namespaces
  * 1.0.0 2007-01-08				vytvorena trieda pre napojenie na lubovolnu db (zatial iba podpora mysqlServer
  */
@@ -20,12 +22,18 @@ class DB{
  public static $CONNECTED = false;
  public static $CONNECTING = false;
  public static $repairIndexesImmidiently = false; // repairs indexes if needed
- public static $DB_TYPE = '\AsyncWeb\DB\MysqlServer';
+ public static $DB_TYPE = false;
  private static function connect(){
 	if(!DB::$connection){
-		$db = '\AsyncWeb\DB\MysqlServer';
+		
 		DB::$CONNECTING = true;
+		$db = '\AsyncWeb\DB\MysqlServer';
 		if(DB::$DB_TYPE) $db = DB::$DB_TYPE;
+		
+		if ($db == '\AsyncWeb\DB\MysqlServer' && version_compare(phpversion(), '7.0.0', '>')) {
+			$db = '\AsyncWeb\DB\MysqliServer';
+		}
+		
 		DB::$connection = new $db();
 		DB::$CONNECTED = true;
 		DB::$CONNECTING = false;
