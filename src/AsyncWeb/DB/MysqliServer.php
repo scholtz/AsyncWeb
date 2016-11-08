@@ -7,6 +7,7 @@ use AsyncWeb\Date\Time;
 use AsyncWeb\DB\DB;
 
 /**
+ * MySQLi DB Engine for AsyncWeb 
  *
  * @author Ludovit Scholtz
  * @version 1.0.4.20161107

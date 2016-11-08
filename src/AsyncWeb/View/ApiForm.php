@@ -704,14 +704,16 @@ class ApiForm{
         throw new \Exception($this->getText($text));
        }
       }
-	  
+	  /*
       $uploadfile = $item["data"]["dir"].$newFilename;
       if(!move_uploaded_file($_FILES[$name]['tmp_name'], $uploadfile)){
 		$text = "errorWhileMovingFile";
 		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
         throw new \Exception($this->getText($text));
       }	  
-      $this->db->u($table,$pid = md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$name]['type'],"name"=>$_FILES[$name]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
+	  /**/
+	  $content = file_get_contents($_FILES[$name]['tmp_name']);
+      $this->db->u($table,$pid = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$uploadfile));
       $data[$colname] = $value = $pid;
 	  }
      break;
@@ -1009,15 +1011,18 @@ class ApiForm{
       // vloz novy subor
 	  
 	  $uploadfile = $item["data"]["dir"].$newFilename;
+	  /*
 	  if(!move_uploaded_file($_FILES[$n]['tmp_name'], $uploadfile)){
  		$text = "errorWhileMovingFile";
 		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
         throw new \Exception($this->getText($text));
-      }
+      }/**/
       // vloz novy subor do db
 	  
-	  
-      $this->db->u($tableF,$id2=md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$n]['type'],"name"=>$_FILES[$n]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
+	  $content = file_get_contents($_FILES[$name]['tmp_name']);
+      $this->db->u($tableF,$id2 = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$uploadfile));
+      
+      //$this->db->u($tableF,$id2=md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$n]['type'],"name"=>$_FILES[$n]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
       $cols[$colname] = $colValue = $id2;
 	  }
 	 break;
