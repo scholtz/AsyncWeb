@@ -92,7 +92,9 @@ class AuthServiceBasicUser implements AuthService{
 				throw new \AsyncWeb\Exceptions\SecurityException(Language::get("Wrong user or password!"));
 			}
 			$authcode = \AsyncWeb\Storage\Session::get("__BasicUserAuthHash__");
-			
+			if(!$authcode){
+				throw new \Exception(Language::get("Session has not provided authorisation code!"));
+			}
 			$hash = hash('sha256',$row["password"].$authcode);
 			
 			if($hash == URLParser::v("AUTH_heslo")){

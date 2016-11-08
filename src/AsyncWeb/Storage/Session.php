@@ -166,6 +166,9 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 		}else{
 			$domain = $_SERVER["HTTP_HOST"];
 		}
+		if($pos = strpos($domain,":")){
+			$domain = substr($domain,0,$pos);
+		}
 		session_set_cookie_params(0,"/",$domain,false,true);
 	}
   }
