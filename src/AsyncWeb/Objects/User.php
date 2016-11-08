@@ -61,13 +61,26 @@ class User{
 		}else{
 			$row = User::get($id2);
 		}
-		$ret = $row["meno"];
-		if($row["priezvisko"]){ 
-			if($ret) $ret.=" ";
-			$ret.=$row["priezvisko"];
-		}
-		if(!$ret){
-			$ret=$row["login"];
+		if(isset($row["firstname"])){
+			
+			$ret = $row["firstname"];
+			if($row["lastname"]){ 
+				if($ret) $ret.=" ";
+				$ret.=$row["lastname"];
+			}
+			if(!$ret){
+				$ret=$row["login"];
+			}
+			
+		}else{
+			$ret = $row["meno"];
+			if($row["priezvisko"]){ 
+				if($ret) $ret.=" ";
+				$ret.=$row["priezvisko"];
+			}
+			if(!$ret){
+				$ret=$row["login"];
+			}
 		}
 		return $ret;
 	}

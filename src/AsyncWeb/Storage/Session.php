@@ -169,7 +169,7 @@ for: ".@$_SESSION['SESSION_STEALING__FW']
 		if($pos = strpos($domain,":")){
 			$domain = substr($domain,0,$pos);
 		}
-		session_set_cookie_params(0,"/",$domain,false,true);
+		session_set_cookie_params(0,"/",$domain,$ssl = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off'),true);
 	}
   }
   private static function check_timeout(){

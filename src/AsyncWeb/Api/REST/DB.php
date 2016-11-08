@@ -127,8 +127,10 @@ class DB extends \AsyncWeb\DB\DBServer {
 				if(!$insert_new){
 					return false;
 				}else{
-					$data2 = array_merge(array("ID"=>$id2),$data2);
-					$data2["ID"] = $id2;
+					if(!isset($data2["ID"])){
+						$data2 = array_merge(array("ID"=>$id2),$data2);
+						$data2["ID"] = $id2;
+					}
 					return $this->insert($table,$data2,$config);
 				}
 			}
@@ -180,7 +182,6 @@ class DB extends \AsyncWeb\DB\DBServer {
 	private $spracovanet = array();
 	public function insert($table,$data=array(),$config=array(),$create=true){
 		$this->lastInsertedId = null;
-		
 		try{
 			$this->afrows = 0;
 			$data["ApiKeySession"]=$this->Session;
@@ -194,7 +195,12 @@ class DB extends \AsyncWeb\DB\DBServer {
 			return $results;
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
-			
+			if(strpos($this->lastError,"CRC does not match")){		
+				$add = \AsyncWeb\Api\REST\Client::MakeHashString($data);
+				$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
+
+				$this->lastError.="<br>\n".$add;
+			}
 			return false;
 		}
 	}
