@@ -686,11 +686,8 @@ class ApiForm{
 		mkdir($item["data"]["dir"],true);
 	  }
 	  if($item["data"]["makeunique"]){
-		$newFilename = md5_file($_FILES[$name]['tmp_name'])."_".Texts::clear(substr($_FILES[$name]['name'],0,-1*strlen($ext)-1)).".$ext";
+		$newFilename = Texts::clear(substr($_FILES[$name]['name'],0,-1*strlen($ext)-1))."-".substr(md5(uniqid()),0,5).".$ext";
 	  }
-      while($item["data"]["makeunique"] && is_file($item["data"]["dir"].$newFilename)){
-       $newFilename = md5(uniqid())."_".Texts::clear(substr($_FILES[$name]['name'],0,-1*strlen($ext)-1)).".$ext";
-      }
       $table = $item["data"]["tableForFiles"];
 	  $info = pathinfo($newFilename);
 	  
@@ -713,7 +710,16 @@ class ApiForm{
       }	  
 	  /**/
 	  $content = file_get_contents($_FILES[$name]['tmp_name']);
-      $this->db->u($table,$pid = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$uploadfile));
+	  
+	  
+	  
+      $this->db->u($table,$pid = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$content,"Owner"=>\AsyncWeb\Security\Auth::userId()));
+	  if($err = $this->db->error()){
+		  throw new \Exception($err);
+	  }
+	  if($newid = $this->db->insert_id()){
+		  if($newid != $pid) $pid = $newid;
+	  }
       $data[$colname] = $value = $pid;
 	  }
      break;
@@ -971,11 +977,8 @@ class ApiForm{
 
       $newFilename = $_FILES[$n]['name'];
 	  if($item["data"]["makeunique"]){
-		$newFilename = md5_file($_FILES[$n]['tmp_name'])."_".Texts::clear(substr($_FILES[$n]['name'],0,-1*strlen($ext)-1)).".$ext";
+		$newFilename = Texts::clear(substr($_FILES[$n]['name'],0,-1*strlen($ext)-1))."-".substr(md5(uniqid()),0,5).".$ext";
 	  }
-      while($item["data"]["makeunique"] && is_file($item["data"]["dir"].$newFilename)){
-       $newFilename = md5(uniqid())."_".Texts::clear(substr($_FILES[$n]['name'],0,-1*strlen($ext)-1)).".$ext";
-      }
 	  
 	  $info = pathinfo($newFilename);
 	  if(!in_array($info["extension"],$allowedExt)){
@@ -983,7 +986,7 @@ class ApiForm{
 		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
 	    throw new \Exception($this->getText($text));
 	  }
-	  
+	  /*
 	  if(is_file($item["data"]["dir"].$newFilename)){
        if($item["data"]["overwrite"]){
         //$this->db->query("delete from `$table` where (name = '$newFilename' and ".$this->aditional_where.")");
@@ -992,7 +995,7 @@ class ApiForm{
 		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
         throw new \Exception($this->getText($text));
        }
-      }
+      }/**/
 	  
       // najdi cestu k staremu suboru
       $tableF = $item["data"]["tableForFiles"];
@@ -1020,7 +1023,13 @@ class ApiForm{
       // vloz novy subor do db
 	  
 	  $content = file_get_contents($_FILES[$name]['tmp_name']);
-      $this->db->u($tableF,$id2 = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$uploadfile));
+      $this->db->u($tableF,$id2 = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$content,"Owner"=>\AsyncWeb\Security\Auth::userId()));
+	  if($err = $this->db->error()){
+		  throw new \Exception($err);
+	  }
+	  if($newid = $this->db->insert_id()){
+		  if($newid != $id2) $id2 = $newid;
+	  }
       
       //$this->db->u($tableF,$id2=md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$n]['type'],"name"=>$_FILES[$n]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
       $cols[$colname] = $colValue = $id2;
