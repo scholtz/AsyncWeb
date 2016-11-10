@@ -174,6 +174,7 @@ class MakeForm{
  private $help_pic = "/img/help.gif";
  public static $captchaPublickey = "6Ld3BM8SAAAAAD_hNiRI8zGZ2x3dbsubJrQRw7He";
  public static $captchaPrivatekey = "6Ld3BM8SAAAAAG-eBDkl2cjuSR8Xsfm17xXlHI74";
+ public static $disableCaptcha = false;
  
  private $wait = 0;
  private static $addJQuery = false;
@@ -489,8 +490,7 @@ class MakeForm{
 	if(isset($item["form"]["type"])){
 		$form_type = $item["form"]["type"];
 	}
-	if($form_type == "captcha"){
-
+	if($form_type == "captcha" && !$disableCaptcha){
 		if(class_exists("\\ReCaptcha\\ReCaptcha")){
 			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
 			$resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
