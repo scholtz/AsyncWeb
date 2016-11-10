@@ -1,5 +1,5 @@
 {
-    "name": "patrik7/async-web"
+    "name": "scholtz/async-web"
   , "type": "library"
   , "description": "PHP WebSocket frontend and server libraries"
   , "keywords": ["AsyncWeb","Asynchonous web","WebSockets", "Server", "Ratchet", "Sockets", "Frontend"]
