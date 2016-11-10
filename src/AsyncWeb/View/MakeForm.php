@@ -490,7 +490,7 @@ class MakeForm{
 	if(isset($item["form"]["type"])){
 		$form_type = $item["form"]["type"];
 	}
-	if($form_type == "captcha" && !$disableCaptcha){
+	if($form_type == "captcha" && !MakeForm::$disableCaptcha){
 		if(class_exists("\\ReCaptcha\\ReCaptcha")){
 			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
 			$resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
