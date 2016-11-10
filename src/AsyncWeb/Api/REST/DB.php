@@ -146,10 +146,9 @@ class DB extends \AsyncWeb\DB\DBServer {
 		try{
 			$results = Client::Call($this->Server."/".$table."/Update",$data);
 			if(is_numeric($results)) $this->afrows += $results;
-			return true;
+			return $results;
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
-			var_dump($this->lastError);exit;
 			return false;
 		}		
 	}
@@ -296,6 +295,13 @@ class DB extends \AsyncWeb\DB\DBServer {
 			return new APIResult($results);
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
+			if(strpos($this->lastError,"CRC does not match")){		
+				$add = "CLIENT: ";
+				$add .= \AsyncWeb\Api\REST\Client::MakeHashString($data);
+				$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
+				$this->lastError.="<br>\n".$add;
+			}
+
 			return false;
 		}
 	}

@@ -49,15 +49,24 @@ class Client{
 	
 	public static function MakeHashString($variables){
 		$toHash = "";
+		$ucfirst = true;
+		if(isset($variables["col"]) && isset($variables["op"])){
+			$ucfirst = false;
+		}
 		foreach($variables as $k=>$v){
-			if(!$v) continue;
+			if($v === null) continue;
+			if($v === "") continue;
+			if($v === false) $v = "0";
 			if($k ===  "CRC") continue;
 			if($v === "__AW__VALUE_NOT_CHANGED") continue;
-			
+			if($ucfirst) $k = ucfirst($k);
 				
 			if(is_array($v)){
 				if(!count($v)) continue;
-				$toHash .= $k."=".Client::MakeHashString($v)."&";
+				$str = Client::MakeHashString($v);
+				if($str){
+					$toHash .= $k."=".$str."&";
+				}
 			}else{
 				$toHash .= $k."=".$v."&";
 			}
@@ -68,6 +77,7 @@ class Client{
 		
 		$toHash = Client::MakeHashString($variables);
 		$toHash.= "&ApiSecret=".$password;
+		//throw new \Exception($toHash);
 		return hash("sha512",$toHash);
 	}
 }
