@@ -12,7 +12,7 @@ class Header extends \AsyncWeb\Frontend\Block{
 		$title = Header::$LOGO_TITLE;
 		if(!$title) $title = "Logo";
 		
-		$this->template = '<header class="navbar navbar-default navbar-inverse" id="top" role="banner">
+		$this->template = '<header class="navbar navbar-inverse" id="top" role="banner">
   <div class="container'.(Header::$USE_FLUID?'-fluid':'').'">
     <div class="navbar-header">
       <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
