@@ -146,103 +146,97 @@ class Email{
 		if($sendAs == "html"){
 			$sendAs='text/html; charset="utf-8"';
 		}
-		if(Email::$debuginplace || @$_SERVER["SystemRoot"] == "C:\\Windows"){
-			$ret = "local mail, not sended";
-			if($attachment) $message.="\n\nATTACHMENTS:";
-			foreach($attachment as $att){
-				$message.=$att["name"]."\n";
-			}
-			DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$fromwname,"result"=>$ret),array("cols"=>array("message"=>array("type"=>"text"))));
-			Messages::err("Email from test system was not sent");
-			//echo "sending email\n";
-			return true;
-		}
-		$mime_boundary = md5(uniqid());
-   		$headers = "";
-   		$mes = "";
-   		$nl = "\n";
-   		if(@$_SERVER["windir"]){
-			$nl = "\r\n";
-   		}
-		$headers .= 'MIME-Version: 1.0' . $nl;
-		//$headers .= 'To: '.$emailwname. $nl;
-		if(!$sign) $headers .= 'From: '.$fromwname . $nl;
-		if(!$sign) $headers .= "Return-Path: $from$nl";
-   		$headers .= "Content-Type: multipart/mixed; boundary=\"$mime_boundary\"$nl";
+                
+                $mime_boundary = md5(uniqid());
+                $headers = "";
+                $mes = "";
+                $nl = "\n";
+                if(@$_SERVER["windir"]){
+                        $nl = "\r\n";
+                }
+                $headers .= 'MIME-Version: 1.0' . $nl;
+                //$headers .= 'To: '.$emailwname. $nl;
+                if(!$sign) $headers .= 'From: '.$fromwname . $nl;
+                if(!$sign) $headers .= "Return-Path: $from$nl";
+                $headers .= "Content-Type: multipart/mixed; boundary=\"$mime_boundary\"$nl";
 
-		$mes .= "--$mime_boundary$nl";
-		$mes .= "Content-Type: $sendAs".$nl;
-		$mes .= "Content-Transfer-Encoding: base64".$nl.$nl.chunk_split(base64_encode($message)).$nl;
-		foreach ($attachment as $priloha){
-			$mes .= "--$mime_boundary$nl";
-			$mes .= "Content-Type: ".$priloha["content-type"]."$nl";
-			if($priloha["name"])
-			 $mes .= "Content-disposition: attachment; filename=".$priloha["name"].$nl;
-			$mes .= "Content-Transfer-Encoding: base64$nl$nl";
-			$mes .= chunk_split(base64_encode($priloha["data"])).$nl;
-		}
-		$mes .= "--$mime_boundary--$nl$nl";		
-//		$mes .= "--$mime_boundary--$nl$nl";		
-		$matches = array();
-		preg_match('/<(?P<email>.*)>/', $from, $matches);
-		if(@$matches["email"]){
-   		 $params = "-f".$matches["email"]." -F".$matches["email"];
-		}else{
-		 $params = "-f$from -F$from";
-		}
-   				
-		
-		if(!\AsyncWeb\Text\Validate::check_input($email,"email")){
-			DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$fromwname,"result"=>false),array("cols"=>array("message"=>array("type"=>"text"))));
-			return false;
-		}
-		
-		if($sign){
-		  $boddy .= "--$mime_boundary--$nl";
-			$boddy = $headers.$nl.$mes;
+                $mes .= "--$mime_boundary$nl";
+                $mes .= "Content-Type: $sendAs".$nl;
+                $mes .= "Content-Transfer-Encoding: base64".$nl.$nl.chunk_split(base64_encode($message)).$nl;
+                foreach ($attachment as $priloha){
+                        $mes .= "--$mime_boundary$nl";
+                        $mes .= "Content-Type: ".$priloha["content-type"]."$nl";
+                        if($priloha["name"])
+                            $mes .= "Content-disposition: attachment; filename=".$priloha["name"].$nl;
+                        $mes .= "Content-Transfer-Encoding: base64$nl$nl";
+                        $mes .= chunk_split(base64_encode($priloha["data"])).$nl;
+                }
+                $mes .= "--$mime_boundary--$nl$nl";		
 
-			if(!is_dir(Email::$safedir)) mkdir("/dev/shm/pcks",0700,true);
-			file_put_contents($in = Email::$safedir."/esi-".md5(uniqid()).".tmp",$boddy);
-			
-			$subject = "=?utf-8?B?".base64_encode($subject)."?=";
-			if(openssl_pkcs7_sign(
-				$in, 
-				$out = Email::$safedir."/eso-".md5(uniqid()).".tmp", 
-				"file://".$sign["crt"], 
-				array("file://".$sign["crt"], $sign["pass"]), 
-				array(
-				//"To"=>$email,
-				"From"=>$fromwname
-				//,"Subject"=>$subject
-				)
-				,PKCS7_BINARY
-				)){//,PKCS7_DETACHED,$sign["pem"]
-				$data = file_get_contents($out);
-				//unlink($in);unlink($out);
-				//var_dump(openssl_pkcs7_verify($out,0));
-				$parts = explode("\n\n", $data, 2);
-				$ret = mail($emailwname, $subject, $parts[1], $parts[0],$params);
-				
-				return $ret;
-			}else{
-				if($dbg){ echo "Failed to sign data\n";}
-			}
-			unlink($in);
-		}
-/*		if($emailwname != $email){
-		
-			$emailwname = "=?utf-8?B?".base64_encode($emailwname)."?=";
-		}/**/
-		$subject = "=?utf-8?B?".base64_encode($subject)."?=";
-		if(@mail($emailwname,$subject,$mes,$headers,$params)){
-		   $ret = true;
-  		}elseif(@imap_mail($email,$subject,$message,$headers)){
-		   $ret = true;
-  		}else{
-   			\AsyncWeb\Storage\Log::log("Email","Error occured while sending email : to :: $email",ML__MEDIUM_PRIORITY);
-   			\AsyncWeb\Text\Msg::err(Language::get("Email error"));
-   			$ret = false;
-		}
+                $matches = array();
+                preg_match('/<(?P<email>.*)>/', $from, $matches);
+                if(@$matches["email"]){
+                 $params = "-f".$matches["email"]." -F".$matches["email"];
+                }else{
+                 $params = "-f$from -F$from";
+                }
+
+
+                if(!\AsyncWeb\Text\Validate::check_input($email,"email")){
+                        DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$fromwname,"result"=>false),array("cols"=>array("message"=>array("type"=>"text"))));
+                        return false;
+                }
+
+                if($sign){
+                  $boddy .= "--$mime_boundary--$nl";
+                        $boddy = $headers.$nl.$mes;
+
+                        if(!is_dir(Email::$safedir)) mkdir("/dev/shm/pcks",0700,true);
+                        file_put_contents($in = Email::$safedir."/esi-".md5(uniqid()).".tmp",$boddy);
+
+                        $subject = "=?utf-8?B?".base64_encode($subject)."?=";
+                        if(openssl_pkcs7_sign(
+                                $in, 
+                                $out = Email::$safedir."/eso-".md5(uniqid()).".tmp", 
+                                "file://".$sign["crt"], 
+                                array("file://".$sign["crt"], $sign["pass"]), 
+                                array(
+                                //"To"=>$email,
+                                "From"=>$fromwname
+                                //,"Subject"=>$subject
+                                )
+                                ,PKCS7_BINARY
+                                )){//,PKCS7_DETACHED,$sign["pem"]
+                                $data = file_get_contents($out);
+                                //unlink($in);unlink($out);
+                                //var_dump(openssl_pkcs7_verify($out,0));
+                                $parts = explode("\n\n", $data, 2);
+                                $ret = mail($emailwname, $subject, $parts[1], $parts[0],$params);
+
+                                return $ret;
+                        }else{
+                                if($dbg){ echo "Failed to sign data\n";}
+                        }
+                        unlink($in);
+                }
+
+                $subject = "=?utf-8?B?".base64_encode($subject)."?=";
+                
+                if(!Email::$debuginplace && @$_SERVER["SystemRoot"] != "C:\\Windows") {
+
+                    if(@mail($emailwname,$subject,$mes,$headers,$params)){
+                       $ret = true;
+                    }elseif(@imap_mail($email,$subject,$message,$headers)){
+                       $ret = true;
+                    }else{
+                            \AsyncWeb\Storage\Log::log("Email","Error occured while sending email : to :: $email",ML__MEDIUM_PRIORITY);
+                            \AsyncWeb\Text\Msg::err(Language::get("Email error"));
+                            $ret = false;
+                    }
+                } else {
+                    $ret = true;
+                }
+                
 		DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$from,"result"=>$ret),array("cols"=>array("message"=>array("type"=>"text"))));
 
 		return $ret;
