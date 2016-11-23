@@ -9,11 +9,14 @@ class Server{
 		foreach($classes as $class){
 			if(isset(self::$Services[$class])) continue;
 			self::$Services[$class] = $class;
-			foreach(get_class_methods($namespace.$class) as $method){
-				\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$class.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
-				if($class != strtolower($class)){
-					$classLower = strtolower($class);
-					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classLower.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
+			$methods = get_class_methods($namespace.$class);
+			if($methods){
+				foreach($methods as $method){
+					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$class.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
+					if($class != strtolower($class)){
+						$classLower = strtolower($class);
+						\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classLower.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
+					}
 				}
 			}
 		}
