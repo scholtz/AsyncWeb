@@ -47,9 +47,9 @@ class Head extends \AsyncWeb\Frontend\Block{
 	':'').'
 	'.(HEAD::$USE_SIDEBAR?'
     <link rel="stylesheet" href="/assets/css/sidebar.css">
-	':'').'
+	':'').\AsyncWeb\HTML\Headers::show().'
     <link rel="stylesheet" href="/css/style.css">
 	';
-		$this->template.=\AsyncWeb\HTML\Headers::show();
+		
 	}
 }
