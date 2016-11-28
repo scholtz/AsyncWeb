@@ -22,7 +22,7 @@ class Block{
 	public function overRideOuterBlock(){
 		return false;
 	}
-	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>10000);
+	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>10001,""=>10000);
 	public static function registerBlockPath($namespace,$level=1){
 		Block::$BLOCKS_PATHS[$namespace] = $level;
 		asort(Block::$BLOCKS_PATHS);
@@ -59,17 +59,33 @@ class Block{
 		$merged = array_merge(Block::$BLOCKS_PATHS,Block::$TEMPLATE_PATHS);
 		asort($merged);
 		foreach($merged as $namespace=>$t){
-			if(isset(Block::$BLOCKS_PATHS[$namespace])){
-				if (class_exists($n=$namespace.$name)){
-					return false;
+			if(!$namespace){
+				if(isset(Block::$BLOCK_PATH)){
+					if (class_exists($n="\\".$name)){
+						return false;
+					}
+				}
+				if(isset(Block::$TEMPLATES_PATH)){
+					$n = Block::NormalizeTemplatePath($name);	
+					if ($file = \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$n.".html")){
+						return $file;
+					}
+				}
+			}else{
+			
+				if(isset(Block::$BLOCKS_PATHS[$namespace])){
+					if (class_exists($n=$namespace.$name)){
+						return false;
+					}
+				}
+				if(isset(Block::$TEMPLATE_PATHS[$namespace])){
+					$n = Block::normalizeTemplatePath($name);	
+					if ($file = \AsyncWeb\IO\File::exists($f = $namespace."/".$n.".html")){
+						return $file;
+					}
 				}
 			}
-			if(isset(Block::$TEMPLATE_PATHS[$namespace])){
-				$n = Block::normalizeTemplatePath($name);	
-				if ($file = \AsyncWeb\IO\File::exists($f = $namespace."/".$n.".html")){
-					return $file;
-				}
-			}
+			
 		}
 	}
 	protected static function initTemplatePath(){
