@@ -16,6 +16,7 @@ class Language{
 	protected static $reversedictionary = array();
 	protected static $id2toid3 = array();
 	protected static $id3toid2 = array();
+	public static $SupressNoDictionaryDataMsg = true;
 	public static function setLangFromSession($sess){
 		$lang = Sess::getLang($sess);
 		return Language::setLang($lang);
@@ -245,7 +246,9 @@ class Language{
 		}
 		if(!$D){
 			if(!$L){
-				throw new \AsyncWeb\Exceptions\FatalException("Unable to find any dictionary item!");
+				if(!Language::$SupressNoDictionaryDataMsg){
+					throw new \AsyncWeb\Exceptions\FatalException("Unable to find any dictionary item!");
+				}
 			}
 			if(Language::$USE_DB_DICTIONARY){
 				$res = \AsyncWeb\DB\DB::g("dictionary",array("lang"=>$lang));
