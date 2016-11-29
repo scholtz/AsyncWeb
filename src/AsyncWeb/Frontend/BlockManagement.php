@@ -29,7 +29,11 @@ class BlockManagement{
 		}
 		
 		$namespace = "";
-		\AsyncWeb\Security\Auth::check();
+		try{
+			\AsyncWeb\Security\Auth::check();
+		}catch(\Exception $exc){
+			\AsyncWeb\Text\Msg::err($exc->getMessage());
+		}
 		if($usr = \AsyncWeb\Security\Auth::userId()){
 			$namespace = $usr;
 		}
