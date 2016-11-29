@@ -1,6 +1,7 @@
 <?php
-use AsyncWeb\DB\DB;
 namespace AsyncWeb\Security;
+
+use \AsyncWeb\DB\DB;
 /** 
  Class group manage users in groups
  
