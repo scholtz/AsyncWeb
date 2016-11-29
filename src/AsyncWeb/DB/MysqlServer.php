@@ -41,8 +41,8 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 	protected $link; // link na db
 	public static $showlastquery = false;
 	protected $lastquery = "";
-	protected $logqueries = false;
-	protected $logfile = "d:/mysql.log";
+	public $logqueries = false;
+	public $logfile = "d:/mysql.log";
 	protected $tryrepair = true;
 	public function __construct($defaultsettings = true, $server="",$login="",$pass="",$db=""){
 
@@ -485,8 +485,9 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 
 
 		$query = "insert into $t ($cols) values ($rows)";
+		$time = Time::get();
+		$this->query("update $t set `$do` = '".$time."' where (`$id2` = '$myId2' and (`$do` <= 0  or `$do` > '$time'))");
 		
-		$this->query("update $t set `$do` = '".Time::get()."' where (`$id2` = '$myId2' and (do <= 0))");
 		$rows = $this->affected_rows();
 		if(!$rows) return false;
 		$this->query($query);
