@@ -42,8 +42,8 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
 	protected $link; // link na db
 	public static $showlastquery = false;
 	protected $lastquery = "";
-	protected $logqueries = false;
-	protected $logfile = "d:/mysql.log";
+	public $logqueries = false;
+	public $logfile = "d:/mysql.log";
 	protected $tryrepair = true;
 	public function __construct($defaultsettings = true, $server="",$login="",$pass="",$db=""){
 
