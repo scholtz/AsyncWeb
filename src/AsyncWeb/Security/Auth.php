@@ -9,6 +9,15 @@ class Auth{
 	public static $TRY_TO_INSTALL_DATA = true;
 	private	static $CHECKED = null;
 	public static $CHECKING = false;
+	/**
+		Function returns 
+		 if $skipControllers == true, TRUE if user is logged in or has just successfully logged in, no matter on controller state
+		 if $skipControllers == true, FALSE if user is not logged in or has not just logged in
+		 if $skipControllers == false, TRUE if user is logged in and all controllers are passed
+		 if $skipControllers == false, FALSE if user is logged in and any of the controller has not passed
+		 
+		 
+	*/
 	public static function check($skipControllers=false){
 		if(Auth::$CHECKED !== null) return Auth::$CHECKED;
 		if(Auth::$CHECKING) return;
@@ -24,13 +33,17 @@ class Auth{
 		if($auth && is_array($auth)){
 			foreach($auth as $service){
 				if(!Auth::$services[$service["id"]]){
-					Auth::$CHECKING = false;
-					Auth::$CHECKED = false;
+					if(!$skipControllers){
+						Auth::$CHECKING = false;
+						Auth::$CHECKED = false;
+					}
 					throw new \AsyncWeb\Exceptions\SecurityException("Service provider (".$service["id"].") is not registered! 0x9319510");
 				}
 				if(!Auth::$services[$service["id"]]->check($service)){
-					Auth::$CHECKING = false;
-					Auth::$CHECKED = false;
+					if(!$skipControllers){
+						Auth::$CHECKING = false;
+						Auth::$CHECKED = false;
+					}
 					throw new \AsyncWeb\Exceptions\SecurityException("Out of date data! 0x9319511");
 				}
 			}
@@ -47,7 +60,9 @@ class Auth{
 		}
 		if(!$skipControllers && $ret){$ret = (true === Auth::checkControllers());}// if any controller fails, check is false
 		Auth::$CHECKING = false;
-		Auth::$CHECKED = $ret;
+		if(!$skipControllers){
+			Auth::$CHECKED = $ret;
+		}
 		return $ret;
 	}
 	public static function countControllers(){

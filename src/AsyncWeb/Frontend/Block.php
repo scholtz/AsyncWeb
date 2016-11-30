@@ -300,8 +300,18 @@ class Block{
 		}
 		if($this->requiresAuthenticatedUser || $this->requiresAnyGroup || $this->requiresAllGroups){
 			if(!\AsyncWeb\Security\Auth::check()){
-				$this->template = '{{{LoginForm}}}';
+				if(\AsyncWeb\Security\Auth::userId()){
+					$controller = \AsyncWeb\Security\Auth::checkControllers();
+					if(self::exists($controller)){
+						$this->template = '{{{'.$controller.'}}}';
+					}else{
+						$this->template = ''.\AsyncWeb\Security\Auth::showControllerForm().'';
+					}
+				}else{
+					$this->template = '{{{LoginForm}}}';
+				}
 			}
+			
 		}
 		if(is_array($this->requiresAnyGroup) && count($this->requiresAnyGroup) > 0){
 			$show = false;

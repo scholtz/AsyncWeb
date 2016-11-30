@@ -34,7 +34,7 @@ class BlockManagement{
 		}catch(\Exception $exc){
 			\AsyncWeb\Text\Msg::err($exc->getMessage());
 		}
-		if($usr = \AsyncWeb\Security\Auth::userId()){
+		if($usr = \AsyncWeb\Security\Auth::userId(true)){
 			$namespace = $usr;
 		}
 		while(self::$needToRerender){
@@ -57,7 +57,6 @@ class BlockManagement{
 		return $tid = URLParser::selectParameters($block->getUsesParams());
 	}
 	public static function get($name,$tid=""){
-		//var_dump("BlockManagement::get:$name;$tid");
 		try{
 			$name = Block::normalizeName($name);
 			if(isset(BlockManagement::$instances[$name][$tid])){
