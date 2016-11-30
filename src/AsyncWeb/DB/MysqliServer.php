@@ -43,7 +43,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
 	public static $showlastquery = false;
 	protected $lastquery = "";
 	public $logqueries = false;
-	public $logfile = "d:/mysql.log";
+	public $logfile = "";
 	protected $tryrepair = true;
 	public function __construct($defaultsettings = true, $server="",$login="",$pass="",$db=""){
 
