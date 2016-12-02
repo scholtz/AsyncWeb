@@ -30,7 +30,13 @@ class Auth{
 		}
 		
 		$auth = Session::get(Auth::$SESS_CHAIN_NAME);
+			
 		if($auth && is_array($auth)){
+			if(\AsyncWeb\Frontend\URLParser::v("logout")){
+				Auth::logout();
+				\AsyncWeb\HTTP\Header::s("reload",array("logout"=>""));
+				exit;
+			}
 			foreach($auth as $service){
 				if(!Auth::$services[$service["id"]]){
 					if(!$skipControllers){
@@ -48,11 +54,6 @@ class Auth{
 				}
 			}
 			$ret = true; // if none fails, than we are ok
-			if(isset($_REQUEST["logout"])){
-				Auth::logout();
-				\AsyncWeb\HTTP\Header::s("reload",array("logout"=>""));
-				exit;
-			}
 		}else{
 			if($ret){
 				throw new \AsyncWeb\Exceptions\SecurityException("Service provider did not register user properly! 0x9319512");
