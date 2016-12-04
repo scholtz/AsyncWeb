@@ -12,6 +12,7 @@ use AsyncWeb\Frontend\URLParser;
 class MainMenu{
 	public static $USE_MAIN_MENU = false;
 	public static $PAGE = "main";// filtruj system pre ktory sa zobrazuje menu
+	public static $CATEGORY_TAG_NAME = "Content_Cat";
 	public static $editingmenu = false;
 	public static $editingart = false;
 	public static $showsep = true;
@@ -538,7 +539,6 @@ $ret='
 		$ret.= '</ul>';
 		return $ret;
 	}
-	public static $CATEGORY_TAG_NAME = "cat";
 	public static function getCurrent($dbg=false){
 	
 		$dbgi = 0;
