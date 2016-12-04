@@ -34,8 +34,8 @@ class ApiForm{
 
  public $db = null;
  private $help_pic = "/img/help.gif";
- public static $captchaPublickey = "6Ld3BM8SAAAAAD_hNiRI8zGZ2x3dbsubJrQRw7He";
- public static $captchaPrivatekey = "6Ld3BM8SAAAAAG-eBDkl2cjuSR8Xsfm17xXlHI74";
+ public static $captchaPublickey = ""; // to be filled in settings if captcha should be used
+ public static $captchaPrivatekey = ""; // to be filled in settings if captcha should be used
  
  private $wait = 0;
  private static $addJQuery = false;
@@ -300,7 +300,7 @@ class ApiForm{
 		$form_type = $item["form"]["type"];
 	}
 	if($form_type == "captcha"){
-
+		if(ApiForm::$captchaPrivatekey){
 		if(class_exists("\\ReCaptcha\\ReCaptcha")){
 			$recaptcha = new \ReCaptcha\ReCaptcha(ApiForm::$captchaPrivatekey);
 			$resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
@@ -321,7 +321,7 @@ class ApiForm{
 			}
 		}
 
-		
+		}
 	}
 	if(!$data_type) return;
     // zkontroluj ci ma spravny format
@@ -1638,6 +1638,7 @@ class ApiForm{
 	 }
 	break;
 	case 'captcha':
+	if(ApiForm::$captchaPublickey){
 	 if(!isset($this->data["bootstrap"])){
 		$ret.= '<tr>';
 	 }else{
@@ -1666,6 +1667,7 @@ class ApiForm{
 	 }else{
 		$ret.='</div></div>'."\n";
 	 }
+	}
     break;
 
     case 'password':
@@ -2484,6 +2486,7 @@ $theme = "simple";
 	 }
     break;
     case 'captcha':
+	if(ApiForm::$captchaPublickey){
      if(!isset($this->data["bootstrap"])){
 		$ret.= '<tr>';
 	 }else{
@@ -2514,6 +2517,7 @@ $theme = "simple";
 	 }else{
 		$ret.='</div></div>'."\n";
 	 }
+	}
     break;
     case 'textbox':
      if(!isset($this->data["bootstrap"])){

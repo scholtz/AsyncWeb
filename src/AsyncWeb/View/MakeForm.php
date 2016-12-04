@@ -172,8 +172,8 @@ class MakeForm{
 
  private $db = null;
  private $help_pic = "/img/help.gif";
- public static $captchaPublickey = "6Ld3BM8SAAAAAD_hNiRI8zGZ2x3dbsubJrQRw7He";
- public static $captchaPrivatekey = "6Ld3BM8SAAAAAG-eBDkl2cjuSR8Xsfm17xXlHI74";
+ public static $captchaPublickey = ""; // to be filled in settings if captcha is enabled
+ public static $captchaPrivatekey = ""; // to be filled in settings if captcha is enabled
  public static $disableCaptcha = false;
  
  private $wait = 0;
@@ -490,7 +490,7 @@ class MakeForm{
 	if(isset($item["form"]["type"])){
 		$form_type = $item["form"]["type"];
 	}
-	if($form_type == "captcha" && !MakeForm::$disableCaptcha){
+	if($form_type == "captcha" && !MakeForm::$disableCaptcha && MakeForm::$captchaPublickey){
 		if(class_exists("\\ReCaptcha\\ReCaptcha")){
 			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
 			$resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
@@ -1816,34 +1816,36 @@ class MakeForm{
 	 }
 	break;
 	case 'captcha':
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $err=null;
-		if(class_exists("\\ReCaptcha\\ReCaptcha")){
-			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
-			$ret.='<div class="g-recaptcha" data-sitekey="'.MakeForm::$captchaPublickey.'"></div>';
-			$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
-		}elseif(class_exists("\\reCaptcha\\Captcha")){
-			$captcha = new \reCaptcha\Captcha();
-			$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
-			$captcha->setPublicKey(MakeForm::$captchaPublickey);
-			$ret.=$captcha->html();
-		}
+		if(MakeForm::$captchaPublickey){
+		 if(!isset($this->data["bootstrap"])){
+			$ret.= '<tr>';
+		 }else{
+			$ret.= '<div class="form-group">';
+		 }
+		 $ret .= $this->makeText($item).$this->makeHelp($item);
+		 if(!isset($this->data["bootstrap"])){
+			$ret.= '<td class="MFFormColumn">';
+		 }else{
+			$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
+		 }
+		 $err=null;
+				if(class_exists("\\ReCaptcha\\ReCaptcha")){
+					$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
+					$ret.='<div class="g-recaptcha" data-sitekey="'.MakeForm::$captchaPublickey.'"></div>';
+					$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
+				}elseif(class_exists("\\reCaptcha\\Captcha")){
+					$captcha = new \reCaptcha\Captcha();
+					$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
+					$captcha->setPublicKey(MakeForm::$captchaPublickey);
+					$ret.=$captcha->html();
+				}
 
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
+		 if(!isset($this->data["bootstrap"])){
+			$ret .= '</td>'."\n".'     </tr>'."\n";
+		 }else{
+			$ret.='</div></div>'."\n";
+		 }
+		}
     break;
 
     case 'password':
@@ -2662,36 +2664,37 @@ $theme = "simple";
 	 }
     break;
     case 'captcha':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-		
-		$err=null;
-		if(class_exists("\\ReCaptcha\\ReCaptcha")){
-			$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
-			$ret.='<div class="g-recaptcha" data-sitekey="'.MakeForm::$captchaPublickey.'"></div>';
-			$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
-		}elseif(class_exists("\\reCaptcha\\Captcha")){
-			$captcha = new \reCaptcha\Captcha();
-			$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
-			$captcha->setPublicKey(MakeForm::$captchaPublickey);
-			$ret.=$captcha->html();
+		if(MakeForm::$captchaPrivatekey){
+		 if(!isset($this->data["bootstrap"])){
+			$ret.= '<tr>';
+		 }else{
+			$ret.= '<div class="form-group">';
+		 }
+		 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
+		 if(!isset($this->data["bootstrap"])){
+			$ret.= '<td class="MFFormColumn">';
+		 }else{
+			$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
+		 }
+			
+			$err=null;
+				if(class_exists("\\ReCaptcha\\ReCaptcha")){
+					$recaptcha = new \ReCaptcha\ReCaptcha(MakeForm::$captchaPrivatekey);
+					$ret.='<div class="g-recaptcha" data-sitekey="'.MakeForm::$captchaPublickey.'"></div>';
+					$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
+				}elseif(class_exists("\\reCaptcha\\Captcha")){
+					$captcha = new \reCaptcha\Captcha();
+					$captcha->setPrivateKey(MakeForm::$captchaPrivatekey);
+					$captcha->setPublicKey(MakeForm::$captchaPublickey);
+					$ret.=$captcha->html();
+				}
+
+		 if(!isset($this->data["bootstrap"])){
+			$ret .= '</td>'."\n".'      </tr>'."\n";
+		 }else{
+			$ret.='</div></div>'."\n";
+		 }
 		}
-
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
     break;
     case 'textbox':
      if(!isset($this->data["bootstrap"])){
