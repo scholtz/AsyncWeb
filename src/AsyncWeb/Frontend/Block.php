@@ -61,7 +61,7 @@ class Block{
 		foreach($merged as $namespace=>$t){
 			if(!$namespace){
 				if(isset(Block::$BLOCK_PATH)){
-					if (class_exists($n="\\".$name)){
+					if($blockready = \AsyncWeb\IO\File::exists($f = Block::$BLOCK_PATH.str_replace('\\',DIRECTORY_SEPARATOR,$name).".php")){
 						return false;
 					}
 				}
@@ -298,6 +298,7 @@ class Block{
 				$dataToRender[$k] = $v;
 			}
 		}
+			
 		if($this->requiresAuthenticatedUser || $this->requiresAnyGroup || $this->requiresAllGroups){
 			if(!\AsyncWeb\Security\Auth::check()){
 				if(\AsyncWeb\Security\Auth::userId()){
@@ -311,7 +312,6 @@ class Block{
 					$this->template = '{{{LoginForm}}}';
 				}
 			}
-			
 		}
 		if(is_array($this->requiresAnyGroup) && count($this->requiresAnyGroup) > 0){
 			$show = false;
