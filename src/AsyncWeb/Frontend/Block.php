@@ -108,8 +108,17 @@ class Block{
 			return $blockready;
 		}
 		foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
-			if (class_exists($n=$namespace.$name)){
-				return true;
+			
+			if(!$namespace){
+				if(isset(Block::$BLOCK_PATH)){
+					if($blockready = \AsyncWeb\IO\File::exists($f = Block::$BLOCK_PATH.str_replace('\\',DIRECTORY_SEPARATOR,$name).".php")){
+						return $file;
+					}
+				}
+			}else{
+				if (class_exists($n=$namespace.$name)){
+					return true;
+				}
 			}
 		}
 		if($checkBlockOnly){
@@ -136,11 +145,26 @@ class Block{
 				$name = "\\".$name;
 			}
 			if($file = Block::exists($name,true) && !Block::templateHasPriorityOverBlock($name)){
+				
 				if($file === true){
 					foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
-						if (class_exists($n=$namespace.$name)){
-							$name = $n;
-							break;
+						if(!$namespace){
+							if(!$namespace){
+								if(isset(Block::$BLOCK_PATH)){
+									if($blockready = \AsyncWeb\IO\File::exists($f = Block::$BLOCK_PATH.str_replace('\\',DIRECTORY_SEPARATOR,$name).".php")){
+										include_once($blockready);
+										if(substr($name,0,1) != "\\"){
+											$name = "\\".$name;
+										}
+										break;
+									}
+								}
+							}
+						}else{
+							if (class_exists($n=$namespace.$name)){
+								$name = $n;
+								break;
+							}
 						}
 					}
 				}else{
