@@ -26,7 +26,7 @@ class AuthServiceBasicUser implements AuthService{
 		}else{
 			$authcode = md5(uniqid());
 		}
-		$authcode = "41e2ca9549";
+		//$authcode = "41e2ca9549";
 		
 		$ret = '
 		<div class="row">
@@ -95,9 +95,15 @@ class AuthServiceBasicUser implements AuthService{
 			if(!$authcode){
 				throw new \Exception(Language::get("Session has not provided authorisation code!"));
 			}
-			$hash = hash('sha256',$row["password"].$authcode);
+			if(URLParser::v("hashing") == "none"){
+				$hash = $row["password"];
+				$tocheck = hash('sha256',$row["cohash"].hash('sha256',URLParser::v("AUTH_heslo")));
+			}else{
+				$hash = hash('sha256',$row["password"].$authcode);
+				$tocheck = URLParser::v("AUTH_heslo");
 			
-			if($hash == URLParser::v("AUTH_heslo")){
+			}
+			if($hash == $tocheck){
 				Auth::auth(array("userid"=>$row["id2"]),$this);
 				\AsyncWeb\HTTP\Header::s("reload",array("__AUTHENTICATE__"=>""));exit;
 				return true;
