@@ -7,6 +7,7 @@ class DB extends \AsyncWeb\DB\DBServer {
 	public $ApiKey = null;
 	public $ApiPass = null;
 	public $Session = null;
+	public static $DEBUG_CRC = false;
 	/**
 	 * Constructor for API DB engine
 	 * 
@@ -149,6 +150,15 @@ class DB extends \AsyncWeb\DB\DBServer {
 			return $results;
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
+			if(self::$DEBUG_CRC){
+				if(strpos($this->lastError,"CRC does not match")){	
+					$add = "Update failed! Client data: ";
+					$add .= \AsyncWeb\Api\REST\Client::MakeHashString($data);
+					$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
+
+					$this->lastError.="<br>\n".$add;
+				}
+			}
 			return false;
 		}		
 	}
@@ -194,11 +204,14 @@ class DB extends \AsyncWeb\DB\DBServer {
 			return $results;
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
-			if(strpos($this->lastError,"CRC does not match")){		
-				$add = \AsyncWeb\Api\REST\Client::MakeHashString($data);
-				$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
+			if(self::$DEBUG_CRC){
+				if(strpos($this->lastError,"CRC does not match")){	
+					$add = "Insert failed! Client data: ";
+					$add .= \AsyncWeb\Api\REST\Client::MakeHashString($data);
+					$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
 
-				$this->lastError.="<br>\n".$add;
+					$this->lastError.="<br>\n".$add;
+				}
 			}
 			return false;
 		}
@@ -295,11 +308,13 @@ class DB extends \AsyncWeb\DB\DBServer {
 			return new APIResult($results);
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
-			if(strpos($this->lastError,"CRC does not match")){		
-				$add = "CLIENT: ";
-				$add .= \AsyncWeb\Api\REST\Client::MakeHashString($data);
-				$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
-				$this->lastError.="<br>\n".$add;
+			if(self::$DEBUG_CRC){
+				if(strpos($this->lastError,"CRC does not match")){		
+					$add = "Request failed! Client data: ";
+					$add .= \AsyncWeb\Api\REST\Client::MakeHashString($data);
+					$add .= " CRC: ".Client::MakeCRC($data,$this->ApiPass);
+					$this->lastError.="<br>\n".$add;
+				}
 			}
 
 			return false;
