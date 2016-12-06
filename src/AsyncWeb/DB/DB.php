@@ -302,7 +302,9 @@ class DB{
 	 $orig2 = array();
 	 $tobe2 = array();
 	 foreach($original as $keys){
-		 $hash = DB::diffDataHash($keys);
+		 $keys4hash = $keys;
+		 unset($keys4hash[$idcol]);
+		 $hash = DB::diffDataHash($keys4hash);
 		 if(!isset($reverse[$hash])){
 			 $reverse[$hash] = $keys;
 			 $orig2[$hash] = $hash;
@@ -337,7 +339,7 @@ class DB{
  }
  public static function diffDataHash($data){
 	 $ret = "";
-	 asort($data);
+	 ksort($data);
 	 foreach($data as $k=>$v){
 		 if($k == "id2") continue;
 		 $ret = md5($ret."-".$k."-".$v);
