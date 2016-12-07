@@ -201,7 +201,7 @@ class DB extends \AsyncWeb\DB\DBServer {
 			$this->lastInsertedId = $results;
 			
 			if($results) $this->afrows++;
-			return $results;
+			return $this->afrows;
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
 			if(self::$DEBUG_CRC){
