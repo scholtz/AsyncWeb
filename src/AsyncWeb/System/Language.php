@@ -429,14 +429,15 @@ class Language{
 		$langs=explode(',',$langsStr);
 		$langa=array();
 		foreach ($langs as $lang){
-			@ereg('([a-z]{1,2})(-([a-z0-9]+))?(;q=([0-9\.]+))?',$lang,$found);
-			$code=htmlentities($found[1],ENT_QUOTES);
-			$coef=sprintf('%3.1f',$found[5]?$found[5]:'1');
-			$key=$coef.'-'.$code;
-			if(strpos($code,"-") === false){
-				$code = \AsyncWeb\Text\ConvertLangToLangCountry::convert($code);
+			if(preg_match('#^([a-z]{1,2})(-([a-z0-9]+))?(;q=([0-9\.]+))?#i',$lang,$found)){
+				$code=htmlentities($found[1],ENT_QUOTES);
+				$coef=sprintf('%3.1f',$found[5]?$found[5]:'1');
+				$key=$coef.'-'.$code;
+				if(strpos($code,"-") === false){
+					$code = \AsyncWeb\Text\ConvertLangToLangCountry::convert($code);
+				}
+				$langa[$key]=array('code'=>$code,'coef'=>$coef);
 			}
-			$langa[$key]=array('code'=>$code,'coef'=>$coef);
 		}
 		krsort($langa);
 		return $langa;
