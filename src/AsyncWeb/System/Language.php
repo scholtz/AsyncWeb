@@ -469,7 +469,9 @@ class Language{
 		
 		if($defaultDomain){
 			if(\AsyncWeb\System\System::isCommandLineInterface()){
-				$_SERVER["HTTP_HOST"] = $defaultDomain;
+				if(!isset($_SERVER["HTTP_HOST"]) || !$_SERVER["HTTP_HOST"]){
+					$_SERVER["HTTP_HOST"] = $defaultDomain;
+				}
 				return true;
 			}
 			header("Location: http://".$defaultDomain);
