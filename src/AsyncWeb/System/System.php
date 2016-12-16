@@ -32,4 +32,8 @@ class System{
 		if(System::$usessl) return "https://".System::getDomain();
 		return "http://".System::getDomain();
 	}
+	public static function isCommandLineInterface()
+	{
+		return (php_sapi_name() === 'cli');
+	}
 }
