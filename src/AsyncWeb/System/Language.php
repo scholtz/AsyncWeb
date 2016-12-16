@@ -445,18 +445,27 @@ class Language{
 
 	public static function checkDomain(){
 		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$arr){
-			if($arr["domain"] == self::getDomain()){
+			if(is_array($arr) && $arr["domain"] == self::getDomain()){
+				return true;
+			}else if(!is_array($arr) && $arr == self::getDomain()){
 				return true;
 			}
 		}
 		$deflang = self::getDefaultLang();
 		if(isset(Language::$SUPPORTED_LANGUAGES[$deflang])){
-			$defaultDomain = Language::$SUPPORTED_LANGUAGES[$deflang]["domain"];
+			if(is_array(Language::$SUPPORTED_LANGUAGES[$deflang])){
+				$defaultDomain = Language::$SUPPORTED_LANGUAGES[$deflang]["domain"];
+			}else{
+				$defaultDomain = Language::$SUPPORTED_LANGUAGES[$deflang];
+			}
 		}else{
-			$defaultDomainarr = array_pop(Language::$SUPPORTED_LANGUAGES);;
-			$defaultDomain = $defaultDomainarr["domain"];
+			$defaultDomainarr = array_pop(Language::$SUPPORTED_LANGUAGES);
+			if(is_array($defaultDomainarr)){
+				$defaultDomain = $defaultDomainarr["domain"];
+			}else{
+				$defaultDomain = $defaultDomainarr;
+			}
 		}
-		
 		if($defaultDomain){
 			header("Location: http://".$defaultDomain);
 			exit;
