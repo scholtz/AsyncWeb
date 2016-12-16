@@ -294,24 +294,7 @@ class MainMenu{
 		Language::$SUPPORTED_LANGUAGES[$lang] = array("domain"=>$path,"img"=>$img);
 	}
 	public static function checkDomain(){
-		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$arr){
-			if($arr["domain"] == MainMenu::getDomain()){
-				return true;
-			}
-		}
-		$deflang = MainMenu::getDefaultLang();
-		if(isset(Language::$SUPPORTED_LANGUAGES[$deflang])){
-			$defaultDomain = Language::$SUPPORTED_LANGUAGES[$deflang]["domain"];
-		}else{
-			$defaultDomainarr = array_pop(Language::$SUPPORTED_LANGUAGES);;
-			$defaultDomain = $defaultDomainarr["domain"];
-		}
-		
-		if($defaultDomain){
-			header("Location: http://".$defaultDomain);
-			exit;
-		}
-		return false;
+		return Language::checkDomain();
 	}
 	public static function getLangs(){
 		return Language::$SUPPORTED_LANGUAGES;

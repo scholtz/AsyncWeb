@@ -442,5 +442,25 @@ class Language{
 		krsort($langa);
 		return $langa;
 	}
-	
+
+	public static function checkDomain(){
+		foreach(Language::$SUPPORTED_LANGUAGES as $lang=>$arr){
+			if($arr["domain"] == self::getDomain()){
+				return true;
+			}
+		}
+		$deflang = self::getDefaultLang();
+		if(isset(Language::$SUPPORTED_LANGUAGES[$deflang])){
+			$defaultDomain = Language::$SUPPORTED_LANGUAGES[$deflang]["domain"];
+		}else{
+			$defaultDomainarr = array_pop(Language::$SUPPORTED_LANGUAGES);;
+			$defaultDomain = $defaultDomainarr["domain"];
+		}
+		
+		if($defaultDomain){
+			header("Location: http://".$defaultDomain);
+			exit;
+		}
+		return false;
+	}	
 }
