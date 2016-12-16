@@ -34,6 +34,6 @@ class System{
 	}
 	public static function isCommandLineInterface()
 	{
-		return (php_sapi_name() === 'cli');
+		return (php_sapi_name() === 'cli' OR defined('STDIN'));
 	}
 }
