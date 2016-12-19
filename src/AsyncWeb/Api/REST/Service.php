@@ -7,6 +7,7 @@ class Service{
 	/**
 		Convers query builder between API DB form and Native DB form
 	*/
+	
 	public static function ConvertQuery($QueryBuilder = array(),$CONVERT = array(),$DB_DICT_COLS=array()){
 		
 		//throw new \Exception($DB_DICT_COLS);exit;
@@ -37,10 +38,13 @@ class Service{
 						$where[$CONVERT[$k]] = $v;
 					}
 				}elseif(is_array($v)){
+					if(isset($v["Col"])){$v["col"] = $v["Col"];unset($v["Col"]);}
+					if(isset($v["Value"])){$v["value"] = $v["Value"];unset($v["Value"]);}
+					if(isset($v["Op"])){$v["op"] = $v["Op"];unset($v["Op"]);}
 					if(isset($CONVERT[$v["col"]])){
 						if(isset($DB_DICT_COLS[$v["col"]])){
 							$exact = true;
-							if($v["col"] == "like"){
+							if($v["op"] == "like"){
 								$exact = false;
 							}
 							$phrases = Language::db_dict_find_by_value($v,$lang=false,$exact);
@@ -64,6 +68,17 @@ class Service{
 					}else{
 						$where[$k] = $v;
 					}
+				}elseif(is_numeric($k) && (
+					   $v == "-("
+					|| $v == "-)"
+					|| $v == "-or"
+					|| $v == "-and"
+					)
+				){
+					// valid values
+					$where[] = array("col"=>$v);
+				}else{
+					throw new \Exception(Language::get("Parameter %param% has not been found!",array("%param%"=>$k)));
 				}
 			}
 			$qb["where"] = $where;
