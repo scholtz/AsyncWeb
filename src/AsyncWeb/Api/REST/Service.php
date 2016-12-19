@@ -19,7 +19,25 @@ class Service{
 				throw new \Exception("Where condition in your query must be an array!");
 			}
 			foreach($QueryBuilder["Where"] as $k=>$v){
-				if(isset($CONVERT[$k])){
+				if(is_numeric($k) && (
+					   trim($v) == "-("
+					|| trim($v) == "-)"
+					|| strtolower(trim($v)) == "-or"
+					|| strtolower(trim($v)) == "-and"
+					)
+				){
+					// valid values
+					$where[] = array("col"=>strtolower(trim($v)));
+				}elseif(is_numeric($k) && is_array($v) && count($v) == 1 && isset($v[0]) && (
+					   trim($v[0]) == "-("
+					|| trim($v[0]) == "-)"
+					|| strtolower(trim($v[0])) == "-or"
+					|| strtolower(trim($v[0])) == "-and"
+					)
+				){
+					// valid values
+					$where[] = array("col"=>strtolower(trim($v[0])));
+				}elseif(isset($CONVERT[$k])){
 					if(isset($DB_DICT_COLS[$k])){
 						$phrases = Language::db_dict_find_by_value($v,$lang=false,$exact = true);
 						$where[] = array("col"=>"-(");
@@ -39,8 +57,8 @@ class Service{
 					}
 				}elseif(is_array($v)){
 					if(isset($v["Col"])){$v["col"] = $v["Col"];unset($v["Col"]);}
-					if(isset($v["Value"])){$v["value"] = $v["Value"];unset($v["Value"]);}
 					if(isset($v["Op"])){$v["op"] = $v["Op"];unset($v["Op"]);}
+					if(isset($v["Value"])){$v["value"] = $v["Value"];unset($v["Value"]);}
 					if(isset($CONVERT[$v["col"]])){
 						if(isset($DB_DICT_COLS[$v["col"]])){
 							$exact = true;
@@ -68,15 +86,6 @@ class Service{
 					}else{
 						$where[$k] = $v;
 					}
-				}elseif(is_numeric($k) && (
-					   $v == "-("
-					|| $v == "-)"
-					|| $v == "-or"
-					|| $v == "-and"
-					)
-				){
-					// valid values
-					$where[] = array("col"=>$v);
 				}else{
 					throw new \Exception(Language::get("Parameter %param% has not been found!",array("%param%"=>$k)));
 				}
