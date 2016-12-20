@@ -1239,6 +1239,8 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 		}
 		$newStr = trim($newStr,"_");
 		$newStr = str_replace("__","_",$newStr);
+		$newStr = str_replace("__","_",$newStr);
+		$newStr = str_replace("__","_",$newStr);
 		return $newStr;
 	}
 }
