@@ -181,7 +181,7 @@ class Text{
 		
 		$fileout ='<?php
  
-namespace '.$this->Namespace.'\\'.$this->Folder.';
+namespace '.$this->MyNamespace($class).';
 use AsyncWeb\System\Language;
 use AsyncWeb\DB\DB;
 
@@ -189,7 +189,7 @@ use AsyncWeb\DB\DB;
 '.$this->doc[true][false][false][$class][$class]["doc"].'
 */
 
-class '.$class.' extends '.$this->extendsClasses[$class].'{';
+class '.$this->ClassName($class).' extends '.$this->ConvertClassToNamespaceName($this->extendsClasses[$class]).'{';
 		return $fileout;
 	}
 	public function GeneratePHPVariables($class){
@@ -1177,6 +1177,21 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 	}
 	public function ConvertClassToDirectory($class){
 		return str_replace("_","/",$class);
+	}
+	public function ConvertClassToNamespaceName($class){
+		return str_replace("_","\\",$class);
+	}
+	public function MyNamespace($class){
+		$arr = explode("_",$class);
+		array_pop($arr);
+		if($arr){
+			return $this->Namespace.'\\'.$this->Folder.'\\'.implode("\\",$arr);
+		}
+		return $this->Namespace.'\\'.$this->Folder;
+	}
+	public function ClassName($class){
+		$arr = explode("_",$class);
+		return array_pop($arr);
 	}
 	public function Schema(){
 		$this->ParseDirectory();
