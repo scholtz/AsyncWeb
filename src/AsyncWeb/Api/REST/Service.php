@@ -19,7 +19,7 @@ class Service{
 				throw new \Exception("Where condition in your query must be an array!");
 			}
 			foreach($QueryBuilder["Where"] as $k=>$v){
-				if(is_numeric($k) && (
+				if(is_numeric($k) && !is_array($v) && (
 					   trim($v) == "-("
 					|| trim($v) == "-)"
 					|| strtolower(trim($v)) == "-or"
