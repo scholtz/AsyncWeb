@@ -58,13 +58,14 @@ class Text{
 		$this->append = $this->optionality = $this->datatypes = $this->doc = $this->extendsClasses =  array();
 		$files = scandir($dir);
 		sort($files);
+		$dir = rtrim($dir,"/");
 		foreach($files as $file){
 			
 			$newdatatypes = array();
 			
 			if(substr($file,0,1) == ".") continue;
-			if(is_dir($file)){
-				$this->ParseDirectory(rtrim($dir,"/")."/".$file);
+			if(is_dir($dir."/".$file)){
+				$this->ParseDirectory($dir."/".$file);
 			}
 			//echo "-------------------------------$file:\n";
 			
@@ -192,9 +193,14 @@ class '.$class.' extends '.$this->extendsClasses[$class].'{';
 		return $fileout;
 	}
 	public function GeneratePHPVariables($class){
+		$table = $class;
+		if($this->extendsClasses[$class] != '\AsyncWeb\Api\REST\Service'){
+			$parts = explode("\\",$this->extendsClasses[$class]);
+			$table = $parts[count($parts)-1];
+		}
 $fileout.='
 	/** @internal */
-	public static $TABLE = "'.$this->ConvertToDBName($class).'";
+	public static $TABLE = "'.$this->ConvertToDBName($table).'";
 	/** @internal */
 	public static $COL_ID = "id2";
 	/** @internal */
@@ -1157,7 +1163,9 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 			$fileout.= $this->GeneratePHPFooter($class);
 			
 			
-			$outfile = $this->OutputDirectory."/".$class.".php";
+			$outfile = $this->OutputDirectory."/".$this->ConvertClassToDirectory($class).".php";
+			$dir = dirname($outfile);
+			if(!is_dir($dir)) mkdir($dir,0770,true);
 			if(!file_exists($outfile) || md5_file($outfile) != md5($fileout)){
 				$res = file_put_contents($outfile,$fileout);
 				echo $outfile." ".$res."\n";
@@ -1166,6 +1174,9 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 		}
 		
 			
+	}
+	public function ConvertClassToDirectory($class){
+		return str_replace("_","/",$class);
 	}
 	public function Schema(){
 		$this->ParseDirectory();
