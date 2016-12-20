@@ -27,41 +27,40 @@ class Text{
 		foreach($this->datatypes as $class=>$types){
 	
 			$extendsClass = "";
-			$table = $class;
 			$extends = '\AsyncWeb\Api\REST\Service';
 			if(isset($this->append[$class]["-:>"])){
 				foreach($this->append[$class]["-:>"] as $k=>$v){
 					
 					$extends = "\\".$this->Namespace."\\".$this->Folder."\\".$k;
-					$extendsClass = $table = $k;
-					//var_dump($this->datatypes[$extendsClass]);
+					$extendsClass = $k;
 					if($this->datatypes[$extendsClass])
 					foreach($this->datatypes[$extendsClass] as $type=>$datatype){
-						if(!isset($this->datatypes[$class][$type])) $this->datatypes[$class][$type] = $this->datatypes[$class][$type] = $datatype;
+						if(!isset($this->datatypes[$class][$type])) $this->datatypes[$class][$type] = $datatype;
 					}
-					
 					if(!isset($this->doc[true][false][false][$currentClass][$class]["doc"])){
 						$this->doc[true][false][false][$currentClass][$class]["doc"] = $this->doc[true][false][false][$extendsClass][$extendsClass]["doc"];
 					}
 					break;
 				}
 			}
+			
 			$this->extendsClasses[$class] = $extends;
 		}
 	}
 	public function ParseDirectory($dir = false){
 		
-		if(!$dir) $dir = $this->SchemaDirectory;
+		if(!$dir){
+			$dir = $this->SchemaDirectory;
+			$this->append = $this->optionality = $this->datatypes = $this->doc = $this->extendsClasses =  array();
+		}
 		if(!is_dir($dir)){
 			echo "\n$dir does not exists!\n";exit;
 		}
-		$this->append = $this->optionality = $this->datatypes = $this->doc = $this->extendsClasses =  array();
 		$files = scandir($dir);
 		sort($files);
 		$dir = rtrim($dir,"/");
 		foreach($files as $file){
 			
-			$newdatatypes = array();
 			
 			if(substr($file,0,1) == ".") continue;
 			if(is_dir($dir."/".$file)){
@@ -104,7 +103,7 @@ class Text{
 						
 						$this->docforclass = true;$this->docforparam = false;$this->docforfunction = false;$this->docobject=$currentClass;
 						if(strtolower(substr($currentClass,-4)) != "enum"){
-							$newdatatypes[$currentClass] = $this->datatypes[$currentClass] = array();
+							if(!isset($this->datatypes[$currentClass])) $this->datatypes[$currentClass] = array();
 						}
 					//}
 				}
@@ -127,7 +126,8 @@ class Text{
 					}else{
 						$this->optionality[$currentClass][$name] = "+";
 					}
-					$newdatatypes[$currentClass][$name] = $this->datatypes[$currentClass][$name] = $datatype;
+					$this->datatypes[$currentClass][$name] = $this->datatypes[$currentClass][$name] = $datatype;
+
 					$this->docforclass = false;$this->docforparam = true;$this->docforfunction = false;$this->docobject=$name;
 					
 				} 
