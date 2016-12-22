@@ -71,6 +71,7 @@ class MenuItemBuilder{
 				$langs[$k] = $path;
 			}
 		}
+
 		return array("id2"=>$id2,"path"=>$path,"title"=>$text,"text"=>$text,"type"=>$type,"visible"=>$visible,"class"=>$class,"logintype"=>"all","group"=>null,"run"=>$run,"style"=>"standard","id"=>"","langs"=>$langs,"fa"=>$fa,"submenu"=>$submenu);
 	}
 }

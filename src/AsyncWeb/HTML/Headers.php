@@ -81,6 +81,7 @@ class Headers{
    	 if(@$header["title"]) $ret .= ' title="'.$header["title"].'"';
    	 if(@$header["href"]) $ret .= ' href="'.$header["href"].'"';
    	 if(@$header["media"]) $ret .= ' media="'.$header["media"].'"';
+	 if(@$header["sizes"]) $ret .= ' sizes="'.$header["sizes"].'"';
    	 $ret.= ' />'."\n";
    	break;
    }
