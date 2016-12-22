@@ -326,6 +326,8 @@ class MainMenu{
 		}
 	}
 	public static function showMenuItem(&$row,$recursive=true,$class="menuitem",$subclass="submenu",$showsubmenu=false,$showeditor=true,$type="main"){
+		$class.=' '.@$row["class"];
+
 		$ret = '';
 		$adddropdown = "";
 		if(!@$row["visible"] && !MainMenu::$editingmenu) return $ret;
@@ -335,7 +337,7 @@ class MainMenu{
 		$active = "";
 		if(MainMenu::isSubmenuOfCurrent($row)) $active = "active ";
 		if($row["type"] != "plaintext"){
-			$ret.='<li class="'.$active.$class.' '.@$row["class"].'">';
+			$ret.='<li class="'.$active.$class.'">';
 		}
 		if(!$row["type"]) $row["type"] = "category";
 		if($row["type"] == "category" && !$row["text"]){$row["text"] = "?";}
@@ -404,6 +406,7 @@ class MainMenu{
 		return true;
 	}
 	public static function showTopMenu(){
+
 		
 		$key = "TopMenuMain_l:".Language::getLang()."_u:".\AsyncWeb\Security\Auth::userId()."_p:".MainMenu::$PAGE;
 		
