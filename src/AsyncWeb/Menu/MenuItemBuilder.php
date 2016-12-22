@@ -33,7 +33,7 @@ class MenuItemBuilder{
 			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Submenu")){
 				$submenu = $arg->get();
 			}else
-			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Class")){
+			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Clazz")){
 				$class = $arg->get();
 			}else
 			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Type")){

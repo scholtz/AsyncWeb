@@ -36,7 +36,7 @@ class Headers{
   Headers::$headers[md5("script__".$type."__".$src)] = array("tag"=>"script","type"=>$type,"src"=>$src);
  }
  
- public static function add_link($href="",$rel="",$type="",$title="",$media=""){
+ public static function add_link($href="",$rel="",$type="",$title="",$media="",$sizes=""){
   $arr = array();
   $arr["tag"]="link";
   
@@ -45,7 +45,8 @@ class Headers{
   if($type  !="") $arr["type"]=$type;
   if($title !="") $arr["title"]=$title;
   if($media !="") $arr["media"]=$media;
-  
+  if($sizes !="") $arr["sizes"]=$sizes;
+ 
   Headers::$headers[md5("link__".$type."__".$rel."__".$href)] = $arr;
  }
  public static $showHeadTags = false;
