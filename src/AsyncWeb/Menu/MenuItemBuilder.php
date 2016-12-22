@@ -3,7 +3,7 @@ namespace AsyncWeb\Menu;
 
 class MenuItemBuilder{
 	public static function get(){//get($id2,$text,$path,$visible="1",$langs=array(),$run="",$fa=""){
-		$id2="";$text="";$path="";$visible="1";$langs=array();$run="";$fa="";$submenu = array();$type = "category";
+		$id2="";$text="";$path="";$visible="1";$langs=array();$run="";$fa="";$submenu = array();$type = "category";$class="";
 		$args = func_get_args();
 		$i = 0;
 		while(($arg = array_shift($args)) !== null){$i++;
@@ -32,6 +32,9 @@ class MenuItemBuilder{
 			}else
 			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Submenu")){
 				$submenu = $arg->get();
+			}else
+			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Class")){
+				$class = $arg->get();
 			}else
 			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Type")){
 				$type = $arg->get();
@@ -68,6 +71,6 @@ class MenuItemBuilder{
 				$langs[$k] = $path;
 			}
 		}
-		return array("id2"=>$id2,"path"=>$path,"title"=>$text,"text"=>$text,"type"=>$type,"visible"=>$visible,"class"=>"","logintype"=>"all","group"=>null,"run"=>$run,"style"=>"standard","id"=>"","langs"=>$langs,"fa"=>$fa,"submenu"=>$submenu);
+		return array("id2"=>$id2,"path"=>$path,"title"=>$text,"text"=>$text,"type"=>$type,"visible"=>$visible,"class"=>$class,"logintype"=>"all","group"=>null,"run"=>$run,"style"=>"standard","id"=>"","langs"=>$langs,"fa"=>$fa,"submenu"=>$submenu);
 	}
 }
