@@ -13,6 +13,8 @@ class MainMenu{
 	public static $USE_MAIN_MENU = false;
 	public static $PAGE = "main";// filtruj system pre ktory sa zobrazuje menu
 	public static $CATEGORY_TAG_NAME = "Content_Cat";
+	public static $DROPDOWN_CARET = ' <span class="caret"></span>';
+
 	public static $editingmenu = false;
 	public static $editingart = false;
 	public static $showsep = true;
@@ -222,7 +224,7 @@ class MainMenu{
 		}
 		return '   <ul class="nav navbar-nav navbar-right">
       <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">'.Language::get("Change language").' <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">'.Language::get("Change language").$DROPDOWN_CARET.'</a>
           <ul class="dropdown-menu" role="menu">
             '.$ret.'
           </ul>
@@ -328,7 +330,7 @@ class MainMenu{
 		$adddropdown = "";
 		if(!@$row["visible"] && !MainMenu::$editingmenu) return $ret;
 		if($type=="main" && isset($row["submenu"]) && is_array($row["submenu"]) && $row["submenu"]){
-			$class.=" dropdown";$adddropdown = ' class="dropdown-toggle" data-toggle="dropdown"';$dropdowncaret=' <span class="caret"></span>';
+			$class.=" dropdown";$adddropdown = ' class="dropdown-toggle" data-toggle="dropdown"';$dropdowncaret=$DROPDOWN_CARET;
 		}
 		$active = "";
 		if(MainMenu::isSubmenuOfCurrent($row)) $active = "active ";
