@@ -131,10 +131,23 @@ class Text{
 					$this->docforclass = false;$this->docforparam = true;$this->docforfunction = false;$this->docobject=$name;
 					
 				} 
-				$posFunction = strpos("".$data,"()");
+				$posFunction = strpos("".$data,"(");
 				if($posFunction !== false){
 					$fnctName = substr($data,0,$posFunction);
 					$this->docforclass = false;$this->docforparam = false;$this->docforfunction = true;$this->docobject=$fnctName;
+					$params = substr($data,$posFunction);
+					$params = trim($params,"()");
+					$paramsarr = array();
+					foreach(explode(",",$params) as $param){
+						$thisparam = explode(" ",$param);
+						if(count($thisparam) == 2){
+							$paramsarr[] = array("name"=>$thisparam[1],"datatype"=>$thisparam[0]);
+						}else{
+							$paramsarr[] = array("name"=>$param,"datatype"=>"string");
+						}
+					}
+					
+					@$this->doc[$this->docforclass][$this->docforparam][$this->docforfunction][$currentClass][$this->docobject]["parameters"] = $paramsarr;
 				}		
 				if($posRule !== false){
 					if($posComment === false){
@@ -1069,6 +1082,78 @@ $fileout.='
 	}
 		return $fileout;
 	}
+	public function GeneratePHPOtherMethods($class){
+		if(isset($this->doc[false][false][true][$class]))
+		foreach($this->doc[false][false][true][$class] as $method=>$arr){
+			if($method == "Create" || $method == "Update" || $method == "Delete" || $method == "Request"){
+				continue;
+			}
+			if(isset($this->doc[false][false][true][$class][$method]["doc"]) && $this->doc[false][false][true][$class][$method]["doc"]){
+		
+		$fileout.='	/**
+	'.$this->doc[false][false][true][$class][$method]["doc"].'	
+';
+			
+			}
+
+	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
+		$fileout.='	
+	@param '.$param["datatype"].' $'.$param["name"].' '.$param["name"].'
+';
+	}
+			
+	$fileout.='	
+	@param string $ApiKeySession Session identifier obtained from Service->Connect() function
+	@param string $CRC <p><b>CRC & Authorisation verifier</b></p>
+		<p>CRC = sha512(
+			"';
+
+	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
+		$fileout.=''.$param["name"]."=..&";
+	}			
+			$fileout.='ApiKeySession=..&ApiSecret=.."
+			)</p>
+		<p>If CRC does not match, function returns unauthorized exception.</p>
+		<p>If any of the variable is null or is empty string, it should not be used for hash crc</p>
+		<p>The order of parameters matters. Parameters as well as data are case sensitive.</p>
+			
+	@throws \\'.$this->Namespace.'\Service\Exception\InvalidArgumentException Invalid argument
+	@throws \\'.$this->Namespace.'\Service\Exception\UnauthorizedException Unauthorized accesss
+	*/
+	
+	public static function '.$method.'(';
+	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
+		$fileout.='$'.$param["name"]."=";
+		if($param["datatype"] == "array"){
+			$fileout.='array()';
+		}else{
+			$fileout.='""';
+		}
+		$fileout .= ',';
+	}			
+	$fileout.='$ApiKeySession = "",$CRC = ""){
+		
+		$vars=array(';
+	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
+		$fileout.='"'.$param["name"].'"=>$'.$param["name"].",";
+	}			
+	$fileout.='"ApiKeySession"=>$ApiKeySession,"CRC"=>$CRC);
+		foreach($vars as $var=>$v){if(isset($_REQUEST[$var])){$$var = $_REQUEST[$var];$vars[$var] = $_REQUEST[$var];}else{if(isset($_REQUEST[strtolower($var)])){$$var = $_REQUEST[strtolower($var)];$vars[$var] = $_REQUEST[strtolower($var)];}}}
+		$apiuser = \\'.$this->Namespace.'\Classes\Session::Validate($vars);
+		$session = \\'.$this->Namespace.'\Classes\Session::Instance($ApiKeySession);'."\n";
+		var_dump($this->doc[false][false][true][$class][$method]);
+		if(isset($this->doc[false][false][true][$class][$method]["code"])){
+			foreach($this->doc[false][false][true][$class][$method]["code"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
+		$fileout.='
+	}'."\n";
+	
+		}
+	
+		return $fileout;
+	}
 	public function GeneratePHPFooter($class){
 		return $fileout.='}';	
 	}
@@ -1172,6 +1257,7 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 			$fileout.= $this->GeneratePHPUpdate($class);
 			$fileout.= $this->GeneratePHPDelete($class);
 			$fileout.= $this->GeneratePHPRequest($class);
+			$fileout.= $this->GeneratePHPOtherMethods($class);
 			$fileout.= $this->GeneratePHPFooter($class);
 			
 			
