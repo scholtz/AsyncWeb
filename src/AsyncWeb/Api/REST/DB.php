@@ -147,6 +147,7 @@ class DB extends \AsyncWeb\DB\DBServer {
 		try{
 			$results = Client::Call($this->Server."/".$table."/Update",$data);
 			if(is_numeric($results)) $this->afrows += $results;
+			$this->lastInsertedId = $id2;
 			return $results;
 		}catch(\Exception $exc){
 			$this->lastError = $exc->getMessage();
