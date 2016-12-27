@@ -923,6 +923,18 @@ $fileout.=$type."=..&";
 				}
 			}
 		}'."\n";
+		}elseif(isset($this->doc[true][false][false][$class][$class]["rule"]) && substr($this->doc[true][false][false][$class][$class]["rule"],0,4) == "only"){
+			 $groups = explode("|",substr($this->doc[true][false][false][$class][$class]["rule"],4));
+		$fileout.='
+		if(';
+		$i = 0;
+		foreach($groups as $group){$i++;
+			if($i > 1) $fileout.='&&';
+			$fileout.='!isset($session->ApiKey->Groups["'.trim($group).'"])';
+		}
+		$fileout.='){
+			throw new \\'.$this->Namespace.'\Service\Exception\UnauthorizedException(Language::get("You are not allowed to update instance of %object%.",array("%object%"=>"'.$class.'")));
+		}'."\n";
 		}else{ // only admin is allowed to delete objects which are not suggestable and are not owned by anyone
 				$fileout.='
 		if(!isset($session->ApiKey->Groups["admin"])){
