@@ -7,14 +7,16 @@ class Server{
 	public static function Register($prepend = "/rest/", $classes=array(), $namespace = "\\"){
 		$prepend = str_replace("/","\\/",$prepend);
 		foreach($classes as $class){
+			$classWBackslashes = str_replace("/","\\",$class);
 			if(isset(self::$Services[$class])) continue;
 			self::$Services[$class] = $class;
-			$methods = get_class_methods($namespace.$class);
+			$methods = get_class_methods($namespace.$classWBackslashes);
 			if($methods){
 				foreach($methods as $method){
-					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$class.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
-					if($class != strtolower($class)){
-						$classLower = strtolower($class);
+					$classEscaped = str_replace("/","\\/",$class);
+					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classEscaped.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
+					if($classEscaped != strtolower($classEscaped)){
+						$classLower = strtolower($classEscaped);
 						\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classLower.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$class,"method"=>$method));
 					}
 				}
