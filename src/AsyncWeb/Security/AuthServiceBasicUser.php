@@ -35,7 +35,7 @@ class AuthServiceBasicUser implements AuthService{
 		<div class="col-md-offset-3 col-md-9"><h4>Basic authentication</h4></div>
 		<div class="col-md-12">
 		<input type="hidden" id="BasicUserAuthHash" name="BasicUserAuthHash" value="'.\AsyncWeb\Storage\Session::set("__BasicUserAuthHash__",$authcode).'">
-		<form class="form-horizontal" method="post" id="BasicUserAuthForm" onsubmit="AUTH_heslo.value=sha256(sha256(\'OFiapci@ifp##!Q-\'+sha256(AUTH_heslo.value)) + BasicUserAuthHash.value);hashing.value=\'SHA256\'; return true;">
+		<form action="'.$_SERVER["REQUEST_URI"].'" class="form-horizontal" method="post" id="BasicUserAuthForm" onsubmit="AUTH_heslo.value=sha256(sha256(\'OFiapci@ifp##!Q-\'+sha256(AUTH_heslo.value)) + BasicUserAuthHash.value);hashing.value=\'SHA256\'; return true;">
 		<input type="hidden" id="__AUTHENTICATE__" name="__AUTHENTICATE__" value="1">
 		<input type="hidden" id="hashing" name="hashing" value="none">
 			<div class="form-group row">
