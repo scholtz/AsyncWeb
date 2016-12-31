@@ -27,7 +27,7 @@ class AuthServiceBasicUser implements AuthService{
 			$authcode = md5(uniqid());
 		}
 		//$authcode = "41e2ca9549";
-		
+		 
 		$ret = '
 		<div class="row">
 		<div class="col-md-6">
