@@ -1816,7 +1816,7 @@ class MakeForm{
 	 }
 	break;
 	case 'captcha':
-		if(MakeForm::$captchaPublickey){
+		if(MakeForm::$captchaPublickey && !MakeForm::$disableCaptcha){
 		 if(!isset($this->data["bootstrap"])){
 			$ret.= '<tr>';
 		 }else{
@@ -2664,7 +2664,7 @@ $theme = "simple";
 	 }
     break;
     case 'captcha':
-		if(MakeForm::$captchaPrivatekey){
+		if(MakeForm::$captchaPrivatekey && !MakeForm::$disableCaptcha){
 		 if(!isset($this->data["bootstrap"])){
 			$ret.= '<tr>';
 		 }else{
