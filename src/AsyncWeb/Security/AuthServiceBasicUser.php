@@ -54,7 +54,7 @@ class AuthServiceBasicUser implements AuthService{
 			 
 			<div class="form-group row">
 			  <div class="col-md-offset-3 col-md-9">
-				<input type="submit" class="btn btn-primary" value="Log in">
+				<input id="AW__LOGIN_BTN" type="submit" class="btn btn-primary" value="Log in">
 			  </div>
 			</div>
 			
