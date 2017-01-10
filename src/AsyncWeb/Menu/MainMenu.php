@@ -230,7 +230,7 @@ class MainMenu{
           </ul>
         </li></ul>';
 	}
-	private static function makeLangPath(&$cur,$lang=false){
+	public static function makeLangPath(&$cur,$lang=false){
 		if(!$cur){
 			$path = "/";
 		}elseif(isset($cur["langs"][$lang])){
