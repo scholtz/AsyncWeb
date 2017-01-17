@@ -5,6 +5,7 @@ class Block{
 	public static $TEMPLATES_PATH = "../templates/";
 	public static $BLOCK_PATH = "../templates/";
 	public static $DICTIONARY = array();
+	public static $DEBUG_TIME = false;
 	public $blockElement = "div";
 	public $blockAttrs = array();
 	protected static $i = 1;
@@ -15,6 +16,8 @@ class Block{
 	protected $tid = "";
 	protected $clients = array();
 	protected $usesparams = array();
+	protected $name = "";
+	
 	
 	public function getUsesParams(){
 		return $this->usesparams;
@@ -139,6 +142,10 @@ class Block{
 	}
 	public static function create($name = "", $tid = "", $template=null){
 		try{
+			if(self::$DEBUG_TIME){
+				echo "BLOCK CREATE $name $tid"; echo \AsyncWeb\Date\Timer1::show()."\n";
+			}
+			
 			Block::initTemplatePath();
 			$name = Block::normalizeName($name);
 			if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
@@ -185,6 +192,9 @@ class Block{
 		return null;
 	}
 	public function __construct($name = "", $tid = "", $template=null){
+		if(self::$DEBUG_TIME){
+			echo "BLOCK __construct $name $tid"; echo \AsyncWeb\Date\Timer1::show()."\n";
+		}
 		$name = Block::normalizeName($name);
 		$this->template = $template;
 		$this->tid = $tid;
@@ -237,7 +247,6 @@ class Block{
 	protected function initTemplate(){
 	
 	}
-	protected $name = "";
 	public function name(){
 		return Block::normalizeName($this->name);
 	}
@@ -253,6 +262,9 @@ class Block{
 		return $this->template;	
 	}
 	public function setData(Array $data, $namespace=""){
+		if(self::$DEBUG_TIME){
+			echo "BLOCK setData $name $tid"; echo \AsyncWeb\Date\Timer1::show()."\n";
+		}
 		$this->data[$namespace] = $data;
 		$this->notify($namespace);
 	}
@@ -305,6 +317,9 @@ class Block{
 	protected $requiresAllGroups = array();
 	protected $firstRun = true;
 	public function get($namespace=""){
+		if(self::$DEBUG_TIME){
+			echo "BLOCK get ".$this->name." ".$this->tid; echo \AsyncWeb\Date\Timer1::show()."\n";
+		}
 		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
 		}
@@ -437,7 +452,13 @@ class Block{
 			}
 		}
 		$this->rendered = true;
+		if(self::$DEBUG_TIME){
+			echo "BLOCK prerender ".$this->name." ".$this->tid; echo \AsyncWeb\Date\Timer1::show()."\n";
+		}
 		$ret= Block::$MustacheEngine->render($this->template,$dataToRender);
+		if(self::$DEBUG_TIME){
+			echo "BLOCK postrender ".$this->name." ".$this->tid; echo \AsyncWeb\Date\Timer1::show()."\n";
+		}
 		return $ret;
 	}
 	public function notify($namespace=""){
