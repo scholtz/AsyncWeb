@@ -48,7 +48,7 @@ class Text{
 		}
 	}
 	public function ParseDirectory($dir = false){
-		$lineProcessed = 0;
+		
 		if(!$dir){
 			$dir = $this->SchemaDirectory;
 			$this->append = $this->optionality = $this->datatypes = $this->doc = $this->extendsClasses =  array();
@@ -69,8 +69,9 @@ class Text{
 			//echo "-------------------------------$file:\n";
 			
 			$out = "";
-			foreach(explode("\n",file_get_contents($dir."/".$file)) as $line){$lineProcessed++;
+			foreach(explode("\n",file_get_contents($dir."/".$file)) as $line){
 				$data = trim("".$line);
+			
 				$posComment = $end = strpos($line,"#");
 				$posRule = strpos($line,"!");
 				if($posRule !== false){
@@ -140,9 +141,9 @@ class Text{
 					foreach(explode(",",$params) as $param){
 						$thisparam = explode(" ",$param);
 						if(count($thisparam) == 2){
-							$paramsarr[] = array("name"=>trim($thisparam[1]),"datatype"=>trim($thisparam[0]));
+							$paramsarr[] = array("name"=>$thisparam[1],"datatype"=>$thisparam[0]);
 						}else{
-							$paramsarr[] = array("name"=>trim($param),"datatype"=>"string");
+							$paramsarr[] = array("name"=>$param,"datatype"=>"string");
 						}
 					}
 					
@@ -183,13 +184,14 @@ class Text{
 				
 				
 				if(substr($currentClass,-4) == "Enum") continue;
-				if($posComment!== false){
+				if($posComment!= false){
 					@$this->doc[$this->docforclass][$this->docforparam][$this->docforfunction][$currentClass][$this->docobject]["doc"] .= trim(substr($line,$posComment+1))."\n";
 				}
 			}
 		}
 	}
 	public function GeneratePHPTop($class){
+		
 		$fileout ='<?php
  
 namespace '.$this->MyNamespace($class).';
@@ -252,7 +254,7 @@ $fileout.='
 	public static $DB_DICT_COLS = array(
 ';
 	if($this->extendsClasses[$class] != '\AsyncWeb\Api\REST\Service' && !isset($this->datatypes[$class]["InstanceDataType"])){
-		$fileout.='		InstanceDataType=>instance_data_type,'."\n";		
+		$fileout.='		"InstanceDataType"=>"instance_data_type",'."\n";		
 	}
 	foreach($this->datatypes[$class] as $type=>$datatype){
 		if($datatype == "LocalisedString"){
@@ -1083,17 +1085,12 @@ $fileout.='
 	public function GeneratePHPOtherMethods($class){
 		if(isset($this->doc[false][false][true][$class]))
 		foreach($this->doc[false][false][true][$class] as $method=>$arr){
-			$methodname = $method;
-			if($pos = strpos($method, " ")){
-				$methodname = trim(strrchr($method, " "));
-			}
-			if($methodname == "Create" || $methodname == "Update" || $methodname == "Delete" || $methodname == "Request"){
+			if($method == "Create" || $method == "Update" || $method == "Delete" || $method == "Request"){
 				continue;
 			}
-			$fileout.='	/**';
 			if(isset($this->doc[false][false][true][$class][$method]["doc"]) && $this->doc[false][false][true][$class][$method]["doc"]){
 		
-			$fileout.='	
+		$fileout.='	/**
 	'.$this->doc[false][false][true][$class][$method]["doc"].'	
 ';
 			
@@ -1124,9 +1121,7 @@ $fileout.='
 	@throws \\'.$this->Namespace.'\Service\Exception\UnauthorizedException Unauthorized accesss
 	*/
 	
-	public static function '.$methodname.'(';
-	
-	
+	public static function '.$method.'(';
 	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
 		$fileout.='$'.$param["name"]."=";
 		if($param["datatype"] == "array"){
@@ -1140,12 +1135,13 @@ $fileout.='
 		
 		$vars=array(';
 	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
-		$fileout.='"'.trim($param["name"]).'"=>$'.trim($param["name"]).",";
+		$fileout.='"'.$param["name"].'"=>$'.$param["name"].",";
 	}			
 	$fileout.='"ApiKeySession"=>$ApiKeySession,"CRC"=>$CRC);
 		foreach($vars as $var=>$v){if(isset($_REQUEST[$var])){$$var = $_REQUEST[$var];$vars[$var] = $_REQUEST[$var];}else{if(isset($_REQUEST[strtolower($var)])){$$var = $_REQUEST[strtolower($var)];$vars[$var] = $_REQUEST[strtolower($var)];}}}
 		$apiuser = \\'.$this->Namespace.'\Classes\Session::Validate($vars);
 		$session = \\'.$this->Namespace.'\Classes\Session::Instance($ApiKeySession);'."\n";
+		var_dump($this->doc[false][false][true][$class][$method]);
 		if(isset($this->doc[false][false][true][$class][$method]["code"])){
 			foreach($this->doc[false][false][true][$class][$method]["code"] as $line){
 				$fileout.='		'.$line."\n";
