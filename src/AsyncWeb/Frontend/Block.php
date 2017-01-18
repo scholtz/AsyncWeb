@@ -143,16 +143,29 @@ class Block{
 	public static function create($name = "", $tid = "", $template=null){
 		try{
 			if(self::$DEBUG_TIME){
-				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE $name $tid\n";
+				$debug_iter = 0;
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
 			}
 			
 			Block::initTemplatePath();
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
+			}
 			$name = Block::normalizeName($name);
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
+			}
 			if(substr($name,0,1) != "\\" && !class_exists($name) && class_exists("\\".$name)){
 				$name = "\\".$name;
 			}
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
+			}
 			if($file = Block::exists($name,true) && !Block::templateHasPriorityOverBlock($name)){
 				
+				if(self::$DEBUG_TIME){
+					echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
+				}
 				if($file === true){
 					foreach(Block::$BLOCKS_PATHS as $namespace=>$t){
 						if(!$namespace){
@@ -178,11 +191,20 @@ class Block{
 					include_once($file);
 				}
 				
+				if(self::$DEBUG_TIME){
+					echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
+				}
 				
 				if(!class_exists($name)){
 					throw new \Exception(\AsyncWeb\System\Language::get("Block %name% does not exists!",array("%name%"=>$name)));
 				}
+				if(self::$DEBUG_TIME){
+					echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE ".($debug_iter++)." $name $tid\n";
+				}
 				return new $name($name,$tid,$template);
+			}
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE before new block".($debug_iter++)." $name $tid\n";
 			}
 			return new Block($name,$tid,$template);
 		}catch(\Exception $exc){
@@ -193,22 +215,41 @@ class Block{
 	}
 	public function __construct($name = "", $tid = "", $template=null){
 		if(self::$DEBUG_TIME){
-			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct $name $tid"."\n";
+			$debug_iter = 0;
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
 		}
 		$name = Block::normalizeName($name);
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
+		}
 		$this->template = $template;
 		$this->tid = $tid;
 		try{
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
+		}
 			$this->initTemplate();
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
+		}
 		}catch(\Exception $exc){
 			$this->template = "";
 			\AsyncWeb\Text\Msg::err($exc->getMessage());
 		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
+		}
 		if(!$name) $name = get_class($this);
 		$this->name = $name;
 		$this->data = array(""=>array());
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
+		}
 		
 		$n = Block::normalizeTemplatePath($name);
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct ".($debug_iter++)." $name $tid"."\n";
+		}
 		if($this->template === null){
 			foreach(Block::$TEMPLATE_PATHS as $dir=>$t){
 				if ($this->template === null && $file = \AsyncWeb\IO\File::exists($f = $dir."/".$n.".html")){
@@ -226,6 +267,9 @@ class Block{
 		
 		
 		if($this->template === null){
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct before template loading ".($debug_iter++)." $name $tid"."\n";
+			}
 			if(!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH."/".$n.".html")){
 		
 				$nparent = Block::normalizeTemplatePath(get_parent_class($this));
@@ -239,7 +283,13 @@ class Block{
 				$this->template = file_get_contents($f,true);
 			}
 		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct before init ".($debug_iter++)." $name $tid"."\n";
+		}
 		$this->init();
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct after init ".($debug_iter++)." $name $tid"."\n";
+		}
 	}
 	protected function init(){
 	
@@ -318,10 +368,14 @@ class Block{
 	protected $firstRun = true;
 	public function get($namespace=""){
 		if(self::$DEBUG_TIME){
-			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".$this->name." ".$this->tid."\n";
+			$debug_iter = 0;
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
 		}
 		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
+		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
 		}
 		
 		$dataToRender = array();
@@ -332,13 +386,23 @@ class Block{
 				$dataToRender[$k] = $v;
 			}
 		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
+		}
 		if(isset(static::$DICTIONARY[\AsyncWeb\System\Language::get()])){
 			foreach(static::$DICTIONARY[\AsyncWeb\System\Language::get()] as $k=>$v){
 				$dataToRender[$k] = $v;
 			}
 		}
 			
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
+		}
 		if($this->requiresAuthenticatedUser || $this->requiresAnyGroup || $this->requiresAllGroups){
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get before Auth::check() ".$this->name." ".$this->tid."\n";
+			}
+			
 			if(!\AsyncWeb\Security\Auth::check()){
 				if(\AsyncWeb\Security\Auth::userId()){
 					$controller = \AsyncWeb\Security\Auth::checkControllers();
@@ -351,6 +415,12 @@ class Block{
 					$this->template = '{{{LoginForm}}}';
 				}
 			}
+			if(self::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get after Auth::check() ".$this->name." ".$this->tid."\n";
+			}
+		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
 		}
 		if(is_array($this->requiresAnyGroup) && count($this->requiresAnyGroup) > 0){
 			$show = false;
@@ -364,6 +434,9 @@ class Block{
 				return '';
 			}
 		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
+		}
 		if(is_array($this->requiresAllGroups) && count($this->requiresAllGroups) > 0){
 			$show = true;
 			foreach($this->requiresAllGroups as $group){
@@ -375,6 +448,9 @@ class Block{
 			if(!$show){
 				return '';
 			}
+		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." before inclusion of other templates ".$this->name." ".$this->tid."\n";
 		}
 
 		$pos = 0;
@@ -417,8 +493,14 @@ class Block{
 				
 			}
 		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
+		}
 		
 		$dataToRender["LANG"] = \AsyncWeb\System\Language::getLang();
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." before filling default variables ".$this->name." ".$this->tid."\n";
+		}
 		if($dataToRender["USER_ID"] = \AsyncWeb\Security\Auth::userId()){
 			
 			if(\AsyncWeb\Security\Auth::checkControllers() === true){
@@ -437,6 +519,9 @@ class Block{
 		}
 		$dataToRender["TEMPLATE_START_DELIMITER"] = "{{{";
 		
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
+		}
 		
 		$pos = 0;
 		while(($pos = strpos($this->template,"{{",$pos)) !== false){
@@ -451,13 +536,16 @@ class Block{
 				$dataToRender[$item] = \AsyncWeb\System\Language::get($item);
 			}
 		}
+		if(self::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".($debug_iter++)." ".$this->name." ".$this->tid."\n";
+		}
 		$this->rendered = true;
 		if(self::$DEBUG_TIME){
-			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK prerender ".$this->name." ".$this->tid."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get before render".($debug_iter++)." ".$this->name." ".$this->tid."\n";
 		}
 		$ret= Block::$MustacheEngine->render($this->template,$dataToRender);
 		if(self::$DEBUG_TIME){
-			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK postrender ".$this->name." ".$this->tid."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get after render".($debug_iter++)." ".$this->name." ".$this->tid."\n";
 		}
 		return $ret;
 	}

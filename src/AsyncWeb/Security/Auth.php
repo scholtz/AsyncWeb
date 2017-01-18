@@ -69,13 +69,22 @@ class Auth{
 	public static function countControllers(){
 		return count(Auth::$controllers);
 	}
+	public static $controllersChecked = null;
 	public static function checkControllers(){
+		if(self::$controllersChecked !== null) return self::$controllersChecked;
 		$ret = true;
+		if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "Auth::checkControllers init"."\n";
+		}
 		foreach(Auth::$controllers as $k=>$controller){
 			if(!$controller->check()){
 				return $k;
 			}
 		}
+		if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "Auth::checkControllers finished"."\n";
+		}
+		self::$controllersChecked = $ret;
 		return $ret;
 	}
 	public static function showControllerForm(){
@@ -110,7 +119,13 @@ class Auth{
 	}
 	protected static $installing = false;
 	public static function userId(){
+		if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "Auth::userID on start"."\n";
+		}
 		$auth = Session::get(Auth::$SESS_CHAIN_NAME);
+		if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "Auth::userID after session init"."\n";
+		}
 		if($auth && is_array($auth)){
 			$data = array_pop($auth);
 			

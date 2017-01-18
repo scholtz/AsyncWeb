@@ -13,6 +13,9 @@ class BlockManagement{
 	}
 	public static function renderWeb(){
 		if(\AsyncWeb\System\Router::run()) return;
+		if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "Rendering has started: "."\n";
+		}
 		if(BlockManagement::$defaultBlock == null){
 			$index = "Index";
 			$url = URLParser::parse();
@@ -21,8 +24,18 @@ class BlockManagement{
 			}
 			
 			if(Block::exists($index)){
+				if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+					echo \AsyncWeb\Date\Timer1::show(); echo "BlockManagement:Render before creating default block "."\n";
+				}
+
 				$def = Block::create($index);
+				if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+					echo \AsyncWeb\Date\Timer1::show(); echo "BlockManagement:Render after creating default block "."\n";
+				}
 				BlockManagement::setDefaultBlock($def);
+				if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+					echo \AsyncWeb\Date\Timer1::show(); echo "BlockManagement:Render after setting default block "."\n";
+				}
 			}else{
 				throw new Exception(Language::get("Please set up the default block in the settings file or create index block!"));
 			}
@@ -30,7 +43,13 @@ class BlockManagement{
 		
 		$namespace = "";
 		try{
+			if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BlockManagement:Render before Auth::check()"."\n";
+			}
 			\AsyncWeb\Security\Auth::check();
+			if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+				echo \AsyncWeb\Date\Timer1::show(); echo "BlockManagement:Render after Auth::check()"."\n";
+			}
 		}catch(\Exception $exc){
 			\AsyncWeb\Text\Msg::err($exc->getMessage());
 		}
@@ -41,6 +60,10 @@ class BlockManagement{
 			self::$needToRerender = false;
 			$ret=BlockManagement::$defaultBlock->get($namespace);
 		}
+		if(\AsyncWeb\Frontend\Block::$DEBUG_TIME){
+			echo \AsyncWeb\Date\Timer1::show(); echo "Render has finished: "."\n";
+		}
+
 		echo $ret;
 		exit;
 		
