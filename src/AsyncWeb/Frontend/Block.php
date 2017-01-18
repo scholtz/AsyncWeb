@@ -143,7 +143,7 @@ class Block{
 	public static function create($name = "", $tid = "", $template=null){
 		try{
 			if(self::$DEBUG_TIME){
-				echo "BLOCK CREATE $name $tid"; echo \AsyncWeb\Date\Timer1::show()."\n";
+				echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK CREATE $name $tid\n";
 			}
 			
 			Block::initTemplatePath();
@@ -193,7 +193,7 @@ class Block{
 	}
 	public function __construct($name = "", $tid = "", $template=null){
 		if(self::$DEBUG_TIME){
-			echo "BLOCK __construct $name $tid"; echo \AsyncWeb\Date\Timer1::show()."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK __construct $name $tid"."\n";
 		}
 		$name = Block::normalizeName($name);
 		$this->template = $template;
@@ -263,7 +263,7 @@ class Block{
 	}
 	public function setData(Array $data, $namespace=""){
 		if(self::$DEBUG_TIME){
-			echo "BLOCK setData $name $tid"; echo \AsyncWeb\Date\Timer1::show()."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK setData $name $tid"."\n";
 		}
 		$this->data[$namespace] = $data;
 		$this->notify($namespace);
@@ -318,7 +318,7 @@ class Block{
 	protected $firstRun = true;
 	public function get($namespace=""){
 		if(self::$DEBUG_TIME){
-			echo "BLOCK get ".$this->name." ".$this->tid; echo \AsyncWeb\Date\Timer1::show()."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK get ".$this->name." ".$this->tid."\n";
 		}
 		if(Block::$MustacheEngine == null){
 			Block::$MustacheEngine = new \Mustache_Engine();
@@ -453,11 +453,11 @@ class Block{
 		}
 		$this->rendered = true;
 		if(self::$DEBUG_TIME){
-			echo "BLOCK prerender ".$this->name." ".$this->tid; echo \AsyncWeb\Date\Timer1::show()."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK prerender ".$this->name." ".$this->tid."\n";
 		}
 		$ret= Block::$MustacheEngine->render($this->template,$dataToRender);
 		if(self::$DEBUG_TIME){
-			echo "BLOCK postrender ".$this->name." ".$this->tid; echo \AsyncWeb\Date\Timer1::show()."\n";
+			echo \AsyncWeb\Date\Timer1::show(); echo "BLOCK postrender ".$this->name." ".$this->tid."\n";
 		}
 		return $ret;
 	}
