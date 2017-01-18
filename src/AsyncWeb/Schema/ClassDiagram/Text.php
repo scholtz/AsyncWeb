@@ -552,61 +552,7 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 			$fileout.='		}'."\n";
 		}
 
-		$fileout.="\n".'		$config = array();'."\n";
-		foreach($this->datatypes[$class] as $type=>$datatype){
-			if(substr($datatype,-8) == "Instance") continue;
-			$DataType =strtolower($datatype);
-			$type = $this->ConvertToDBName($type);
-			if($DataType == "string"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "varchar";'."\n";
-				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "250";'."\n";
-			}else
-			if($DataType == "int"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "int";'."\n";
-			}else		
-			if($DataType == "bool"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "int";'."\n";
-			}else		
-			if($DataType == "text"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "text";'."\n";
-			}else		
-			if($DataType == "decimal"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "decimal";'."\n";
-			}else		
-			if($DataType == "double"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "double";'."\n";
-			}else		
-			if($DataType == "blob"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "blob";'."\n";
-			}else		
-			if($datatype == "LocalisedString"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "char";'."\n";
-				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "32";'."\n";
-				$fileout.='		$config["keys"][] = "'.$type.'";'."\n";			
-			}else
-			if(substr($datatype,-2) == "ID"){
-				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "char";'."\n";
-				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "32";'."\n";
-				$fileout.='		$config["keys"][] = "'.$type.'";'."\n";			
-			}else{
-				//echo "WARNING: unknown data type $class.$type :: $datatype\n";
-			}		
-		}
-		$fileout.='		$config["cols"]["modified_by"]["type"] = "char";'."\n";
-		$fileout.='		$config["cols"]["modified_by"]["length"] = "32";'."\n";
-		$fileout.='		$config["cols"]["created"]["type"] = "bigint";'."\n"; 
-		if($this->extendsClasses[$class] != '\AsyncWeb\Api\REST\Service' && !isset($this->datatypes[$class]["InstanceDataType"])){
-			$fileout.='		$config["cols"]["instance_data_type"]["type"] = "varchar";'."\n"; 
-			$fileout.='		$config["cols"]["instance_data_type"]["length"] = "250";'."\n";
-			$fileout.='		$config["keys"][] = "instance_data_type";'."\n";			
-		}
-	
-		if(isset($this->doc[true][false][false][$class][$class]["rule"]) && $this->doc[true][false][false][$class][$class]["rule"] == "userIsAllowedToSuggest"){
-			$fileout.='		$config["cols"]["suggested_by"]["type"] = "char";'."\n";
-			$fileout.='		$config["cols"]["suggested_by"]["length"] = "32";'."\n";
-			$fileout.='		$config["cols"]["state"]["type"] = "varchar";'."\n";
-			$fileout.='		$config["cols"]["state"]["length"] = "32";'."\n";
-		}
+		$fileout.="\n".'		$config = self::__Get_Schema();'."\n";
 
 				
 		$fileout.='		// generate insert array'."\n";
@@ -804,6 +750,21 @@ $fileout.=$type."=..&";
 		}
 		$fileout.='			if($instance->ModifiedBy != $apiuser) $update[self::$COL_MODIFIED_BY]=$apiuser;'."\n";
 		
+		$fileout.="\n".'		$config = self::__Get_Schema();'."\n";
+
+		$fileout.='		if(count($update) > 0){'."\n";
+		$fileout.='			$ret= DB::u(self::$TABLE,$ID,$update,$config);'."\n";
+		$fileout.='			if(DB::error()) throw new \Exception(DB::error());'."\n";
+		$fileout.='			return $ret;'."\n";
+		$fileout.='		}else{return true;}'."\n";
+		
+		$fileout.='	}'."\n"."\n";
+	}
+		return $fileout;
+	}
+	public function GenerateSchema($class){
+		
+		$fileout= "\n".'	public static function __Get_Schema(){'."\n";
 		$fileout.="\n".'		$config = array();'."\n";
 		foreach($this->datatypes[$class] as $type=>$datatype){
 			if(substr($datatype,-8) == "Instance") continue;
@@ -859,17 +820,8 @@ $fileout.=$type."=..&";
 			$fileout.='		$config["cols"]["state"]["type"] = "varchar";'."\n";
 			$fileout.='		$config["cols"]["state"]["length"] = "32";'."\n";
 		}
-
-		
-		
-		$fileout.='		if(count($update) > 0){'."\n";
-		$fileout.='			$ret= DB::u(self::$TABLE,$ID,$update,$config);'."\n";
-		$fileout.='			if(DB::error()) throw new \Exception(DB::error());'."\n";
-		$fileout.='			return $ret;'."\n";
-		$fileout.='		}else{return true;}'."\n";
-		
-		$fileout.='	}'."\n"."\n";
-	}
+		$fileout .= '		return $config;'."\n";
+		$fileout .= '	}'."\n";
 		return $fileout;
 	}
 	public function GeneratePHPDelete($class){
@@ -966,6 +918,7 @@ $fileout.='
 		return false;
 	}'."\n"."\n";
 	}
+	
 		return $fileout;
 	}
 	public function GeneratePHPRequest($class){
@@ -1259,6 +1212,7 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 			$fileout = $this->GeneratePHPTop($class);
 			$fileout.= $this->GeneratePHPVariables($class);
 			$fileout.= $this->GeneratePHPConstructor($class);
+			$fileout.= $this->GenerateSchema($class);
 			$fileout.= $this->GeneratePHPInstance($class);
 			$fileout.= $this->GeneratePHPCreate($class);
 			$fileout.= $this->GeneratePHPUpdate($class);
