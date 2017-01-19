@@ -779,6 +779,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
 					$new_table_q .= "`$key` varchar(250) collate utf8_unicode_ci NULL DEFAULT $default,\n";
 				}
 			}
+			if(isset($config["cols"]) && is_array($config["cols"]))
 			foreach($config["cols"] as $key=>$colConfig){
 				if(isset($colsprocessed[$key])){
 					continue;
