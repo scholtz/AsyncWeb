@@ -1,6 +1,7 @@
 <?php
 namespace AsyncWeb\Objects;
 use AsyncWeb\DB\DB;
+use AsyncWeb\System\Language;
 
 class User{
 	public static function id(){
@@ -158,7 +159,6 @@ class User{
 		return $val;
 	}
 	public static function isInGroup($user,$group){
-		require_once("modules/Group.php");
 		return Group::userInGroup($user,$group);
 	}
 	public static function isCarbonTrader($user = null){
@@ -210,7 +210,6 @@ class User{
 		if($row) return $row["language"];
 
 		
-		require_once("modules/Language.php");
 		return Language::getLang();
 	}
 	public static function getAddress($usr=null,$row=null){
