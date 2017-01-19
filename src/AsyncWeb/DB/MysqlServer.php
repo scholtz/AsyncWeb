@@ -735,12 +735,12 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 			$new_table_q = "CREATE TABLE IF NOT EXISTS  $t (
   `id` int(11)  NOT NULL AUTO_INCREMENT,
   `id2` char(32) collate utf8_unicode_ci NOT NULL,\n";
+			$colsprocessed=array("id"=>true,"id2"=>true,"od"=>true,"do"=>true,"edited_by"=>true);
 			foreach ($data as $key=>$value){
-				if($key == "id2") continue;
-				if($key == "id") continue;
-				if($key == "od") continue;
-				if($key == "do") continue;
-				if($key == "edited_by") continue;
+				if(isset($colsprocessed[$key])){
+					continue;
+				}
+				$colsprocessed[$key] = true;
 				
 				$default = "NULL";
 				if(isset($config["cols"][$key]["default"])) $default = "'".$this->myAddSlashes($config["cols"][$key]["default"])."'";
@@ -770,6 +770,43 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 				}else{
 					$new_table_q .= "`$key` varchar(250) collate utf8_unicode_ci NULL DEFAULT $default,\n";
 				}
+			}
+
+			foreach($config["cols"] as $key=>$colConfig){
+				if(isset($colsprocessed[$key])){
+					continue;
+				}
+				$colsprocessed[$key] = true;
+				
+				$default = "NULL";
+				if(isset($config["cols"][$key]["default"])) $default = "'".$this->myAddSlashes($config["cols"][$key]["default"])."'";
+				
+				if(@$config["cols"][$key]["type"] == "double"){
+					$new_table_q .= "`$key` double NULL DEFAULT $default,";
+				}elseif(@$config["cols"][$key]["type"] == "decimal"){
+								$before = 10;
+								$after = 8;
+								if(isset($config["cols"][$key]["before"])) $before = $config["cols"][$key]["before"];
+								if(isset($config["cols"][$key]["after"])) $after = $config["cols"][$key]["after"];
+					$new_table_q .= "`$key` decimal($before,$after) NULL DEFAULT $default,";
+				}elseif(@$config["cols"][$key]["type"] == "int"){
+					$new_table_q .= "`$key` bigint NULL DEFAULT $default,";
+				}elseif(@$config["cols"][$key]["type"] == "char"){
+					$l = @$config["cols"][$key]["length"];
+					if(!$l) $l = 50;
+					$new_table_q .= "`$key` char($l) collate utf8_unicode_ci NULL DEFAULT $default,\n";
+				}elseif(@$config["cols"][$key]["type"] == "text"){
+					$new_table_q .= "`$key` text NULL DEFAULT $default,";
+				}elseif(@$config["cols"][$key]["type"] == "blob"){
+					$new_table_q .= "`$key` longblob NULL DEFAULT $default,";
+				}elseif(@$config["cols"][$key]["type"] == "varchar"){
+					$l = @$config["cols"][$key]["length"];
+					if(!$l) $l = 250;
+					$new_table_q .= "`$key` varchar($l) NULL DEFAULT $default,";
+				}else{
+					$new_table_q .= "`$key` varchar(250) collate utf8_unicode_ci NULL DEFAULT $default,\n";
+				}
+				
 			}
 			$new_table_q.="
   `od` bigint(20) NOT NULL DEFAULT 0,
