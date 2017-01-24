@@ -31,6 +31,41 @@ class MyCurl{
 	public static function devideHeaders(&$text,&$headers){
 		return MyCurl::divideHeaders($text,$headers);
 	}
-}
+	
+	public static function http_build_query($a,$b='',$c=0)
+	{
+		// from php doc: http://php.net/manual/en/function.http-build-query.php
+		// 2017 01 24
+		// modified to work properly
 
-?>
+		if (!is_array($a)) return false;
+		foreach ((array)$a as $k=>$v)
+		{
+			if ($c)
+			{
+				if( is_numeric($k) )
+					$k=$b."[]";
+				else
+					$k=$b."[$k]";
+			}
+			else
+			{   if (is_int($k))
+					$k=$b.$k;
+			}
+
+			if (is_array($v)||is_object($v))
+			{
+				$ret = self::http_build_query($v,$k,1);
+				if($ret!== null)
+					$r[]=$ret;
+					continue;
+			}
+			if(is_bool($v)){
+				$r[]=urlencode($k)."=0";
+				continue;
+			}
+			$r[]=urlencode($k)."=".urlencode($v);
+		}
+		return implode("&",$r);
+	}
+}

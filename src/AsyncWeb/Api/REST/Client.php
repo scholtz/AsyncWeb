@@ -7,13 +7,13 @@ class Client{
 		CURLOPT_HEADER => false,
 		CURLOPT_RETURNTRANSFER => true,
 	);
+
 	public static function Call($url,$variables=array(),$type=null){
 		$curl = curl_init($url);
 		curl_setopt_array($curl, self::$curlOptions);
 		if($variables){
 			curl_setopt($curl, CURLOPT_POST, 1);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($variables));
-
+			curl_setopt($curl, CURLOPT_POSTFIELDS,  \AsyncWeb\Connectors\MyCurl::http_build_query($variables));
 		}else{
 			switch($type){
 				case "POST":
