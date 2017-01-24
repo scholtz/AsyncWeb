@@ -32,44 +32,54 @@ class MyCurl{
 		return MyCurl::divideHeaders($text,$headers);
 	}
 	
-	public static function http_build_query($a,$b='',$c=0)
+	
+	public static function http_build_query($a,$keyName='',$c=0,$debug=false)
 	{
 		// from php doc: http://php.net/manual/en/function.http-build-query.php
 		// 2017 01 24
 		// modified to work properly
 
 		if (!is_array($a)) return false;
+		$AllKeysAreNumeric = true;
+		foreach ((array)$a as $k=>$v){
+			if(!is_int($k)) {
+				$AllKeysAreNumeric = false;
+				break;
+			} 
+		}		
 		foreach ((array)$a as $k=>$v)
 		{
+			$k = urlencode($k);
 			if ($c)
 			{
-				if( is_numeric($k) )
-					$k=$b."[]";
+				if( $AllKeysAreNumeric )
+					$k=$keyName."[]";
 				else
-					$k=$b."[$k]";
+					$k=$keyName."[".$k."]";
 			}
 			else
 			{   if (is_int($k))
-					$k=$b.$k;
+					$k=$keyName.$k; 
 			}
 
 			if (is_array($v)||is_object($v))
 			{
-				$ret = self::http_build_query($v,$k,1);
+				$ret = self::http_build_query($v,$k,1,$debug);
 				if($ret!== null)
 					$r[]=$ret;
 					continue;
 			}
 			if(is_bool($v)){
 				if($v){
-					$r[]=urlencode($k)."=1";
+					$r[]=$k."=1";
 				}else{					
-					$r[]=urlencode($k)."=0";
+					$r[]=$k."=0";
 				}
 				continue;
 			}
-			$r[]=urlencode($k)."=".urlencode($v);
+			$r[]=$k."=".urlencode($v);
 		}
+		if($debug){echo "mycurl:";echo print_r($r,true);echo "\n";}
 		return implode("&",$r);
 	}
 }
