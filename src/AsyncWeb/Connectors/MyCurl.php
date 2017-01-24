@@ -61,7 +61,11 @@ class MyCurl{
 					continue;
 			}
 			if(is_bool($v)){
-				$r[]=urlencode($k)."=0";
+				if($v){
+					$r[]=urlencode($k)."=1";
+				}else{					
+					$r[]=urlencode($k)."=0";
+				}
 				continue;
 			}
 			$r[]=urlencode($k)."=".urlencode($v);
