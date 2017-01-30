@@ -1198,8 +1198,8 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 
 			if($this->OutputFormsDirectory){
 				$outform = $this->OutputFormsDirectory."/".$this->Folder."/".$class.".php";
-				if(!file_exists($outform) || md5_file($outform) != md5($form)) {
-					$res = file_put_contents($outform,$form);
+				if(!file_exists($outform) || md5_file($outform) != md5($fileout)) {
+					$res = file_put_contents($outform,$fileout);
 					echo $outform." ".$res."\n";
 				}
 			}			
