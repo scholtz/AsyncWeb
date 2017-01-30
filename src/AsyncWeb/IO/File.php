@@ -37,4 +37,7 @@ class File{
 	public static function write($file,$content,$options=null){
 		return file_put_contents($file,$content,$options);
 	}
+	public static function load($file){
+		return self::read($file);
+	}
 }

@@ -19,6 +19,7 @@ class Email{
 	public static $defaulttheme = null;
 	public static $defaultprepend = null;
 	public static $defaultSenderEmail = "";
+	public static $defaultSendAs = 'text/plain; charset="utf-8"';
 	
 	public static function send(){
 		//$to,$subject,$message,$from = "",$attachment=array(),$sendAs='text/plain; charset="utf-8"',$sign=array(),$dbg=false
@@ -27,7 +28,7 @@ class Email{
 		$message = "";
 		$from = "";
 		$attachment=array();
-		$sendAs='text/plain; charset="utf-8"';
+		$sendAs=null;
 		$sign=array();
 		$dbg=false;
 		$theme = "";
@@ -91,30 +92,29 @@ class Email{
 		if(!$prepend) $prepend = Email::$defaultprepend;
 		if($prepend) $subject = $prepend.": ".$subject;
 		if(!$from) $from = Email::$defaultSenderEmail;
-		
+		if($sendAs === null) $sendAs = Email::$defaultSendAs;
 		if(!$theme) $theme = Email::$defaulttheme;
 		if($dbg){
 			echo "Setting theme: $theme\n";
 		}
+				
 		if($theme && substr($sendAs,0,10)!='text/plain'){
 			$row = DB::gr("emailstyles",array("name"=>$theme));
 			if($row){
 				$template = Language::get($row["text"]);
-				$message = \AsyncWeb\Text\Template::loadTemplate($template,array("email"=>$message),$dbg);
-				if(File::exists("templates/$text.html")){
+				try{
 					
+					$message = \AsyncWeb\Text\Template::loadTemplate($template,array("email"=>$message),false,$dbg);
 					if($dbg){
-						echo "THEME OK\n";
-						echo \AsyncWeb\Frontend\Block::$TEMPLATES_PATH."$text.html\n";
+						echo "THEME OK:$template\n";
 						echo strlen($message)."\n";
 					}
-				}else{
+				}catch(\Exception $exc){
 					if($dbg){
-						echo "THEME FILE NOT FOUND\n";
-						echo \AsyncWeb\Frontend\Block::$TEMPLATES_PATH."$text.html\n";
+						echo "THEME FILE NOT FOUND:$template: ".$exc->getMessage()."\n";
 					}
 				}
-				
+				/**/
 				
 			}else{
 				if($dbg){
@@ -186,8 +186,7 @@ class Email{
                         DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$fromwname,"result"=>false),array("cols"=>array("message"=>array("type"=>"text"))));
                         return false;
                 }
-
-                if($sign){
+			    if($sign){
                   $boddy .= "--$mime_boundary--$nl";
                         $boddy = $headers.$nl.$mes;
 
@@ -221,7 +220,8 @@ class Email{
                 }
 
                 $subject = "=?utf-8?B?".base64_encode($subject)."?=";
-                
+			
+			
                 if(!Email::$debuginplace && @$_SERVER["SystemRoot"] != "C:\\Windows") {
 
                     if(@mail($emailwname,$subject,$mes,$headers,$params)){
@@ -234,14 +234,12 @@ class Email{
                             $ret = false;
                     }
                 } else {
-                    $ret = true;
+                    $ret = "email not sent - debug in place";
                 }
                 
-		DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$from,"result"=>$ret),array("cols"=>array("message"=>array("type"=>"text"))));
-
+			DB::insert("emails",array("to"=>$emailwname,"subject"=>$subject,"message"=>$message,"from"=>$from,"result"=>$ret),array("cols"=>array("message"=>array("type"=>"text"))));
 		return $ret;
 	}
 
 }
 
-?>
