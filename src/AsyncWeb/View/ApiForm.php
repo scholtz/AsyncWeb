@@ -2367,6 +2367,9 @@ $theme = "simple";
   $name = $this->data["uid"];
   $where=$this->where;
   $where["UID"] = (int) URLParser::v($name."___ID");
+  if(!$where["UID"]){
+	  throw new \Exception(Language::get("Error occured. The identifier for object you are trying to update has not been found."));
+  }
   $formName = $name;
   $row = $this->db->gr($this->data["table"],$where);
   
