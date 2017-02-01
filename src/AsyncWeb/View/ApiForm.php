@@ -2371,7 +2371,7 @@ $theme = "simple";
   $row = $this->db->gr($this->data["table"],$where);
   
   if(!$row){
-  	Messages::error(Language::get("Error while selecting information from the database".((isset($this->data["append_errors"]) && $this->data["append_errors"])?" ".$this->db->error():"")));
+  	Messages::getInstance()->error(Language::get("Error while selecting information from the database".((isset($this->data["append_errors"]) && $this->data["append_errors"])?" ".$this->db->error():"")));
   	\AsyncWeb\Storage\Log::log("ApiForm","update2 no row selected",ML__HIGH_PRIORITY);
 	if(ApiForm::$redirectAfterSuccess == "?"){	
 		Header::s("reload",array($this->data["uid"]."___ID"=>"",$this->data["uid"]."___UPDATE2"=>"",$this->data["uid"]."___UPDATE1"=>""));

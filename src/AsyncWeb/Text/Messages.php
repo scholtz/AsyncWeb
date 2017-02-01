@@ -8,15 +8,13 @@
  20051117 zmena defaultnej hodnoty alert pri mes na false
  20060129 pridana funkcia die_error.. hlavne pre db, aby mohla zobrazit hlasku, ked sa zruti server..
  
- Priklad::
+ Example::
  
- Messages::message($msg);
- Messages::err($msg);
 
  
  
   $mes = Messages::getInstance();
-  $mes->error("chybova hlaska");
+  $mes->error("Error message");
   
   || 
   

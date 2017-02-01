@@ -38,7 +38,7 @@ class MyCurl{
 		// from php doc: http://php.net/manual/en/function.http-build-query.php
 		// 2017 01 24
 		// modified to work properly
-
+		$r = array();
 		if (!is_array($a)) return false;
 		$AllKeysAreNumeric = true;
 		foreach ((array)$a as $k=>$v){
