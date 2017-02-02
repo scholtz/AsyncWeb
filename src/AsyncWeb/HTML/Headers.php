@@ -29,11 +29,11 @@ class Headers{
  public static function get_meta($name){
   return @Headers::$headers[md5("meta__".$name)]["content"];
  }
- public static function add_script($type="text/javascript",$src){
+ public static function add_script($type="text/javascript",$src,$async=false){
   if($type == "javascript" || !$type){
   	$type = "text/javascript";
   }
-  Headers::$headers[md5("script__".$type."__".$src)] = array("tag"=>"script","type"=>$type,"src"=>$src);
+  Headers::$headers[md5("script__".$type."__".$src)] = array("tag"=>"script","type"=>$type,"src"=>$src,"async"=>$async);
  }
  
  public static function add_link($href="",$rel="",$type="",$title="",$media="",$sizes=""){
@@ -72,7 +72,7 @@ class Headers{
    	break;
    	case 'script':
 	 if(!$header["type"]) $header["type"] = "text/javascript";
-   	 $ret .= '<script type="'.$header["type"].'" src="'.$header["src"].'"></script>'."\n";
+   	 $ret .= '<script '.($header["async"]?"async ":"").'type="'.$header["type"].'" src="'.$header["src"].'"></script>'."\n";
    	break;
    	case 'link':
    	 $ret .= '<link';
