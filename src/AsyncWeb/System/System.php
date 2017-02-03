@@ -36,4 +36,12 @@ class System{
 	{
 		return (php_sapi_name() === 'cli' OR defined('STDIN'));
 	}
+	protected static $variables = array();
+	public static function set($variableName,$variable){
+		$variables[$variableName] = $variable;
+	}
+	public static function get($variableName){
+		if(!isset($variables[$variableName])) return null;
+		return $variables[$variableName];
+	}
 }
