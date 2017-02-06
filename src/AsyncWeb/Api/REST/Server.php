@@ -1,19 +1,20 @@
 <?php
 
 namespace AsyncWeb\Api\REST;
-
+ 
 class Server{
 	public static $Services = array();
 	public static function Register($prepend = "/rest/", $classes=array(), $namespace = "\\"){
 		$prepend = str_replace("/","\\/",$prepend);
 		foreach($classes as $class){
-			$classWBackslashes = str_replace("/","\\",$class);
+			$classWBackslashes = str_replace(array("/","_"),"\\",$class);
 			if(isset(self::$Services[$class])) continue;
 			self::$Services[$class] = $class;
 			$methods = get_class_methods($namespace.$classWBackslashes);
 			if($methods){
 				foreach($methods as $method){
-					$classEscaped = str_replace("/","\\/",$class);
+					$class = str_replace(array("/","_"),"\\",$class);
+					$classEscaped = str_replace(array("/","\\"),"\\/",$class);
 					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classEscaped.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$classWBackslashes,"method"=>$method));
 					if($classEscaped != strtolower($classEscaped)){
 						$classLower = strtolower($classEscaped);
