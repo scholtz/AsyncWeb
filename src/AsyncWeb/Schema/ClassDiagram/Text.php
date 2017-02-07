@@ -400,7 +400,7 @@ $fileout.='
 		if(isset(self::$CACHE[$id])){
 			return self::$CACHE[$id];
 		}
-		return new '.$class.'($id);
+		return new '.$this->ClassName($class).'($id);
 	}'."\n";
 		return $fileout;		
 	}
@@ -774,6 +774,15 @@ $fileout.=$type."=..&";
 				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "varchar";'."\n";
 				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "250";'."\n";
 			}else
+			if($DataType == "date"){
+				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "int";'."\n";
+			}else		
+			if($DataType == "datetime"){
+				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "int";'."\n";
+			}else		
+			if($DataType == "time"){
+				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "int";'."\n";
+			}else		
 			if($DataType == "int"){
 				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "int";'."\n";
 			}else		
