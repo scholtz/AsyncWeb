@@ -30,24 +30,28 @@ class Session{
 
   protected static $initializing = false;
   
-  private function __construct($force=true){
-	  
-	Session::set_cookie_params();
-   @session_start();
-   \AsyncWeb\HTTP\Header::send("Cache-Control: private");
-   Session::check_timeout();
-   if(\AsyncWeb\Security\Auth::controllerIsRegistered('\AsyncWeb\Security\TrustedIPController')){
-    Session::$CHECK_IP = false;
-   }
-   Session::$initializing=false;
+  private function __construct(){
+	if(\AsyncWeb\System\System::isCommandLineInterface()){
+		@session_start();
+	}else{
+		Session::set_cookie_params();
+		@session_start();
+		\AsyncWeb\HTTP\Header::send("Cache-Control: private");
+		Session::check_timeout();
+		if(\AsyncWeb\Security\Auth::controllerIsRegistered('\AsyncWeb\Security\TrustedIPController')){
+			Session::$CHECK_IP = false;
+		}
+	}
+	Session::$initializing=false;
   }
   public static function init($force=false){
+	if(\AsyncWeb\System\System::isCommandLineInterface()) $force = true;
 	if(!isset($_COOKIE["PHPSESSID"]) && $force==false){return;}
 	
 	if(!Session::$inst){
 		if(Session::$initializing) return;
 		Session::$initializing = true;
-		Session::$inst = new Session($force);
+		Session::$inst = new Session();
 	}
   }
   public static function initialized(){
