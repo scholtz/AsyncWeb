@@ -68,4 +68,5 @@ class TrustedIPController implements AuthController{
 	  return $ret;
 		
 	}
+	public function beforeLogout(){}
 }

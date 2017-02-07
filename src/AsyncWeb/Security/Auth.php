@@ -89,8 +89,9 @@ class Auth{
 	}
 	public static function showControllerForm(){
 		$k = Auth::checkControllers();
-		
-		return Auth::$controllers[$k]->form();
+		if(isset(Auth::$controllers[$k])){
+			return Auth::$controllers[$k]->form();
+		}
 	}
 	public static function auth(Array $data, AuthService $service){
 		if(!isset(Auth::$services[$service->SERVICE_ID()])){throw new \AsyncWeb\Exceptions\SecurityException("Service provider '".$service->SERVICE_ID()."' is not registered! 0x9319520");}
@@ -101,6 +102,17 @@ class Auth{
 		return $ret;
 	}
 	public static function logout($completelogout=false){
+		
+		foreach(Auth::$controllers as $controller){
+			
+			if(method_exists($controller,"beforeLogout")){
+				if($controller->beforeLogout()){
+					$auth = Session::get(Auth::$SESS_CHAIN_NAME);
+					return array_pop($auth);
+				}
+			}
+		}
+		
 		if($completelogout){
 			$auth = array();
 		}else{
