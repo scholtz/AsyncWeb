@@ -1311,4 +1311,4 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 		$newStr = str_replace("__","_",$newStr);
 		return $newStr;
 	}
-}
+} 
