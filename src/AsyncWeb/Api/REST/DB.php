@@ -122,6 +122,8 @@ class DB extends \AsyncWeb\DB\DBServer {
 			if(!is_array($ID)){
 				$ID = array("ID"=>$id2);
 			}
+			
+			
 			$row = $this->gr($table,$ID,array(),$cols);
 			//throw new \Exception(var_export($id2,true));
 			if(!$row){
@@ -131,6 +133,13 @@ class DB extends \AsyncWeb\DB\DBServer {
 					if(!isset($data2["ID"])){
 						$data2 = array_merge(array("ID"=>$id2),$data2);
 						$data2["ID"] = $id2;
+					}else{
+						reset($data2);
+						if("ID" != key($data2)){ // if ID is not first key
+							$ID = $data2["ID"];
+							unset($data2["ID"]);
+							$data2 = array_merge(array("ID"=>$ID),$data2);
+						}
 					}
 					return $this->insert($table,$data2,$config);
 				}
