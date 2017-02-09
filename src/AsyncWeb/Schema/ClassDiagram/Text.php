@@ -543,11 +543,13 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 		}
 		if(isset($this->optionality[$class]["Name"])){
 			$fileout.='		// We will try to make nice looking identifier'."\n";
-			$fileout.='		$ID = substr(\AsyncWeb\Text\Texts::clear($Name),0,32);'."\n";
-			$fileout.='		if(DB::gr(self::$TABLE,array("id2"=>$ID))){'."\n";
-			$fileout.='			$ID = substr($ID,0,30).rand(10,99);'."\n";
+			$fileout.='		if(!$OrigID){'."\n";
+			$fileout.='			$ID = substr(\AsyncWeb\Text\Texts::clear($Name),0,32);'."\n";
 			$fileout.='			if(DB::gr(self::$TABLE,array("id2"=>$ID))){'."\n";
-			$fileout.='				$ID = md5(uniqid());'."\n";
+			$fileout.='				$ID = substr($ID,0,30).rand(10,99);'."\n";
+			$fileout.='				if(DB::gr(self::$TABLE,array("id2"=>$ID))){'."\n";
+			$fileout.='					$ID = md5(uniqid());'."\n";
+			$fileout.='				}'."\n";
 			$fileout.='			}'."\n";
 			$fileout.='		}'."\n";
 		}
@@ -1311,4 +1313,4 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 		$newStr = str_replace("__","_",$newStr);
 		return $newStr;
 	}
-} 
+}
