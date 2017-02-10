@@ -14,6 +14,11 @@ the Time class can be modified on the System::$USE_MICROTIME setting..
 
 if System::$USE_MICROTIME == false, time() == Time::get()
 
+2017.02.10 Added support for internalization 
+Example:
+\AsyncWeb\System\System::Set("Locale","en_US");
+\AsyncWeb\Date\Time::ToString(time() - 100);
+
 */
 
 namespace AsyncWeb\Date;
@@ -70,6 +75,21 @@ class Time{
 		}
 		return 1;
 	}
+	public static function ToString($date){
+		$date = self::get($date);
+		$dt = new \DateTime();
+		$dt->setTimestamp($date);
+		$locale = \AsyncWeb\System\System::get("Locale");
+		if($locale === null) $locale = "sk_SK";
+		if($locale && class_exists("\IntlDateFormatter")){
+			$format = \IntlDateFormatter::MEDIUM;
+			if($date > (self::get() - self::span(3600*24))){
+				$format = \IntlDateFormatter::SHORT;
+			}
+				
+			$formatter = new \IntlDateFormatter($locale, $format, $format);
+			return $formatter->format($dt);
+		}
+		return date("d.m.Y",$date);
+	}
 }
-
-?>
