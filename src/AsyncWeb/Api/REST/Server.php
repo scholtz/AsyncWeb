@@ -15,10 +15,10 @@ class Server{
 				foreach($methods as $method){
 					$class = str_replace(array("/","_"),"\\",$class);
 					$classEscaped = str_replace(array("/","\\"),"\\/",$class);
-					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classEscaped.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$classWBackslashes,"method"=>$method));
+					\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classEscaped.'\/'.$method.'[\/]*[\?(.*)]*$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$classWBackslashes,"method"=>$method));
 					if($classEscaped != strtolower($classEscaped)){
 						$classLower = strtolower($classEscaped);
-						\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classLower.'\/'.$method.'[\/]*(.*)$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$classWBackslashes,"method"=>$method));
+						\AsyncWeb\System\Router::addRoute($match = '/^'.$prepend.$classLower.'\/'.$method.'[\/]*[\?(.*)]*$/',array("\\AsyncWeb\\Api\REST\\Server","Process"),false,array("class"=>$namespace.$classWBackslashes,"method"=>$method));
 					}
 				}
 			}
