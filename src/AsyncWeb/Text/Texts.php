@@ -34,6 +34,7 @@ class Texts{
 		
 		$url = str_replace(';',"_",$url);
 		
+		$url = str_replace('%',"",$url);
 		$url = str_replace('^',"",$url);
 		$url = str_replace('#',"",$url);
 		$url = str_replace('$',"",$url);
