@@ -32,14 +32,14 @@ class Client{
 			}elseif(isset($resp["Result"])){
 				return $resp["Result"];
 			}else{
-				throw new \Exception("Server did not responded according to CEB REST Standards");
+				throw new \Exception(\AsyncWeb\System\Language::get("Server did not responded according to AW REST Standards"));
 			}
 		}else{
-			throw new \Exception("Server has not provided any reasonable response");
+			throw new \Exception(\AsyncWeb\System\Language::get("Server has not provided any reasonable response"));
 		}
 	}
 	/**
-		Creates HashString according to CEB REST Standard
+		Creates HashString according to AW REST Standard
 		
 		array("1"=>"2","3"=>array("4"=>"5"),"6"=>"7") will convert to 
 		
