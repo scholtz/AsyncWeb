@@ -150,7 +150,7 @@ class Text{
 						if(count($thisparam) == 2){
 							$paramsarr[] = array("name"=>trim($thisparam[1]),"datatype"=>trim($thisparam[0]));
 						}else{
-							$paramsarr[] = array("name"=>\AsyncWeb\Text\Texts::clear_($param),"datatype"=>"string");
+							$paramsarr[] = array("name"=>$param,"datatype"=>"string");
 						}
 					}
 					
@@ -212,7 +212,6 @@ class '.$this->ClassName($class).' extends '.$this->ConvertClassToNamespaceName(
 		return $fileout;
 	}
 	public function GeneratePHPVariables($class){
-		$fileout = "";
 		$table = $class;
 		if($this->extendsClasses[$class] != '\AsyncWeb\Api\REST\Service'){
 			$parts = explode("\\",$this->extendsClasses[$class]);
@@ -322,7 +321,6 @@ $fileout.='	/** Identifier of user who has suggested the object */
 		return $fileout;
 	}
 	public function GeneratePHPConstructor($class){
-		$fileout = "";
 		
 
 
@@ -394,8 +392,7 @@ $fileout.='		self::$CACHE[$data[self::$COL_ID]] = $this;
 		return $fileout;		
 	}
 	public function GeneratePHPInstance($class){
-		$fileout = "";
-		
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Instance
 $fileout.='
 	/**
@@ -416,8 +413,7 @@ $fileout.='
 		return $fileout;		
 	}
 	public function GeneratePHPCreate($class){
-		$fileout = "";
-		
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// CREATE
 	
 	if(isset($this->doc[false][false][true][$class]["Create"])){
@@ -613,8 +609,7 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 		return $fileout;
 	}
 	public function GeneratePHPUpdate($class){
-		$fileout = "";
-		
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// UPDATE
 	if(isset($this->doc[false][false][true][$class]["Update"])){
 		
@@ -849,7 +844,6 @@ $fileout.=$type."=..&";
 		return $fileout;
 	}
 	public function GeneratePHPDelete($class){
-		$fileout = "";
 		
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// DELETE
 	if(isset($this->doc[false][false][true][$class]["Delete"])){
@@ -947,7 +941,6 @@ $fileout.='
 		return $fileout;
 	}
 	public function GeneratePHPRequest($class){
-		$fileout = "";
 		
 
 	
@@ -1060,8 +1053,6 @@ $fileout.='
 		return $fileout;
 	}
 	public function GeneratePHPOtherMethods($class){
-		$fileout = "";
-			
 		if(isset($this->doc[false][false][true][$class]))
 		foreach($this->doc[false][false][true][$class] as $method=>$arr){
 			
@@ -1145,7 +1136,7 @@ $fileout.='
 		return $fileout;
 	}
 	public function GeneratePHPFooter($class){
-		return $fileout='}';	
+		return $fileout.='}';	
 	}
 	public function GenerateForm($class){
 
