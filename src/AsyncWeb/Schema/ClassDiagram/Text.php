@@ -137,6 +137,7 @@ class Text{
 					if(!preg_match("/^[a-zA-Z0-9\_]+$/",$name)){
 						throw new \Exception(\AsyncWeb\System\Language::get("Parameter '%param%' in class '%class%' contains invalid characters",array("%class%"=>$currentClass,"%param%"=>$name)));
 					}
+					
 				} 
 				$posFunction = strpos("".$data,"(");
 				if($posFunction !== false){
@@ -145,12 +146,29 @@ class Text{
 					$params = substr($data,$posFunction);
 					$params = trim($params,"()");
 					$paramsarr = array();
+					
 					foreach(explode(",",trim($params)) as $param){
-						$thisparam = explode(" ",$param);
-						if(count($thisparam) == 2){
-							$paramsarr[] = array("name"=>trim($thisparam[1]),"datatype"=>trim($thisparam[0]));
-						}else{
-							$paramsarr[] = array("name"=>$param,"datatype"=>"string");
+						$param = trim($param);
+						if($param){
+							$thisparam = explode(" ",$param);
+							
+							
+							if(count($thisparam) == 2){
+								$name = trim($thisparam[1]);
+								$datatype = trim($thisparam[0]);
+							}else{
+								$name = $param;
+								$datatype = "string";
+							}
+							
+							if(!preg_match("/^[a-zA-Z0-9\_]+$/",$name)){
+								throw new \Exception(\AsyncWeb\System\Language::get("Parameter '%param%' in class '%class%' contains invalid characters",array("%class%"=>$currentClass,"%param%"=>$name)));
+							}
+							if(!preg_match("/^[a-zA-Z0-9\_]+$/",$datatype)){
+								throw new \Exception(\AsyncWeb\System\Language::get("DataType '%param%' in class '%class%' contains invalid characters",array("%class%"=>$currentClass,"%param%"=>$datatype)));
+							}
+							
+							$paramsarr[] = array("name"=>$name,"datatype"=>$datatype);
 						}
 					}
 					
