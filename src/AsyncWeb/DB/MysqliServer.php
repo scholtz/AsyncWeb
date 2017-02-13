@@ -495,8 +495,9 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
 
 
 		$query = "insert into $t ($cols) values ($rows)";
+		$time = Time::get();
 		
-		$this->query("update $t set `$do` = '".Time::get()."' where (`$id2` = '$myId2' and (do <= 0 or do >= '$t'))");
+		$this->query("update $t set `$do` = '".Time::get()."' where (`$id2` = '$myId2' and (do <= 0 or do >= '$time'))");
 		$rows = $this->affected_rows();
 		$this->query($query);
 		$rows = $this->affected_rows();
