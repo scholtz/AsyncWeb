@@ -137,12 +137,12 @@ class Text{
 					$params = substr($data,$posFunction);
 					$params = trim($params,"()");
 					$paramsarr = array();
-					foreach(explode(",",$params) as $param){
+					foreach(explode(",",trim($params)) as $param){
 						$thisparam = explode(" ",$param);
 						if(count($thisparam) == 2){
 							$paramsarr[] = array("name"=>trim($thisparam[1]),"datatype"=>trim($thisparam[0]));
 						}else{
-							$paramsarr[] = array("name"=>trim($param),"datatype"=>"string");
+							$paramsarr[] = array("name"=>\AsyncWeb\Text\Texts::clear_($param),"datatype"=>"string");
 						}
 					}
 					
@@ -1047,6 +1047,7 @@ $fileout.='
 	public function GeneratePHPOtherMethods($class){
 		if(isset($this->doc[false][false][true][$class]))
 		foreach($this->doc[false][false][true][$class] as $method=>$arr){
+			
 			$methodname = $method;
 			if($pos = strpos($method, " ")){
 				$methodname = trim(strrchr($method, " "));
@@ -1105,6 +1106,7 @@ $fileout.='
 	$fileout.='$ApiKeySession = "",$CRC = ""){
 		
 		$vars=array(';
+		
 	foreach($this->doc[false][false][true][$class][$method]["parameters"] as $param ){
 		if(!trim($param["name"])) continue;
 		$fileout.='"'.trim($param["name"]).'"=>$'.trim($param["name"]).",";
@@ -1130,7 +1132,7 @@ $fileout.='
 	}
 	public function GenerateForm($class){
 
-	
+
 	$form  = '<?php
 
 namespace '.$this->Namespace.'\Block\Form\\'.$this->Folder.';
@@ -1235,7 +1237,10 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 			
 			$outfile = $this->OutputDirectory."/".$this->ConvertClassToDirectory($class).".php";
 			$dir = dirname($outfile);
-			if(!is_dir($dir)) mkdir($dir,0770,true);
+			if(!is_dir($dir)) {
+				echo "Creating directory $dir\n";
+				mkdir($dir,0770,true);
+			}
 			if(!file_exists($outfile) || md5_file($outfile) != md5($fileout)){
 				$res = file_put_contents($outfile,$fileout);
 				echo $outfile." ".$res."\n";
