@@ -91,6 +91,7 @@ class Text{
 						}else{
 							$currentClass = trim(substr($data,1));
 						}
+												
 						$currentClassA = explode(":",$currentClass);
 						if(count($currentClassA) > 1){
 							// inherited
@@ -99,7 +100,11 @@ class Text{
 							$this->append[$currentClass]["-:>"][$parentClass] = true;
 							$data = "[$currentClass|";
 						}
-						
+
+						if(!preg_match("/^[a-zA-Z0-9\_]+$/",$currentClass)){
+							throw new \Exception(\AsyncWeb\System\Language::get("Class '%class%' contains invalid characters",array("%class%"=>$currentClass)));
+						}
+								
 						$this->docforclass = true;$this->docforparam = false;$this->docforfunction = false;$this->docobject=$currentClass;
 						if(strtolower(substr($currentClass,-4)) != "enum"){
 							if(!isset($this->datatypes[$currentClass])) $this->datatypes[$currentClass] = array();
@@ -129,6 +134,9 @@ class Text{
 
 					$this->docforclass = false;$this->docforparam = true;$this->docforfunction = false;$this->docobject=$name;
 					
+					if(!preg_match("/^[a-zA-Z0-9\_]+$/",$name)){
+						throw new \Exception(\AsyncWeb\System\Language::get("Parameter '%param%' in class '%class%' contains invalid characters",array("%class%"=>$currentClass,"%param%"=>$name)));
+					}
 				} 
 				$posFunction = strpos("".$data,"(");
 				if($posFunction !== false){
