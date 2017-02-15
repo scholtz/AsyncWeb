@@ -433,17 +433,8 @@ $fileout.='
 	/**
 		Returns instance from identifier.
 	*/
-	public static function Instance($id){
-		if(!$id){
-			throw new \\'.$this->Namespace.'\Service\Exception\UnauthorizedException(Language::get("Invalid call for object %object%. Identifier must not be empty.",array("%object%"=>"'.$class.'")));
-		}
-		if(is_array($id)){
-			throw new \\'.$this->Namespace.'\Service\Exception\UnauthorizedException(Language::get("Invalid call for object %object%. Identifier must not be an array. %array%",array("%object%"=>"'.$class.'","%array%"=>print_r($id,true))));
-		}
-		if(isset(self::$CACHE[$id])){
-			return self::$CACHE[$id];
-		}
-		return new '.$this->ClassName($class).'($id);
+	public function ToArray(){
+		return json_decode(json_encode($this),true);
 	}'."\n";
 		return $fileout;		
 	}
