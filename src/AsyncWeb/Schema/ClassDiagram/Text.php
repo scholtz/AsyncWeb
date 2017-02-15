@@ -230,6 +230,7 @@ class '.$this->ClassName($class).' extends '.$this->ConvertClassToNamespaceName(
 		return $fileout;
 	}
 	public function GeneratePHPVariables($class){
+		$fileout = "";
 		$table = $class;
 		if($this->extendsClasses[$class] != '\AsyncWeb\Api\REST\Service'){
 			$parts = explode("\\",$this->extendsClasses[$class]);
@@ -339,7 +340,7 @@ $fileout.='	/** Identifier of user who has suggested the object */
 		return $fileout;
 	}
 	public function GeneratePHPConstructor($class){
-		
+		$fileout = "";
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// CONSTRUCTOR
@@ -410,8 +411,24 @@ $fileout.='		self::$CACHE[$data[self::$COL_ID]] = $this;
 		return $fileout;		
 	}
 	public function GeneratePHPInstance($class){
-
+		$fileout= "";
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Instance
+$fileout.='
+	/**
+		Returns instance from identifier.
+	*/
+	public static function Instance($id){
+		if(!$id){
+			throw new \\'.$this->Namespace.'\Service\Exception\UnauthorizedException(Language::get("Invalid call for object %object%. Identifier must not be empty.",array("%object%"=>"'.$class.'")));
+		}
+		if(is_array($id)){
+			throw new \\'.$this->Namespace.'\Service\Exception\UnauthorizedException(Language::get("Invalid call for object %object%. Identifier must not be an array. %array%",array("%object%"=>"'.$class.'","%array%"=>print_r($id,true))));
+		}
+		if(isset(self::$CACHE[$id])){
+			return self::$CACHE[$id];
+		}
+		return new '.$this->ClassName($class).'($id);
+	}'."\n";
 $fileout.='
 	/**
 		Returns instance from identifier.
@@ -431,6 +448,7 @@ $fileout.='
 		return $fileout;		
 	}
 	public function GeneratePHPCreate($class){
+		$fileout = "";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// CREATE
 	
@@ -627,6 +645,7 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 		return $fileout;
 	}
 	public function GeneratePHPUpdate($class){
+		$fileout = "";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// UPDATE
 	if(isset($this->doc[false][false][true][$class]["Update"])){
@@ -791,6 +810,7 @@ $fileout.=$type."=..&";
 		return $fileout;
 	}
 	public function GenerateSchema($class){
+		$fileout = "";
 		
 		$fileout= "\n".'	public static function __Get_Schema(){'."\n";
 		$fileout.="\n".'		$config = array();'."\n";
@@ -862,6 +882,7 @@ $fileout.=$type."=..&";
 		return $fileout;
 	}
 	public function GeneratePHPDelete($class){
+		$fileout = "";
 		
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// DELETE
 	if(isset($this->doc[false][false][true][$class]["Delete"])){
@@ -959,6 +980,7 @@ $fileout.='
 		return $fileout;
 	}
 	public function GeneratePHPRequest($class){
+		$fileout = "";
 		
 
 	
@@ -1071,6 +1093,7 @@ $fileout.='
 		return $fileout;
 	}
 	public function GeneratePHPOtherMethods($class){
+		$fileout = "";
 		if(isset($this->doc[false][false][true][$class]))
 		foreach($this->doc[false][false][true][$class] as $method=>$arr){
 			
@@ -1154,6 +1177,7 @@ $fileout.='
 		return $fileout;
 	}
 	public function GeneratePHPFooter($class){
+		$fileout = "";
 		return $fileout.='}';	
 	}
 	public function GenerateForm($class){
