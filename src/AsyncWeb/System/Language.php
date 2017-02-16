@@ -72,7 +72,7 @@ class Language{
 		if($row){
 			$id2 = $row["id2"];
 		}
-		$ret = \AsyncWeb\DB\DB::u("dictionary",$id2,array("key"=>$term,"value"=>$value,"lang"=>$lang));
+		$ret = \AsyncWeb\DB\DB::u("dictionary",$id2,array("key"=>$term,"value"=>$value,"lang"=>$lang),array("cols"=>array("value"=>array("type"=>"text"))));
 		Language::makeCache();
 		if(!$origterm && $ret)  return $term;
 		return $ret;
