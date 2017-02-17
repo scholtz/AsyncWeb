@@ -26,16 +26,26 @@ class Client{
 		}
 		
 		$response = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		
+		if($info["http_code"] != "200"){
+			throw new \Exception(\AsyncWeb\System\Language::get("API Server returned http status code %code%",array("%code"=>$info["http_code"])));
+		}
+		
+		if(!$response){
+			throw new \Exception(\AsyncWeb\System\Language::get("API Server returned empty result"));
+		}
+		
 		if($resp = @json_decode($response,true)){
 			if(isset($resp["Status"]) && $resp["Status"] == "error"){
 				throw new \Exception($resp["Text"]);
 			}elseif(isset($resp["Result"])){
 				return $resp["Result"];
 			}else{
-				throw new \Exception(\AsyncWeb\System\Language::get("Server did not responded according to AW REST Standards"));
+				throw new \Exception(\AsyncWeb\System\Language::get("API Server did not responded according to AW REST Standards"));
 			}
 		}else{
-			throw new \Exception(\AsyncWeb\System\Language::get("Server has not provided any reasonable response"));
+			throw new \Exception(\AsyncWeb\System\Language::get("API Server has not provided any reasonable response"));
 		}
 	}
 	/**
