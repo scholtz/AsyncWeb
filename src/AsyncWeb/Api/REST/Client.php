@@ -29,7 +29,7 @@ class Client{
 		$info = curl_getinfo($curl);
 		
 		if($info["http_code"] != "200"){
-			throw new \Exception(\AsyncWeb\System\Language::get("API Server returned http status code %code%",array("%code"=>$info["http_code"])));
+			throw new \Exception(\AsyncWeb\System\Language::get("API Server returned http status code %code%",array("%code%"=>$info["http_code"])));
 		}
 		
 		if(!$response){
