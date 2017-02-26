@@ -2844,6 +2844,7 @@ $theme = "simple";
      $ret .='>';
      
      foreach($item["filter"]["option"] as $k=>$v){
+	  $v = Language::get($v);
       $ret .= '<option value="'.$k.'"';
       if($form_submitted){
        if($colValue == $k){

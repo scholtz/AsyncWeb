@@ -2670,6 +2670,8 @@ $theme = "simple";
      $ret .='>';
      
      foreach($item["filter"]["option"] as $k=>$v){
+	  $v = Language::get($v);
+
       $ret .= '<option value="'.$k.'"';
       if($form_submitted){
        if($colValue == $k){
@@ -2682,7 +2684,7 @@ $theme = "simple";
 	    $ret .= ' selected="selected"';
 	   }
       }
-      $ret .='>'.strip_tags($v).'</option>'."\n";
+	  $ret .='>'.strip_tags($v).'</option>'."\n";
      }
      $ret.='</select>';
 	 
