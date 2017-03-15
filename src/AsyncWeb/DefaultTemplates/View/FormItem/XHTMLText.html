@@ -1,0 +1,71 @@
+<div class="form-group">
+	{{#LabelText}}<label for="{{ID}}" class="control-label col-{{BT_SIZE}}-{{BT_WIDTH_OF_LABEL}}">{{.}}</label>{{/LabelText}}
+	<div class="col-{{BT_SIZE}}-1 collapse MFCheckColumn {{^LabelText}}col-{{BT_SIZE}}-offset-{{BT_WIDTH_OF_LABEL}}{{/LabelText}}">
+		<input class="MFUpdateCheckBox" type="checkbox" title="Check this checkbox, if you want to change the value in the line. Uncheck it if you do not want to change it and do not want to reset the form." name="{{ID}}_CHANGED" id="{{ID}}_CHANGED" >
+	</div>
+	<div class="col-{{BT_SIZE}}-{{BT_WIDTH_9}} MFFormColumn">
+
+	
+{{#Prepend}}
+	{{#After}}
+		<div class="input-group"><span class="input-group-addon">{{.}}</span>
+	{{/After}}
+	{{^After}}
+		<div class="input-group"><span class="input-group-addon">{{.}}</span>
+	{{/After}}
+{{/Prepend}}
+{{^Prepend}}
+	{{#After}}
+		<div class="input-group">
+	{{/After}}
+{{/Prepend}}
+
+
+	<object type="application/x-xstandard" 
+		id="{{EditorName}}" 
+		width="{{Width}}" 
+		height="{{Height}}"
+		{{#Disabled}} disabled{{/Disabled}} 
+		>
+		<param name="CSS" 		value="{{CSS}}" />
+		<param name="Styles" 	value="{{Styles}}" />
+		<param name="Lang" 		value="{{Lang}}" />
+		<param name="Value" 	value="{{Value}}" />
+		<div>Please install XStandard Lite from http://xstandard.com/download.asp</div>
+		<textarea 
+			onchange="document.getElementById('{{ID}}_CHANGED').checked=true" name="alternate{{ID}}" id="alternate{{ID}}" cols="50" rows="15"
+			
+			{{#DataValidation.Modules}} data-validation="{{.}}"{{/DataValidation.Modules}}
+			{{#DataValidation.Format}} data-validation-format="{{.}}"{{/DataValidation.Format}}
+			{{#DataValidation.Length}} data-validation-length="{{.}}"{{/DataValidation.Length}}
+			{{#DataValidation.Allowing}} data-validation-allowing="{{.}}"{{/DataValidation.Allowing}}
+			{{#DataValidation.Qty}} data-validation-qty="{{.}}"{{/DataValidation.Qty}}
+			{{#DataValidation.Regexp}} data-validation-regexp="{{.}}"{{/DataValidation.Regexp}}
+			{{#DataValidation.Optional}} data-validation-optional="{{.}}"{{/DataValidation.Optional}}
+			{{#DataValidation.Ignore}} data-validation-ignore="{{.}}"{{/DataValidation.Ignore}}
+			{{#DataContent}} data-validation-help="{{.}}"{{/DataContent}}
+			{{#DataValidation.Suggestion}} data-suggestions="{{.}}"{{/DataValidation.Suggestion}}
+			{{#DataValidation.Strength}} data-validation-strength="{{.}}"{{/DataValidation.Strength}}
+			{{#DataValidation.MaxSize}} data-validation-max-size="{{.}}"{{/DataValidation.MaxSize}}
+			{{#DataValidation.ErrorMessage}} data-validation-error-msg="{{.}}"{{/DataValidation.ErrorMessage}}
+			{{#DataValidation.RequiredMessage}} data-validation-error-msg-required="{{.}}"{{/DataValidation.RequiredMessage}}
+			>{{Value}}</textarea>
+	</object>
+	<input type="hidden" name="{{ID}}" id="{{ID}}" value="{{Value}}" 
+			onchange="document.getElementById('{{ID}}_CHANGED').checked=true" />
+
+{{#Prepend}}
+	{{#After}}
+		<span class="input-group-addon">{{.}}</span></div>
+	{{/After}}
+	{{^After}}
+		</div>
+	{{/After}}
+{{/Prepend}}
+{{^Prepend}}
+	{{#After}}
+		<span class="input-group-addon">{{.}}</span></div>
+	{{/After}}
+{{/Prepend}}
+	</div>
+</div>

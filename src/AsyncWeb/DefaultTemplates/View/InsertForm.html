@@ -1,0 +1,23 @@
+{{#Merged}}
+<input type="hidden" name="{{ID}}___INSERT" value="1" />
+{{/Merged}}
+{{^Merged}}
+<form 
+	class="form-horizontal" 
+	role="form" 
+	method="post" 
+	action="{{SubmitURL}}" 
+	{{#EncType}} enctype="{{.}}"{{/EncType}}
+	{{#OnSubmit}} onsubmit="{{.}}"{{/OnSubmit}}
+   >
+{{/Merged}}
+
+	{{#HeaderText}}<h3>{{.}}</h3>{{/HeaderText}}
+	
+	{{{HTML}}}
+	
+{{#Focus}}	<script language="javascript">$("#{{.}}").focus();</script>{{/Focus}}
+	
+{{^Merged}}
+</form>
+{{/Merged}}

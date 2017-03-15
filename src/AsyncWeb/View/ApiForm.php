@@ -6,6 +6,8 @@
 //
 // 17.10.2016	API form created
 
+// @todo fix Language::set is not sent to api server
+
 namespace AsyncWeb\View;
 
 use AsyncWeb\Objects\Group;
@@ -449,33 +451,7 @@ class ApiForm{
  *@input $from true|false If false, than input time is string (str2time). 
  */
  private function convertDate($time, $from, $format="Y-m-d"){ 
-  // tato funkcia skonvertuje cas UNIXovsky na normalny
-  // from.. ak true, tak $time je unix, ak nie, tak je zadany vo formate $format
-  if(!$format) $format = "Y-m-d";
-  if($from){
-   if(!$time) return "";
-   if($time <= 0) return '';
-   // ak nam nechce vratit rovnaky vysledok po strtotime, tak nastav zachranny rezim
-   $ret = @date($format, \AsyncWeb\Date\Time::getUnix($time));
-   
-   if(\AsyncWeb\Date\Time::get(strtotime($ret)) != $time){
-   	$ret = @date("c",\AsyncWeb\Date\Time::getUnix($time));//ISO 8601 
-   }
-   return $ret;
-  }else{
-   if(!$time) return 0;
-  	$time1 = \AsyncWeb\Date\Time::get((int)strtotime($time));
-   if(\AsyncWeb\Date\Time::get(strtotime(date("Y-m-d",\AsyncWeb\Date\Time::getUnix($time1)))) == $time1 && mb_strlen($time,'UTF-8') == 10){ // je vyplneny iba datum vo formate YYYY-MM-DD
-   	// pridaj k tomu 23hod, 59min, 59 sek
-   	$time1 += \AsyncWeb\Date\Time::span(24*3600-1);
-   }
-   if(\AsyncWeb\Date\Time::get(strtotime(date("d.m.Y",\AsyncWeb\Date\Time::getUnix($time1)))) == $time1 && mb_strlen($time,'UTF-8') == 10){ // je vyplneny iba datum vo formate DD-MM-YYYY
-   	// pridaj k tomu 23hod, 59min, 59 sek
-   	$time1 += \AsyncWeb\Date\Time::span(24*3600-1);
-   }
-  
-   return $time1;
-  }
+  return \AsyncWeb\Date\Time::ConvertDate($time, $from, $format);
  }
  private function checkCancel(){// for N2N tables if the item should be canceled
  
@@ -534,215 +510,90 @@ class ApiForm{
    }
   }
   
-  $data = array();
-  $includedCols = array();
+	$data = array();
+	$includedCols = array();
+	$this->updateLangs = $langupdates = array();
+	foreach($this->data["col"] as $colname=>$item){
 
-  foreach($this->data["col"] as $colname=>$item){
-	  
-   if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
-   $usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
-  
-	if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
-	$n = $formName."_".$colname;
-	
-	if(isset($item["data"]["var"])) $n = $item["data"]["var"];
-	$colValue = URLParser::v($n);
+		if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
+		$usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
 
-    if($in=$this->inWhere($colname)){
-	 $colValue = $in["value"];
- 	 $item["editable"] = false;
-    }
-	
-	$name1 = $n;//."__MF_";
-	if(isset($item["data"]["datatype"])){
-		$datatype = $item["data"]["datatype"];
-	}else{
-		$datatype = "string";
-	}
-	
-  	if(!(null!==URLParser::v($name1)) && (null!==URLParser::v($n))) $colValue = URLParser::v($n);
+		if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
+		$n = $formName."_".$colname;
 
-	if($item["form"]["type"] == "part") continue;
-	if(isset($item["function"])) continue;
-	
-    // skontroluj format..
-    
-	if(@$includedCols[$colname]){
-	 continue;
-	}else{
- 	 $includedCols[$colname] = true;
-	}
-    
-    if(isset($item["editable"]) && $item["editable"] == false && isset($item["texts"]["default"])){
-     $data[$colname] = $this->getText($item["texts"]["default"]);
-	 continue;
-	}else{
-		if(isset($item["editable"]) && !$item["editable"]){continue;}
-	}
-	    
-    switch($item["form"]["type"]){
-     case 'value':
-     	if(isset($item["texts"]["value"])){//value neprehodnocuj podla Language::get
-			$value = $item["texts"]["value"];
+		if(isset($item["data"]["var"])) $n = $item["data"]["var"];
+		$colValue = URLParser::v($n);
+
+		if($in=$this->inWhere($colname)){
+			$colValue = $in["value"];
+			$item["editable"] = false;
+		}
+
+		$name1 = $n;//."__MF_";
+		if(isset($item["data"]["datatype"])){
+			$datatype = $item["data"]["datatype"];
 		}else{
-			$value = $this->getText($item["texts"]["text"]);
+			$datatype = "string";
 		}
-		if(@URLParser::v($name1)) {//isset($item["allowChange"]) && $item["allowChange"] && 
-			$value = $this->filters(@URLParser::v($name1),$datatype,true);	
+
+		if(!(null!==URLParser::v($name1)) && (null!==URLParser::v($n))) $colValue = URLParser::v($n);
+
+		if($item["form"]["type"] == "part") continue;
+		if(isset($item["function"])) continue;
+
+		// skontroluj format..
+
+		if(@$includedCols[$colname]){
+			continue;
+		}else{
+			$includedCols[$colname] = true;
 		}
-     	
-     	$data[$colname] = $value;
-     break;
-     case 'password':
-      	$data[$colname] = hash('sha256',URLParser::v($name1));
-		if(isset($item["data"]["cohash"])){
-			$data[$colname] = hash('sha256',$item["data"]["cohash"].$data[$colname]);
+
+		if(isset($item["editable"]) && $item["editable"] == false && isset($item["texts"]["default"])){
+			$data[$colname] = $this->getText($item["texts"]["default"]);
+			continue;
+		}else{
+			if(isset($item["editable"]) && !$item["editable"]){continue;}
+		}
+
+		if(!isset($item["FormItemInstance"])){
+			if(!self::$ItemsMap){
+				self::MakeItemsMap();
+			}
+			if(!isset(self::$ItemsMap[$item["form"]["type"]])){
+				throw new \Exception(Language::get("Form type %formtype% has not been found!",array("%formtype%"=>$item["form"]["type"])));
+			}
+			$item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item,$this->data);
 		}
 		
-     case 'htmlText':
-     case 'tinyMCE':
-	  
-	  $data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
-	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-		if($value){
-		 if(class_exists("DetectIntrusion")){
-	      $value = DetectIntrusion::XSSDecode($value);
-	     }
-	     $key = substr("Z___".md5(uniqid()),0,32);
-		 //$this->db->u("dictionary",array("key"=>$k,"lang"=>$l),array("key"=>$key,"lang"=>Language::getLang(),"value"=>$value));
-		 Language::set($key,$value);
-		 $data[$colname] = $key;
+		if($item["FormItemInstance"]->IsDictionary()){
+			$langupdates[$colname] = $item["FormItemInstance"]->Validate(URLParser::v($name1));
+			$langupdates[$colname] = $this->filters($data[$colname],$datatype,true);	
+		}else{
+			$data[$colname] = $item["FormItemInstance"]->Validate(URLParser::v($name1));
+			$data[$colname] = $this->filters($data[$colname],$datatype,true);	
 		}
-	  }
-	 
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
-		$data[$colname] = null;
-	  }
-
-	 
-	 break;
-     case 'textbox':
-     case 'hidden':
-     case 'textarea':
-      $data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
-
-	  
-	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-		if($value){
-			$key = substr("Z___".md5(uniqid()),0,32);
-			Language::set($key,$value);
-			$data[$colname] = $key;
-		}
-	  }
-	 
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
-			$data[$colname] = null;
-	  }
-
-
-     break;
-     case 'radio':
-     case 'select':
-     case 'selectDB':
-      $data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
-			$data[$colname] = null;
-	  }
-     break;
-     case 'set':
-	  $data[$colname] = $value = implode(";",URLParser::v($name1));
-      //$data[$colname] = $value = $this->filters(@URLParser::v($name1),$datatype,true);
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$data[$colname]){
-			$data[$colname] = null;
-	  }
-     break;
-     case 'checkbox':
-      $val = @URLParser::v($name1) || @URLParser::v($name1);
-      $data[$colname] = $value =$this->filters($val,$datatype,true);
-      if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@URLParser::v($name1)){
-			$data[$colname] = null;
-	  }
-     break;
-     case 'file':
-      $allowedExt = array("jpg","png","gif","pdf","xls","xlsx","doc","docx","txt","zip","rar");
-	  if(isset($item["data"]["allowed"])) $allowedExt = $item["data"]["allowed"];
-	  
-	  $name = $formName."_".$colname;
-	  
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && (!isset($_FILES[$name]['name']) || !$_FILES[$name]['name'])){
-		 $data[$colname] = null;
-	  }else{
-	  
-      $newFilename = $_FILES[$name]['name'];
-	  
-	  $info = pathinfo($_FILES[$name]['name']);
-	  $ext = $info["extension"];
-	  if(!in_array($ext,$allowedExt)){
-		$text = "fileNotAllowed";
-		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
-		throw new \Exception($this->getText($text));
-	  }
-	  if(!is_dir($item["data"]["dir"])){
-		mkdir($item["data"]["dir"],true);
-	  }
-	  if($item["data"]["makeunique"]){
-		$newFilename = Texts::clear(substr($_FILES[$name]['name'],0,-1*strlen($ext)-1))."-".substr(md5(uniqid()),0,5).".$ext";
-	  }
-      $table = $item["data"]["tableForFiles"];
-	  $info = pathinfo($newFilename);
-	  
-	  if(is_file($item["data"]["dir"].$newFilename)){
-       if($item["data"]["overwrite"]){
-        
 		
-       }else{
- 		$text = "fileExistsException";
-		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
-        throw new \Exception($this->getText($text));
-       }
-      }
-	  /*
-      $uploadfile = $item["data"]["dir"].$newFilename;
-      if(!move_uploaded_file($_FILES[$name]['tmp_name'], $uploadfile)){
-		$text = "errorWhileMovingFile";
-		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
-        throw new \Exception($this->getText($text));
-      }	  
-	  /**/
-	  $content = file_get_contents($_FILES[$name]['tmp_name']);
-	  
-	  
-	  
-      $this->db->u($table,$pid = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$content,"Owner"=>\AsyncWeb\Security\Auth::userId()));
-	  if($err = $this->db->error()){
-		  throw new \Exception($err);
-	  }
-	  if($newid = $this->db->insert_id()){
-		  if($newid != $pid) $pid = $newid;
-	  }
-      $data[$colname] = $value = $pid;
-	  }
-     break;
-    }
-	  	  
-    //URLParser::v($name1) = $value;
-	
-
-    try{
-     $this->checkRightDataFormat($item,$name1);
-    }catch(\Exception $e){
-     throw $e;
-    }
-  }
-  foreach($this->where as $col=>$val){
-	if(is_array($val)){
-	 if($val["op"]=="eq"){
-	  $data[$val["col"]] = $val["value"];
-	 }
-	}else{
-	  $data[$col] = $val;
+		
+		try{
+			$this->checkRightDataFormat($item,$name1);
+		}catch(\Exception $e){
+			throw $e;
+		}
 	}
-  }
+	
+	$this->updateLangs = $langupdates;
+	
+		
+	foreach($this->where as $col=>$val){
+		if(is_array($val)){
+			if($val["op"]=="eq"){
+				$data[$val["col"]] = $val["value"];
+			}
+		}else{
+			$data[$col] = $val;
+		}
+	}
 
   $this->insertData = $data;
   if($this->merged){
@@ -769,11 +620,24 @@ class ApiForm{
   }
   }
   $table = $this->data["table"];
+
+  foreach($this->updateLangs as $k=>$v){
+    if(!isset($this->insertData[$k])){
+		$key = substr("Z___".md5(uniqid()),0,32);
+		$this->insertData[$k] = $key;
+	}
+	$key=$this->insertData[$k];
+	Language::set($key,$v);
+  }
+  
   if(isset($this->data["api_keys_order"])){
 	$this->insertData = $this->db->SortFields($this->insertData,$this->data["api_keys_order"]);
   }
+  
   $res = $this->db->u($table,$id2=md5(uniqid()),$this->insertData);
   $id = $this->db->insert_id();
+  
+  
   if($res){
    \AsyncWeb\Storage\Log::log("INSERT","insert into $table");
   
@@ -842,7 +706,7 @@ class ApiForm{
 	}
    }
   }
-  $langupdates = array();
+  $this->updateLangs = $langupdates = array();
   
   foreach($this->data["col"] as $colname=>$item){
    $usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
@@ -868,175 +732,29 @@ class ApiForm{
      }
     }
 	$name1 = $n;//."__MF_";
-	
-    switch($item["form"]["type"]){
-     case 'value':
-	  if(isset($item["texts"]["value"])){
-	   $value = $this->getText($item["texts"]["value"]);
-	  }else{
-	   $value = $this->getText($item["texts"]["text"]);
-	  }
-	  if(isset($item["allowChange"]) && $item["allowChange"] && @$colValue) $value = $colValue;
-	  $cols[$colname] = $this->filters($value,@$item["data"]["datatype"],true);
-     break;
-	 case 'password':
-      $colValue = hash('sha256',$colValue);
-		if(isset($item["data"]["cohash"])){
-			$data[$colname] = hash('sha256',$item["data"]["cohash"].$data[$colname]);
+
+
+		if(isset($item["allowChange"]) && !$item["allowChange"]) continue;
+
+		if(!isset($item["FormItemInstance"])){
+			if(!self::$ItemsMap){
+				self::MakeItemsMap();
+			}
+			if(!isset(self::$ItemsMap[$item["form"]["type"]])){
+				throw new \Exception(Language::get("Form type %formtype% has not been found!",array("%formtype%"=>$item["form"]["type"])));
+			}
+			$item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item,$this->data);
 		}
-	 case 'tinyMCE':
-	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
-	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
-	   if(class_exists("DetectIntrusion")){
-	    $langupdates[$colname] = DetectIntrusion::XSSDecode($value);
-	   }else{
-		$langupdates[$colname] = $value;
-	   }
-	  }else{
-	   $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"],true);
-	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
-	    $cols[$colname] = null;
-	   }
-	  }
-	 break;
-     case 'textbox':
-     case 'textarea':
-	   $value = $this->filters($colValue,@$item["data"]["datatype"],true);
-	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
-		$langupdates[$colname] = $value;
-	  }else{
-	   $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"],true);
-	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
-	    $cols[$colname] = null;
-	   }
-	  }
-     break;
-     case 'select':
-     case 'selectDB':
-	  $value = $this->filters($colValue,@$item["data"]["datatype"]);
-	   $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"]);
-	   if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
-	    $cols[$colname] = null;
-	   }
-     break;
-     case 'set':
-	  $cols[$colname] = $value = implode(";",$colValue);
-      //$data[$colname] = $value = $this->filters(@$colValue,$datatype,true);
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$data[$colname]){
-			$cols[$colname] = null;
-	  }
-     break;
-     case 'checkbox':
-      $colValue = $colValue || $colValue;
-      $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"]);
-	  
-	  if((isset($item["allowNull"]) && $item["allowNull"] && !@$colValue) || (isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && !@$colValue)){
-	   $cols[$colname] = null;
-	  }
-     break;
-     case 'htmlText':
-	  $value = $this->filters($colValue,@$item["data"]["datatype"],true);
-	  if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"] && $value){
-	   if(class_exists("DetectIntrusion")){
-	    $langupdates[$colname] = DetectIntrusion::XSSDecode($value);
-	   }else{
-		$langupdates[$colname] = $value;
-	   }
-	  }else{
-       $cols[$colname] = $this->filters($colValue,@$item["data"]["datatype"],true);
-	  }
-     break;
-     case 'file':
-      // vytvor unikatne meno
-	  /*
-	  $name = $formName."_".$colname;
-      $newFilename = $_FILES[$name]['name'];
-	  if(!is_dir($item["data"]["dir"])){
-		mkdir($item["data"]["dir"],true);
-	  }
-      while($item["data"]["makeunique"] && is_file($item["data"]["dir"].$newFilename)){
-       $newFilename = md5(uniqid())."_".$_FILES[$name]['name'];
-      }
-      $table = $item["data"]["tableForFiles"];
-	  /**/
-	  $allowedExt = array("jpg","png","gif","pdf","xls","xlsx","doc","docx","txt","zip","rar");
-	  if(isset($item["data"]["allowed"])) $allowedExt = $item["data"]["allowed"];
 
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"] && (!isset($_FILES[$n]['name']) || !$_FILES[$n]['name'])){
-		 $data[$colname] = null;
-	  }else{
-	  
-  	  $info = pathinfo($_FILES[$n]['name']);
-	  
-	  $ext = $info["extension"];
-	  if(!in_array($ext,$allowedExt)){
-		  $text = "fileNotAllowed";
-		  if(isset($this->data["texts"][$text])) $text=$this->data["texts"][$text];
-		throw new \Exception($this->getText($text));
-	  }
+		if($item["FormItemInstance"]->IsDictionary()){
+			$langupdates[$colname] = $item["FormItemInstance"]->Validate($colValue);
+			$langupdates[$colname] = $this->filters($data[$colname],$datatype,true);	
+		}else{
+			$cols[$colname] = $item["FormItemInstance"]->Validate($colValue);
+			$cols[$colname] = $this->filters($data[$colname],$datatype,true);	
+		}
+		
 
-      $newFilename = $_FILES[$n]['name'];
-	  if($item["data"]["makeunique"]){
-		$newFilename = Texts::clear(substr($_FILES[$n]['name'],0,-1*strlen($ext)-1))."-".substr(md5(uniqid()),0,5).".$ext";
-	  }
-	  
-	  $info = pathinfo($newFilename);
-	  if(!in_array($info["extension"],$allowedExt)){
- 		$text = "fileNotAllowed";
-		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
-	    throw new \Exception($this->getText($text));
-	  }
-	  /*
-	  if(is_file($item["data"]["dir"].$newFilename)){
-       if($item["data"]["overwrite"]){
-        //$this->db->query("delete from `$table` where (name = '$newFilename' and ".$this->aditional_where.")");
-       }else{
- 		$text = "fileExistsException";
-		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
-        throw new \Exception($this->getText($text));
-       }
-      }/**/
-	  
-      // najdi cestu k staremu suboru
-      $tableF = $item["data"]["tableForFiles"];
-	  $where = $this->where;
-	  $where["UID"] = URLParser::v($formName."___ID");
-	  $row = $this->db->gr($table,$where);
-      $row2 = $this->db->gr($tableF,$row[$n]);
-	  
-      // vymaz stary subor
-      /*if(!unlink($row2["path"])){
-       throw new \Exception($this->getText("errorWhileDeletingFile"));
-      }
-      // vymaz stary subor z db
-      $this->db->delete($tableF,$row2["ID"]);
-	  /**/
-      // vloz novy subor
-	  
-	  $uploadfile = $item["data"]["dir"].$newFilename;
-	  /*
-	  if(!move_uploaded_file($_FILES[$n]['tmp_name'], $uploadfile)){
- 		$text = "errorWhileMovingFile";
-		if(isset($item["texts"][$text])) $text = $item["texts"][$text];
-        throw new \Exception($this->getText($text));
-      }/**/
-      // vloz novy subor do db
-	  
-	  $content = file_get_contents($_FILES[$name]['tmp_name']);
-      $this->db->u($tableF,$id2 = md5(uniqid()),array("Name"=>$newFilename,"Extension"=>$ext,"MimeType"=>$_FILES[$name]['type'],"Content"=>$content,"Owner"=>\AsyncWeb\Security\Auth::userId()));
-	  if($err = $this->db->error()){
-		  throw new \Exception($err);
-	  }
-	  if($newid = $this->db->insert_id()){
-		  if($newid != $id2) $id2 = $newid;
-	  }
-      
-      //$this->db->u($tableF,$id2=md5(uniqid()),array("md5"=>md5_file($uploadfile),"size"=>filesize($uploadfile),"type"=>$_FILES[$n]['type'],"name"=>$_FILES[$n]['name'],"path"=>$uploadfile,"fullpath"=>str_replace("\\","/",realpath($uploadfile))));
-      $cols[$colname] = $colValue = $id2;
-	  }
-	 break;
-    }
-   
     try{
      $this->checkRightDataFormat($item,$name1, true,$formName);
     }catch(\Exception $e){
@@ -1081,29 +799,28 @@ class ApiForm{
 
    $old_row = $row;
    
+   foreach($this->updateLangs as $k=>$v){
+    if(!$this->updateData[$k]){
+		$key = substr("Z___".md5(uniqid()),0,32);
+		$this->updateData[$k] = $key;
+	}
+	$key=$this->updateData[$k];
+	Language::set($key,$v);
+   }
+   
 	if(isset($this->data["api_keys_order"])){
 		$this->updateData = $this->db->SortFields($this->updateData,$this->data["api_keys_order"]);
 	}
+
+   
    if(!$this->db->u($this->data["table"],$row["ID"],$this->updateData)){
    	 \AsyncWeb\Storage\Log::log("ApiForm","Update oddo failed".$this->db->error(),ML__HIGH_PRIORITY);
 	 $this->exception = new \Exception(Language::get("Error while updating the record!" . ((isset($this->data["append_errors"]) && $this->data["append_errors"])?" ".$this->db->error():"")));
 	 throw $this->exception;
-	 return false;
    }
    
    $row = $this->db->gr($this->data["table"],array("ID"=>$row["ID"]));
    $l = Language::getLang();
-   foreach($this->updateLangs as $k=>$v){
-    if(!$row[$k]){
-		$key = substr("Z___".md5(uniqid()),0,32);
-		$this->db->u($this->data["table"],$row["ID"],array($k=>$key));
-		$row[$k] = $key;
-	}
-	$key=$row[$k];
-	
-    //$this->db->u("dictionary",array("key"=>$key,"lang"=>$l),array("key"=>$key,"lang"=>$l,"value"=>$v));
-	Language::set($key,$v);
-   }
    
    $new_row = $row;
    $table  = $this->data["table"];
@@ -1480,714 +1197,69 @@ class ApiForm{
 	$text = "";//$this->getText($this->data["uid"]."-texts-insert");
   }
   $ret= "";	
-  if(!isset($this->data["bootstrap"])){
-  
-  $ret = '<tr class="MF_Insert"><td colspan="3" class="MFSubHead">'.$text.'</td></tr>'."\n";
-  $ret .= '<tr><td>';
-  }
-  
-  if($this->merged){
-	$ret .= '<input type="hidden" name="'.$this->data["uid"]."___INSERT".'" value="1" />';
-  }else{
-   $ret .= '<form class="form-horizontal" role="form" method="post" action="'.Path::make(array($this->data["uid"]."___INSERT"=>1))."\"";
-   if(isset($this->data["enctype"]) && $this->data["enctype"]) $ret.= ' enctype="'.$this->data["enctype"].'"';
-   if(isset($this->data["form"]["onInsertSubmit"])){
-    $ret .= " onsubmit=\"".$this->data["form"]["onInsertSubmit"]."\"";
-   }
-   $ret .=">\n";
-  }
-  
-  if(!isset($this->data["bootstrap"])){
-  $ret .= "<table>";
-  }
-  
   $form_submitted = (null!==URLParser::v($this->data["uid"]."___INSERT"));
   
   foreach($this->data["col"] as $colname=>$item){
    $usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
    
-   if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
-   $name = $formName."_".$colname;
-   if(isset($item["data"]["var"])) $name = $item["data"]["var"];
-   $colValue = URLParser::v($name);
-   if($in=$this->inWhere($colname)){
-	 $colValue = $in["value"];
-	 $item["editable"] = false;
-   }
+		if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
+		$name = $formName."_".$colname;
+		if(isset($item["data"]["var"])) $name = $item["data"]["var"];
+		$colValue = null;
+		if($form_submitted)
+			$colValue = URLParser::v($name);
+		if($in=$this->inWhere($colname)){
+			$colValue = $in["value"];
+			$item["editable"] = false;
+		}
   
-	 $minl = @$item["data"]["minlength"];
-	 $maxl = @$item["data"]["maxlength"];
-	 $minn = @$item["data"]["minnum"];
-	 $maxn = @$item["data"]["maxnum"];
-	 $step = @$item["data"]["step"];
-	 
-   switch($item["form"]["type"]){
-    case 'textbox':
-	 if(!isset($this->data["bootstrap"])){
-     $ret.= '<tr>';
-	 }else{
-	 $ret.= '<div class="form-group">';
-	 }
-	 $ret.= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-     $ret.= '<td class="MFFormColumn">';
-	 }else{
-	 $ret.= '<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 
-     $type = @$item["data"]["datatype"];
-	 if(!$type) $type = "text";
-	$prepend = false;
-	$after = false;
-	if(isset($this->data["bootstrap"])){
-		if(isset($item["texts"]["prepend"]) && $prepend=$this->getText($item["texts"]["prepend"])){
-			$ret.='<div class="input-group"><span class="input-group-addon">'.$prepend.'</span>';
-		}else{
-			if(isset($item["texts"]["after"]) && $after=$this->getText($item["texts"]["after"])){
-				$ret.='<div class="input-group">';
+		$item["DBLINK"] = $this->db;
+  
+		if(!isset($item["BT_SIZE"])) $item["BT_SIZE"] = $this->BT_SIZE;
+		if(!isset($item["BT_WIDTH_OF_LABEL"])) $item["BT_WIDTH_OF_LABEL"] = $this->BT_WIDTH_OF_LABEL;
+		if(!isset($item["BT_WIDTH_9"])) $item["BT_WIDTH_9"] = 12 - 1 - $this->BT_WIDTH_OF_LABEL;
+		if(!isset($item["BT_WIDTH_10"])) $item["BT_WIDTH_10"] = 12 - $this->BT_WIDTH_OF_LABEL;
+	  
+		if(!isset($item["FormItemInstance"])){
+			if(!self::$ItemsMap){
+				self::MakeItemsMap();
 			}
+			if(!isset(self::$ItemsMap[$item["form"]["type"]])){
+				throw new \Exception(Language::get("Form type %formtype% has not been found!",array("%formtype%"=>$item["form"]["type"])));
+			}
+			$item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item,$this->data);
 		}
-	}
-	
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 $ret.= ' <input class="MFInput form-control'.$addclass.'" type="'.$type.'" id="'.$name.'" name="'.$name.'"';
-     if($form_submitted){
-      $ret.=' value="'.stripslashes(@$colValue).'"';
-     }else{
-	  if(isset($item["texts"]["default"]) && ($t=$this->getText($item["texts"]["default"])) !== null){
-	   $ret.=' value="'.$t.'"';
-	  }else{
-	   $ret.=' value="'.stripslashes(@$colValue).'"';
-	  }
-	 }
-     if(isset($maxl)) $ret .= ' maxlength="'.$maxl.'"';
-	 if(isset($minn)) $ret .= ' min="'.$minn.'"';
-	 if(isset($maxn)) $ret .= ' max="'.$maxn.'"';
-	 if(isset($step)) $ret .= ' step="'.$step.'"';
-	 
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret .= " onchange=\"apply_filter('$name','$type','$minl','$maxl','$minn','$maxn',false)\"";
-	 
-	 if(isset($this->data["bootstrap"])){
-		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
-		}
-	 }
-	 
-	 
-	 $ret.='/>';
-	 if($prepend){
-		$ret.='</div>';
-	 }
-	 if($after){
-		$ret.='<span class="input-group-addon">'.$after.'</span></div>';;
-	 }else{
-		 if(isset($item["texts"]["after"]) && $t=$this->getText($item["texts"]["after"])){
-		  $ret .= ' '.$t;
-		 }
-	 }
-	 $ret .= "<script type=\"text/javascript\">apply_filter('$name','$type','$minl','$maxl','$minn','$maxn',true);</script>";
-	 if($type == "date" || $type == "date_string"){
-	  if(\AsyncWeb\IO\File::exists($f = "img/icons/calendar.png")){
-	   $select = Language::get("Select date");
-	   $ret .= ' <a href="#image" onclick="select_date(\''.$name.'\');return false;"><img width="20" height="20" src="/'.$f.'" class="icon" alt="'.$select.'" title="'.$select.'" /></a>';
-      }else{
-	   $ret .= ' <a href="#image" onclick="select_date(\''.$name.'\');return false;">'.$select.'</a>';
-      }
-	 }
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>
-     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-	case 'htmlText':
-	 ////////////////// todo
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $ret .= '<object type="application/x-xstandard" id="'.$item["data"]["editorName"].'" width="'.$item["data"]["width"].'" height="'.$item["data"]["height"].'';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-	 $ret.='">';
-	 $ret .= '<param name="CSS" value="'.$item["data"]["cssSubor"].'" />';
-	 $ret .= '<param name="Styles" value="'.$item["data"]["styleXMLSubor"].'" />';
-	 $ret .= '<param name="Lang" value="'.Language::getLang().'"/>';
-	 $ret .= '<param name="Value" value="" />';
-	 $ret .= '<div>Ak vidíte túto správu, nainštalujte si XStandard Lite z http://xstandard.com/download.asp!</div>';
-	 $ret .= '<textarea name="alternate1" id="alternate1" cols="50" rows="15"></textarea>';
-	 $ret .= '</object>';
-	 $ret .= '<input type="hidden" name="'.$name.'" id="'.$name.'" value="" /> ';
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>
-     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	break;
-	case 'captcha':
-	if(ApiForm::$captchaPublickey){
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $err=null;
-		if(class_exists("\\ReCaptcha\\ReCaptcha")){
-			$recaptcha = new \ReCaptcha\ReCaptcha(ApiForm::$captchaPrivatekey);
-			$ret.='<div class="g-recaptcha" data-sitekey="'.ApiForm::$captchaPublickey.'"></div>';
-			$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
-		}elseif(class_exists("\\reCaptcha\\Captcha")){
-			$captcha = new \reCaptcha\Captcha();
-			$captcha->setPrivateKey(ApiForm::$captchaPrivatekey);
-			$captcha->setPublicKey(ApiForm::$captchaPublickey);
-			$ret.=$captcha->html();
-		}
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	}
-    break;
-
-    case 'password':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 $ret.=' <input class="MFInput form-control'.$addclass.'" type="password" id="'.$name.'" name="'.$name.'"';
-     if(!$form_submitted){
-      if(isset($item["texts"]["default"])) $ret.=' value="'.$this->getText($item["texts"]["default"]).'"';
-     }
-     if(isset($maxl)) $ret .= ' maxlength="'.$maxl.'"';
-     $ret .= '" ';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-	 
-	 if(isset($this->data["bootstrap"])){
-		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
-		}
-	 }
-	 
-	 $ret.='/>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-    break;
-    case 'select':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.= ' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-	 $ret.='>';
-     foreach($item["filter"]["option"] as $k=>$v){
-	  $v = Language::get($v);
-      $ret .= '<option value="'.$k.'"';
-      if($form_submitted){
-       if(@$colValue == $k){
-        $ret .= ' selected="selected"';
-       }
-      }else{
-	   if(isset($item["texts"]["default"]) && ($item["texts"]["default"] == $k || $item["texts"]["default"] == $v)){
-        $ret .= ' selected="selected"';
-       }elseif($in=$this->inWhere($colname) && ($k==$in["value"] || $v == $in["value"])){
-	    $ret .= ' selected="selected"';
-	   }
-      }
-      $ret .='>'.strip_tags($v).'</option>'."\n";
-     }
-     $ret.='</select>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-    break;
-
-    case 'set':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.= ' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'[]"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-	 $ret.=' multiple="multiple">';
-     foreach($item["filter"]["option"] as $k=>$v){
-	  $v = Language::get($v);
-      $ret .= '<option value="'.$k.'"';
-      if($form_submitted){
-       if(in_array($k,$colValue)){
-        $ret .= ' selected="selected"';
-       }
-      }else{
-	   if(isset($item["texts"]["default"]) && ($item["texts"]["default"] == $k || $item["texts"]["default"] == $v) || (isset($item["texts"]["default"][$k]) && $item["texts"]["default"][$k])){
-        $ret .= ' selected="selected"';
-       }elseif($in=$this->inWhere($colname) && ($k==$in["value"] || $v == $in["value"])){
-	    $ret .= ' selected="selected"';
-	   }
-      }
-      $ret .='>'.strip_tags($v).'</option>'."\n";
-     }
-     $ret.='</select>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-    break;    
-	case 'selectDB':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-	 $ret.='>';
-	 $options = array();
-	 
-     
-	 
-	 $col = $item["data"]["fromColumn"];
-     $index = "ID";
-	 if(!isset($item["data"]["where"])) $item["data"]["where"] = array();
-	 $res = $this->db->g($item["data"]["fromTable"],$item["data"]["where"],null,null,@$item["data"]["order"]);
-     
-     //$res = $this->db->query("select `".$index."`,`".(string)$item->db->fromColumn."`,`".(string)$item->db->fromColumn."` as RS_val1 from `".(string)$item->db->fromTable."` where ($where) order by `".(string)$item->db->fromColumn."`");
-
-     while($row = $this->db->fetch_assoc($res)){
-	 
-	  if((isset($item["data"]["isText"]) && $item["data"]["isText"]) || (isset($item["data"]["dictionary"]) && $item["data"]["dictionary"])){
-	   $options[$row[$index]] = strip_tags($this->getText($row[$col],true));
-	  }else{
-	   $options[$row[$index]] = $this->getInnerDBColConfig($row,$col);
-	  }
-	  
-     }
-	 asort($options);
-	 $reto = "";
-	 $sel = false;
-	 foreach($options as $k=>$v){
-	  $k = "".$k;
-      $reto .= '<option value="'.$k.'"';
-      if($form_submitted){
-       if(@$colValue == $k){
-        $reto .= ' selected="selected"';
-       }
-      }else{
-       if(isset($item["texts"]["default"]) && ($v == $this->getText($item["texts"]["default"]) || $k == $this->getText($item["texts"]["default"]))){
-        $reto .= ' selected="selected"';
-		$sel = true;
-       }elseif(($in=$this->inWhere($colname)) && $k==$in["value"]){
-	    $reto .= ' selected="selected"';
-		$sel = true;
-	   }
-      }
-      $reto .= '>';
-	  $reto .= $v;
-	  $reto .='</option>'."\n";
-	  
-	 }
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"]){
-	   if(isset($item["texts"]["nullValue"]) && $item["texts"]["nullValue"]){
-        $reto = '<option value="0">'.strip_tags($this->getText($item["texts"]["nullValue"])).'</option>'.$reto;
-	   }else{
-        $reto = '<option value="0">'.$this->getText("nullValue").'</option>'.$reto;
-	   }
-      }
-	  
-	 $ret.= $reto;
-     $ret.='</select>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'textarea':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
-     if($form_submitted){
-      $ret.=$this->encodeEntities($colValue);
-     }else{
-      if(isset($item["texts"]["default"])) $ret .= $this->encodeEntities($this->getText($item["texts"]["default"]));
-     }
-     $ret.='</textarea>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'tinyMCE':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" cols="50" rows="15">';
-     if($form_submitted){
-      $ret.=$this->encodeEntities($colValue);
-     }else{
-      if(isset($item["texts"]["default"])) $ret .= $this->encodeEntities($this->getText($item["texts"]["default"]));
-     }
-$theme = "simple";
-	 if(isset($item["form"]["theme"])){
-		$theme = $item["form"]["theme"];
-	 }
-     $ret.='</textarea>
-	 ';
-	 if($theme != "advanced"){
-	 $ret.= '	 
-	 <script type="text/javascript">
-	$().ready(function() {
-		tinymce.init({selector:"#'.$name.'",
-		remove_script_host : false,
-		convert_urls : false,
-		relative_urls : false
 		
-		';
-		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
-		$ret.='});
-	});
-	</script>';
-	
-	 }else{
-//			theme_advanced_styles : "image",
-	 $ret.= '
-<script type="text/javascript">
-	$().ready(function() {
-		tinymce.init({selector:"#'.$name.'",
-		remove_script_host : false,
-		convert_urls : false,
-		relative_urls : false,
-		plugins : "advlist autolink link image lists charmap print preview searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste"';
-		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
-		$ret.='});
-	});
-</script>
-	 ';
-	 }
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'checkbox':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'"';
-     if($form_submitted){
-      if((null!==$colValue) && $colValue=="on"){
-       $ret.= ' checked="checked"';
-      }
-     }else{
-      if(isset($item["texts"]["default"]) && $this->getText($item["texts"]["default"]) == 1){
-       $ret.= ' checked="checked"';
-      }
-     }
-     $ret .= "/>";
-	 if(isset($item["texts"]["after"]) && $t=$this->getText($item["texts"]["after"])){
-	  $ret .= ' '.$t;
-	 }
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'radio':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		 $inline = "";
-		 if(isset($this->item["form"]["inline"]) && $this->item["form"]["inline"]) $inline = " inline";
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $value = "";
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     if(isset($item["texts"]["value"])) $value = $this->getText($item["texts"]["value"]);
-	 if(isset($item["filter"]["option"])){
-	  foreach($item["filter"]["option"] as $k=>$v){
-	   $ret.="<div class=\"radio".$inline."\"><label for=\"${name}_${k}\">".' <input value="'.$k.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'_'.$k.'" name="'.$name.'"';
-        if($form_submitted){
-         if($colValue==$k){
-          $ret.= ' checked="checked"';
-         }
-        }else{
-         if(isset($item["data"]["selected"]) && $item["data"]["selected"] == $k){
-          $ret.= ' checked="checked"';
-         }
-        }
-       if(isset($item["editable"]) && !$item["editable"]){
-        $ret.=' disabled="disabled"';
-       }
-       $ret .= "/>".$v."</label></div> ";
-	   
-	  }
-	 }else{
-		 
-      $ret.=' <label for="'.$name.'"><input value="'.$value.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'" name="'.$name.'"';
-      if($form_submitted){
-       if($colValue==$value){
-        $ret.= ' checked="checked"';
-       }
-      }else{
-       if(isset($item["data"]["selected"]) && $item["data"]["selected"]){
-        $ret.= ' checked="checked"';
-       }
-      }
-       if(isset($item["editable"]) && !$item["editable"]){
-        $ret.=' disabled="disabled"';
-       }
-      $ret .= "/>";
-	  
-	  if(isset($item["texts"]["optionText"])){
-		$ret .= $this->getText($item["texts"]["optionText"]);
-	  }
-	  $ret.='</label>';
-	 }
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'part':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div>'."\n";
-	 }
-    break;
-    case 'file':
-	//$item["data"]["maxFileSize"]
-	
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-     if(isset($item["data"]["maxFileSize"])) $ret .= '<input type="hidden" name="MAX_FILE_SIZE" value="'.$item["data"]["maxFileSize"].'" />'."\n";
-     
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 $ret .= '<input class="MFFile form-control'.$addclass.'" type="file" name="'.$name.'"/>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'submit':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-     $ret.= '<td class="MFFormColumn">';
-	 }else{
-	 $ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 
-     $ret.= '<input class="MFSubmit btn btn-primary'.$addclass.'" type="submit" value="'.$this->getText($item["texts"]["insert"]).'"/>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	 if($this->merged) $this->merged->formDisplayed();
-    break;
-    case 'submitReset':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-     $ret.= '<td class="MFFormColumn">';
-	 }else{
-	 $ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.= '<input class="MFSubmit btn btn-primary'.$addclass.'" type="submit" value="'.$this->getText($item["texts"]["insert"]).'" />
-     <input class="MFSubmit btn btn-default"  type="reset" value="'.$this->getText($item["texts"]["reset"]).'" />';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	 if($this->merged) $this->merged->formDisplayed();
-    break;
-	case "submitResetCancel":
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-     $ret.= '<td class="MFFormColumn">';
-	 }else{
-	 $ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 
-	 $textCancel = "Cancel";
-	 if(isset($item["texts"]["cancel"])) $textCancel= $item["texts"]["cancel"];
-     $ret.= '<input class="MFSubmit btn btn-primary'.$addclass.'" type="submit" value="'.$this->getText($item["texts"]["insert"]).'" />
-     <input class="MFSubmit btn btn-default" type="reset" value="'.$this->getText($item["texts"]["reset"]).'" />
-	 <a href="'.Path::make(array($this->data["uid"]."___CANCEL"=>"1")).'" class="btn btn-default">'.$this->getText($textCancel).'</a>';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'     </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	 if($this->merged) $this->merged->formDisplayed();
-	break;
-     case 'hidden':
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr><td><input type="hidden" value="'.$this->getText($item["texts"]["value"]).'" name="'.$name.'" /></td></tr>';
-	 }else{
-		$ret.= '<div class="form-group" style="display:none;"><input type="hidden" value="'.$this->getText($item["texts"]["value"]).'" name="'.$name.'" /></div>';
-	 }
-	 
-    break;
-    }
+ 
+		$ret .= $item["FormItemInstance"]->InsertForm($colValue);
+			 
+		switch($item["form"]["type"]){
+			case 'submit':
+			case 'submitReset':
+			case "submitResetCancel":
+				if($this->merged) $this->merged->formDisplayed();
+			break;
+		}
    }
-   if(!isset($this->data["bootstrap"])){
-	$ret .= "</table>";
-   }
-   
-   $ret .= ''."\n";
-  if(!$this->merged) $ret.='</form>';
-  
-    if(!isset($this->data["bootstrap"])){
-		  $ret .= "</td></tr>";
-	}   
-   if($form_submitted && $this->item && isset($this->item["data"]["col"])){
-    $ret .= '<script language="javascript">$("#'.$this->makeItemId($this->item).'").focus();</script>';
-   }
-   return $ret;
+	if($form_submitted && $this->item && isset($this->item["data"]["col"])){
+		$Focus = $this->makeItemId($this->item);
+	}
+	$ID = $this->data["uid"];
+	$SubmitURL = Path::make(array($ID."___INSERT"=>1));
+	$EncType = false;if(isset($this->data["enctype"]) && $this->data["enctype"]) $EncType = $this->data["enctype"];
+	$OnSubmit = false;if(isset($this->data["form"]["onInsertSubmit"]) && $this->data["form"]["onInsertSubmit"]) $OnSubmit = $this->data["form"]["onInsertSubmit"];
+	$Template = "View_InsertForm"; if(isset($this->data["template"]["insert"]) && $this->data["template"]["insert"]) $Template = Language::get($this->data["template"]["insert"]);
+
+	return \AsyncWeb\Text\Template::loadTemplate($Template,array(
+			"HeaderText"=>$text,
+			"HTML"=>$ret,
+			"Focus"=>$Focus,
+			"ID"=>$ID,
+			"Merged"=>$this->merged,
+			"SubmitURL"=>$SubmitURL,
+			"OnSubmit"=>$OnSubmit,
+			"EncType"=>$EncType,
+		),false,false);		
  }
  private function makeN2NInsertCols(){
 	
@@ -2383,753 +1455,94 @@ $theme = "simple";
 	}
   	exit;
   }
-
-
-  $text = "";$ret="";
-  if(isset($this->data["texts"]["update"])){
-	$text = $this->getText($this->data["texts"]["update"]);
-  }else{
-	$text = "";//$this->getText($this->data["uid"]."-texts-update");
-  }
-  if($text){
-  if(!isset($this->data["bootstrap"])){
-	$ret = '<tr><td></td><td colspan="3" class="MFSubHead">'.$text."</td></tr>\n";
-  }
-  }
-  if(@$this->data["showUp"]){
-  if(!isset($this->data["bootstrap"])){
-   $ret .= "<tr><td></td><td colspan=\"3\" class=\"MFSubHead\"><a href=\"".Path::make(array("REMOVE_VARIABLES"=>"1"))."\">".$this->get("Zobraziť data")."</a></td></tr>\n";
-  }
-  }
-  if(!isset($this->data["bootstrap"])){
-  $ret .= "<tr><td>";
-  }
-  if($this->merged){
-	$ret .= '<input type="hidden" name="'.$this->data["uid"]."___UPDATE2".'" value="1" />';
-  }else{
-   $ret .= '<form class="form-horizontal" role="form"  method="post" action="'.Path::make(array($name."___UPDATE2"=>1))."\"";
-	if(isset($this->data["enctype"]) && $this->data["enctype"]) $ret.= ' enctype="'.$this->data["enctype"].'"';
-    if(isset($this->data["form"]["onUpdateSubmit"])){
-    $ret .= " onsubmit=\"".$this->data["form"]["onUpdateSubmit"]."\"";
-   }
-   $ret .= ">\n";
-  }
-  $ret .= '<input type="hidden" value="'.((int)URLParser::v($name."___ID")).'" name="'.$name."___ID".'" />';
   
-  if(!isset($this->data["bootstrap"])){
-  $ret .= "<table>";
-  $ret .= '<tr><td colspan="3">';
-  $ret .= '</td></tr>';
-  }
+	$text = "";$ret="";
+	if(isset($this->data["texts"]["update"])){
+		$text = $this->getText($this->data["texts"]["update"]);
+	}else{
+		$text = "";
+	}
   
-  foreach($this->data["col"] as $colname => $item){
-	  $usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
+	$form_submitted = (null!==URLParser::v($this->data["uid"]."___UPDATE2"));
+
+  
+	foreach($this->data["col"] as $colname => $item){
+		$usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
 
 
-   if(isset($item["data"]["col"])) $colname = $col = $item["data"]["col"];
-   if(!isset($item["form"])) continue;
-   $col = $colname;
-   $name = $formName."_".$col;
-   if(isset($item["data"]["var"])) $name = $item["data"]["var"];
-   $colValue = URLParser::v($name);
-   if($in=$this->inWhere($col)){
-	 $colValue = $in["value"];
-	 $item["editable"] = false;
-   }
+		if(isset($item["data"]["col"])) $colname = $col = $item["data"]["col"];
+		if(!isset($item["form"])) continue;
+		$col = $colname;
+		$name = $formName."_".$col;
+		if(isset($item["data"]["var"])) $name = $item["data"]["var"];
+		$colValue = null;
+		if($form_submitted)
+			$colValue = URLParser::v($name);
+		if($in=$this->inWhere($col)){
+			$colValue = $in["value"];
+			$item["editable"] = false;
+		}
    
-   $form_submitted = (null!==URLParser::v($this->data["uid"]."___UPDATE2"));
-
-	 $minl = @$item["data"]["minlength"];
-	 $maxl = @$item["data"]["maxlength"];
-	 $minn = @$item["data"]["minnum"];
-	 $maxn = @$item["data"]["maxnum"];
-	 $step = @$item["data"]["step"];   
-	 
-   switch($item["form"]["type"]){
-    case 'password':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <input class="MFInput form-control'.$addclass.'" type="password" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true" id="'.$name.'" name="'.$name.'"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     if(isset($this->data["data"]["maxlength"])) $ret.=' maxlength="'.$this->data["data"]["maxlength"].'"';
-	 
-	 if(isset($this->data["bootstrap"])){
-		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
-		}
-	 }
-	 
-	 $ret.='/>';
-	 
-     if(isset($item["data"]["datatype"]) && ($item["data"]["datatype"] == "date" || $item["data"]["datatype"] == "date_string")){
-		$select = Language::get("Select date");
-		if(\AsyncWeb\IO\File::exists($f = "img/icons/calendar.png")){
-			$ret .= ' <a href="#image" onclick="document.getElementById(\''.$name.'_CHANGED\').checked=true;select_date(\''.$name.'\');return false;"><img width="20" height="20" src="/'.$f.'" class="icon" alt="'.$select.'" title="'.$select.'" /></a>';
-		}else{
-		   $ret .= ' <a href="#image" onclick="document.getElementById(\''.$name.'_CHANGED\').checked=true;select_date(\''.$name.'\');return false;">'.$select.'</a>';
-		}
-     }
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'captcha':
-	if(ApiForm::$captchaPublickey){
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
+		$item["DBLINK"] = $this->db;
+   
+  
+		if(!isset($item["BT_SIZE"])) $item["BT_SIZE"] = $this->BT_SIZE;
+		if(!isset($item["BT_WIDTH_OF_LABEL"])) $item["BT_WIDTH_OF_LABEL"] = $this->BT_WIDTH_OF_LABEL;
+		if(!isset($item["BT_WIDTH_9"])) $item["BT_WIDTH_9"] = 12 - 1 - $this->BT_WIDTH_OF_LABEL;
+		if(!isset($item["BT_WIDTH_10"])) $item["BT_WIDTH_10"] = 12 - $this->BT_WIDTH_OF_LABEL;
 		
-		$err=null;
-		if(class_exists("\\ReCaptcha\\ReCaptcha")){
-			$recaptcha = new \ReCaptcha\ReCaptcha(ApiForm::$captchaPrivatekey);
-			$ret.='<div class="g-recaptcha" data-sitekey="'.ApiForm::$captchaPublickey.'"></div>';
-			$ret.='<script async type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl='.Language::getLang().'"></script>';
-		}elseif(class_exists("\\reCaptcha\\Captcha")){
-			$captcha = new \reCaptcha\Captcha();
-			$captcha->setPrivateKey(ApiForm::$captchaPrivatekey);
-			$captcha->setPublicKey(ApiForm::$captchaPublickey);
-			$ret.=$captcha->html();
-		}
-
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	}
-    break;
-    case 'textbox':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	$prepend = false;
-	$after = false;
-	if(isset($this->data["bootstrap"])){
-		if(isset($item["texts"]["prepend"]) && $prepend=$this->getText($item["texts"]["prepend"])){
-			$ret.='<div class="input-group"><span class="input-group-addon">'.$prepend.'</span>';
-		}else{
-			if(isset($item["texts"]["after"]) && $after=$this->getText($item["texts"]["after"])){
-				$ret.='<div class="input-group">';
+		
+		if(!isset($item["FormItemInstance"])){
+			if(!self::$ItemsMap){
+				self::MakeItemsMap();
 			}
+			if(!isset(self::$ItemsMap[$item["form"]["type"]])){
+				throw new \Exception(Language::get("Form type %formtype% has not been found!",array("%formtype%"=>$item["form"]["type"])));
+			}
+			$item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item,$this->data);
+		}
+		
+		$ret.=$item["FormItemInstance"]->UpdateForm($colValue);
+		
+		switch($item["form"]["type"]){
+			case 'submit':
+			case 'submitReset':
+			case "submitResetCancel":
+				if($this->merged) $this->merged->formDisplayed();
+			break;
 		}
 	}
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <input class="MFInput form-control'.$addclass.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true" type="text" id="'.$name.'" name="'.$name.'"';
-     if($form_submitted){
-	  if(URLParser::v("date_".$name) !== null){
-       $ret.=' value="'.stripslashes(URLParser::v("date_".$name)).'"';
-	  }else{
-	   $ret.=' value="'.stripslashes($colValue).'"';
-	  }
-     }else{
-	  
-      if(isset($item["data"]["datatype"]) && $item["data"]["datatype"] == "date"){
-       if(isset($item["data"]["format"])){
-		$format1 = $item["data"]["format"];
-	   }else{
-		$format1 = "Y-m-d";
-	   }
-       $ret.=' value="'.stripslashes($this->convertDate($row[$col], true, $format1)).'"';
-	  }else{
-	   $value = @$row[$col];
-	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-	    $value = $this->getText($value,true);
-	   }
-	   $ret.=' value="'.stripslashes($value).'"';
-	  }
-     }
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-
-     if(isset($maxl)) $ret .= ' maxlength="'.$maxl.'"';
-	 if(isset($minn)) $ret .= ' min="'.$minn.'"';
-	 if(isset($maxn)) $ret .= ' max="'.$maxn.'"';
-	 if(isset($step)) $ret .= ' step="'.$step.'"';
-	 
-	 if(isset($this->data["bootstrap"])){
-		if(isset($item["texts"]["help"]) && $text=$this->getText($item["texts"]["help"])){
-		 $ret.= ' title="'.$text.'" placeholder="'.$text.'" data-content="'.$text.'" data-placement="bottom"';
-		}
-	 }
-	 
-	 $ret.='/>';
-	 
-	 if(isset($item["data"]["datatype"]))
-     if($item["data"]["datatype"] == "date" || $item["data"]["datatype"] == "date_string"){
-		$select = Language::get("Select date");
-		if(\AsyncWeb\IO\File::exists($f = "img/icons/calendar.png")){
-			$ret .= ' <a href="#image" onclick="document.getElementById(\''.$name.'_CHANGED\').checked=true;select_date(\''.$name.'\');return false;"><img width="20" height="20" src="/'.$f.'" class="icon" alt="'.$select.'" title="'.$select.'" /></a>';
-		}else{
-		   $ret .= ' <a href="#image" onclick="document.getElementById(\''.$name.'_CHANGED\').checked=true;select_date(\''.$name.'\');return false;">'.$select.'</a>';
-		}
-     }
-	 if($prepend){
-		$ret.='</div>';
-	 }
-	 if($after){
-		$ret.='<span class="input-group-addon">'.$after.'</span></div>';;
-	 }else{
-		 if(isset($item["texts"]["after"]) && $t=$this->getText($item["texts"]["after"])){
-		  $ret .= ' '.$t;
-		 }
-	 }	 
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-	case 'htmlText':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item,true).$this->makeText($item).$this->makeHelp($item);
-	 if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $ret .= '<object type="application/x-xstandard" id="'.(string)$item->settings->editorName.'" width="'.(string)$item->settings->width.'" height="'.(string)$item->settings->height.'">';
-	 $ret .= '<param name="CSS" value="'.(string)$item->settings->cssSubor.'" />';
-	 $ret .= '<param name="Styles" value="'.(string)$item->settings->styleXMLSubor.'" />';
-	 $ret .= '<param name="Lang" value="sk"/>';
-     if((null!==$colValue)){
-      $ret .= '<param name="Value" value="'.htmlspecialchars(stripslashes($colValue), ENT_COMPAT,'UTF-8').'" />';
-     }else{
-	   $value = $row[$col];
-	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-	    $value = $this->getText($value,true);
-	   }
-	   $ret .= '<param name="Value" value="'.htmlspecialchars($value, ENT_COMPAT,'UTF-8').'" />';
-     }
-	 $ret .= '<div>Ak vidíte túto správu, nainštalujte si XStandard Lite z http://xstandard.com/download.asp!</div>';
-	 $ret .= '<textarea name="alternate1" id="alternate1" cols="50" rows="15">'.htmlspecialchars($row[$col], ENT_COMPAT,'UTF-8').'</textarea>';
-	 $ret .= '</object>';
-	 $ret .= '<input type="hidden" name="novy_text" id="novy_text" value="" /> ';
-	 if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-	break;
-
-    case 'select':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret .='>';
-     
-     foreach($item["filter"]["option"] as $k=>$v){
-	  $v = Language::get($v);
-
-      $ret .= '<option value="'.$k.'"';
-      if($form_submitted){
-       if($colValue == $k){
-        $ret .= ' selected="selected"';
-       }
-      }else{
-       if(array_key_exists($col,$row) && $row[$col] == $k){
-        $ret .= ' selected="selected"';
-       }elseif($in=$this->inWhere($colname) && $k==$in["value"]){
-	    $ret .= ' selected="selected"';
-	   }
-      }
-	  $ret .='>'.strip_tags($v).'</option>'."\n";
-     }
-     $ret.='</select>';
-	 
- 	 if(isset($item["texts"]["after"]) && $t = $this->getText($item["texts"]["after"])){
-	  $ret .= ' '.$t;
-	 }
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-    break;
-
-    case 'set':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <select class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'[]" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret .=' multiple="multiple">';
-     
-     foreach($item["filter"]["option"] as $k=>$v){
-      $ret .= '<option value="'.$k.'"';
-      if($form_submitted){
-       if($colValue == $k){
-        $ret .= ' selected="selected"';
-       }
-      }else{
-	   $items = explode(";", @$row[$col]);
-       if(in_array($k,$items)){
-        $ret .= ' selected="selected"';
-       }elseif($in=$this->inWhere($colname) && $k==$in["value"]){
-	    $ret .= ' selected="selected"';
-	   }
-      }
-      $ret .='>'.strip_tags($v).'</option>'."\n";
-     }
-     $ret.='</select>';
-	 
- 	 if(isset($item["texts"]["after"]) && $t = $this->getText($item["texts"]["after"])){
-	  $ret .= ' '.$t;
-	 }
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-    break;	
-    case 'selectDB':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     $ret.=' <select class="MFSelect form-control'.$addclass.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true" class="MFSelect form-control'.$addclass.'" id="'.$name.'" name="'.$name.'"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret.='>';
-	 $options = array();
-	 
-     $index = "ID";
-     $where = 1;
-	 
-     $col2 = $item["data"]["fromColumn"];
-     $index = "ID";
-	 if(!isset($item["data"]["where"])) $item["data"]["where"] = array();
-	 $res1 = $this->db->g($item["data"]["fromTable"],$item["data"]["where"],null,null,@$item["data"]["order"]);
-	 
-     while($row1 = $this->db->f($res1)){
-	  if((isset($item["data"]["isText"]) && $item["data"]["isText"]) || (isset($item["data"]["dictionary"]) && $item["data"]["dictionary"])){
-	   $options[$row1[$index]] =  strip_tags($this->getText($row1[$col2],true));
-	  }else{
-	   $options[$row1[$index]] = $this->getInnerDBColConfig($row1,$col2);
-	  }
-     }
-	 $reto = false;
-
-	 asort($options);//sort by value, maintain key assoc
-	 foreach($options as $k=>$v){
-		$k = "".$k;
-	 $reto .= '<option value="'.$k.'"';
-	  if($form_submitted){
-       if($colValue == $k){
-        $reto .= ' selected="selected"';
-       }       
-      }else{
-       if($row[$col] == "".$k){
-        $reto .= ' selected="selected"';
-       }elseif($in=$this->inWhere($colname) && $k == $in["value"]){
-	    $reto .= ' selected="selected"';
-	   }
-      }
-	   $reto .= '>'.$v.'</option>'."\n";
-	 }
-	 	 
-	  if(isset($item["data"]["allowNull"]) && $item["data"]["allowNull"]){
-	   if(isset($item["texts"]["nullValue"]) && $item["texts"]["nullValue"]){
-        $reto = '<option value="0">'.strip_tags($this->getText($item["texts"]["nullValue"])).'</option>'.$reto;
-	   }else{
-		   $text = $this->getText("nullValue");
-		   if($text == "nullValue") $text = Language::get("Please select value");
-       $reto = '<option value="0">'.$text.'</option>'.$reto;
-	   }
-      }
-	 $ret.=$reto;
-     $ret.='</select>';
-	 if(isset($item["texts"]["after"]) && $t = $this->getText($item["texts"]["after"])){
-	  $ret .= ' '.$t;
-	 }
-
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'textarea':
-
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-     $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret.=' cols="50" rows="15">';
-     if($form_submitted){
-      $ret .= $colValue;
-     }else{
-	   $value = $this->encodeEntities($row[$col]);
-	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-	    $value = $this->encodeEntities($this->getText($value,true));
-	   }
-      $ret .= $value;
-     }
-     $ret.='</textarea>';
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-     break;
-    case 'tinyMCE':
-
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item,true).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-     $ret.=' <textarea class="MFTextArea form-control'.$addclass.'" class="MFTextArea form-control'.$addclass.'" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret.=' cols="50" rows="15">';
-     if($form_submitted){
-      $ret .= $colValue;
-     }else{
-	   $value = $this->encodeEntities($row[$col]);
-	   if(isset($item["data"]["dictionary"]) && $item["data"]["dictionary"]){
-	    $value = $this->encodeEntities($this->getText($value,true));
-	   }
-      $ret .= $value;
-     }
-     
-$theme = "simple";
-	 if(isset($item["form"]["theme"])){
-		$theme = $item["form"]["theme"];
-	 }
-     $ret.='</textarea>';
-	 if($theme != "advanced"){
-	 $ret.= '	 
-	 <script type="text/javascript">
-	$().ready(function() {
-		tinymce.init({selector:"#'.$name.'",
-		remove_script_host : false,
-		convert_urls : false,
-		relative_urls : false
-		
-		';
-		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
-		$ret.='});
-	});
-	</script>';
 	
-	 }else{
-//			theme_advanced_styles : "image",
-	 $ret.= '
-<script type="text/javascript">
-	$().ready(function() {
-		tinymce.init({selector:"#'.$name.'",
-		remove_script_host : false,
-		convert_urls : false,
-		relative_urls : false,
-		plugins : "advlist autolink link image lists charmap print preview searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste"';
-		if(\AsyncWeb\IO\File::exists($f="/js/tinymce/langs/".substr(\AsyncWeb\System\Language::getLang(),0,2).".js")) $ret.=',language_url :"'.$f.'"';
-		$ret.='});
-	});
-</script>
-	 ';
-	 }
-	 
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-     break;
-    case 'checkbox':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-     $ret.=' <input class="MFCheckBox form-control'.$addclass.'" type="checkbox" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if($form_submitted){
-      if(URLParser::v($name) !== null)
-      if($colValue=="on"){
-       $ret.= ' checked="checked"';
-      }
-     }else{
-      if($row[$col]){
-       $ret.= ' checked="checked"';
-      }
-     }
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret .= "/>";
-	 if(isset($item["texts"]["after"]) && $t = $this->getText($item["texts"]["after"])){
-	  $ret .= ' '.$t;
-	 }
-	 
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'radio':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 
-	 $value = "";
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-     if(isset($item["texts"]["value"])) $value = $this->getText($item["texts"]["value"]);
-	 if(isset($item["filter"]["option"])){
-	  foreach($item["filter"]["option"] as $k=>$v){
-	   $ret.="<div class=\"radio".$inline."\"><label for=\"${name}_${k}\">".' <input value="'.$k.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'_'.$k.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-        if($form_submitted){
-         if($colValue==$k){
-          $ret.= ' checked="checked"';
-         }
-        }else{
-         if(isset($item["data"]["selected"]) && $item["data"]["selected"] == $k){
-          $ret.= ' checked="checked"';
-         }
-        }
-       if(isset($item["editable"]) && !$item["editable"]){
-        $ret.=' disabled="disabled"';
-       }
-       $ret .= "/>".$v."</label></div> ";
-	   
-	  }
-	 }else{
-		 
-      $ret.=' <label for="'.$name.'"><input value="'.$value.'" class="MFRadio '.$addclass.'" type="radio" id="'.$name.'" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-      if($form_submitted){
-       if($colValue==$value){
-        $ret.= ' checked="checked"';
-       }
-      }else{
-       if(isset($item["data"]["selected"]) && $item["data"]["selected"]){
-        $ret.= ' checked="checked"';
-       }
-      }
-      if(isset($item["editable"]) && !$item["editable"]){
-       $ret.=' disabled="disabled"';
-      }
-      $ret .= "/>";
-	  
-	  if(isset($item["texts"]["optionText"])){
-		$ret .= $this->getText($item["texts"]["optionText"]);
-	  }
-	  $ret.='</label>';
-	 }
-	 
-	 
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'part':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= '<td class="MFCheckColumn"></td>'.$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-
-    break;
-    case 'file':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= $this->makeCheck($item).$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-     if(isset($item->data["data"]["maxFileSize"])) $ret .= '<input type="hidden" name="MAX_FILE_SIZE" value="'.$item->data["data"]["maxFileSize"].'" />'."\n";
-     $ret .= '<input class="MFFile" type="file" name="'.$name.'" onchange="document.getElementById(\''.$name.'_CHANGED\').checked=true"';
-     if(isset($item["editable"]) && !$item["editable"]){
-      $ret.=' disabled="disabled"';
-     }
-     $ret .='/>';
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-    break;
-    case 'submit':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= '<td class="MFCheckColumn"></td>'.$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 
-     $ret.= '<input class="MFSubmit btn btn-primary'.$addclass.'" type="submit" value="'.$this->getText($item["texts"]["update"]).'"/>';
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	 
-	 if($this->merged) $this->merged->formDisplayed();
-    break;
- 	case "submitResetCancel":
-    case 'submitReset':
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<tr>';
-	 }else{
-		$ret.= '<div class="form-group">';
-	 }
-	 $ret .= '<td class="MFCheckColumn"></td>'.$this->makeText($item).$this->makeHelp($item);
-     if(!isset($this->data["bootstrap"])){
-		$ret.= '<td class="MFFormColumn">';
-	 }else{
-		$ret.='<div class="col-'.$this->BT_SIZE.'-offset-'.($this->BT_WIDTH_OF_LABEL).' col-'.$this->BT_SIZE.'-'.(12-$this->BT_WIDTH_OF_LABEL).' MFFormColumn">';
-	 }
-	 $addclass = "";if(isset($item["form"]["class"])) $addclass = " ".$item["form"]["class"];
-	 
-     $ret.= '<input class="MFSubmit btn btn-primary'.$addclass.'" type="submit" value="'.$this->getText($item["texts"]["update"]).'" />
-     <input class="MFSubmit btn btn-default" type="reset" value="'.$this->getText($item["texts"]["reset"]).'" />';
-     if(!isset($this->data["bootstrap"])){
-		$ret .= '</td>'."\n".'      </tr>'."\n";
-	 }else{
-		$ret.='</div></div>'."\n";
-	 }
-	 
-	 if($this->merged) $this->merged->formDisplayed();
-    break;
-    }
-   }
-  $ret .= "</table>";
-  $ret.='<script type="text/javascript">$(".MFCheckColumn").hide();$(".MFFormColumn").dblclick(function(){  $(".MFCheckColumn").show(); });</script>';
-   $ret .= "\n".'';
-  if(!$this->merged) $ret.='</form>';
-  $ret .= "</td></tr>";
-   if($this->item && isset($this->item["data"]["col"])){
-    $ret .= '<script language="javascript">$("#'.$this->makeItemId($item).'").focus();</script>';
-   }
-
-  return $ret;
+	$ID = $this->data["uid"];
+	$SubmitURL = Path::make(array($ID."___UPDATE2"=>1));
+	$OriginalRecordID = URLParser::v($ID."___ID");
+	
+	if($form_submitted && $this->item && isset($this->item["data"]["col"])){
+		$Focus = $this->makeItemId($this->item);
+	}
+	$Template = "View_UpdateForm"; if(isset($this->data["template"]["update"]) && $this->data["template"]["update"]) $Template = Language::get($this->data["template"]["update"]);
+	
+	$ShowUp = false;if(isset($this->data["showUp"]) && $this->data["showUp"]) $ShowUp = true;
+	$ShowUpURL = $ShowUpText= false;
+	if($ShowUp){
+		$ShowUpURL = Path::make(array("REMOVE_VARIABLES"=>"1"));
+		$ShowUpText = Language::get("Show data");
+	}
+	
+	return \AsyncWeb\Text\Template::loadTemplate($Template,array(
+			"HeaderText"=>$text,
+			"HTML"=>$ret,
+			"Focus"=>$Focus,
+			"ID"=>$this->data["uid"],
+			"Merged"=>$this->merged,
+			"SubmitURL"=>$SubmitURL,
+			"OnSubmit"=>$OnSubmit,
+			"EncType"=>$EncType,
+			"OriginalRecordID"=>$OriginalRecordID,
+			"ShowUp"=>$ShowUp,
+			"ShowUpURL"=>$ShowUpURL,
+			"ShowUpText"=>$ShowUpText,
+		),false,false);	
  }
  private function deleteForm(){
  if(!isset($this->data["allowDelete"])) return false;
@@ -3204,5 +1617,38 @@ $theme = "simple";
   }
   return $ret;
  }
+ 
+	protected static $ItemsMap = array();
+	public static function MakeItemsMap(){
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Value");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Password");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\HTMLText");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\TinyMCE");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\TextBox");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Hidden");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\TextArea");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Radio");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Select");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\APISelectDB");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Set");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\CheckBox");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\APIFile");
+		
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Captcha");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\SubmitResetCancel");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\SubmitReset");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Submit");
+		self::RegisterItemsMap("\\AsyncWeb\\View\\FormItem\\Part");
+	}
+	public static function RegisterItemsMap($class){
+		$impl = class_implements($class);
+		if(!isset($impl['AsyncWeb\\View\\FormItemInterface'])){
+			throw new \Exception(Language::get("Class $class must implement FormItemInterface"));
+		}
+		$instance = new $class();
+		$tag = $instance->TagName();
+		if(isset(self::$ItemsMap[$tag])) throw new \Exception(Language::get("Tag name $tag is already defined in view manager!"));
+		self::$ItemsMap[$tag] = $class;
+	}
 } // endof class
 

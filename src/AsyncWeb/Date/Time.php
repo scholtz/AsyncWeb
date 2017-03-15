@@ -92,4 +92,41 @@ class Time{
 		}
 		return date("d.m.Y",$date);
 	}
+	
+
+	/**
+	* This function converts str2time or time2str
+	* also parses date 2010-30-10 as time  2010-30-10T23:59:59
+	*
+	*@input $from true|false If false, than input time is string (str2time). 
+	*/
+	public static function ConvertDate($time, $from, $format="Y-m-d"){ 
+		// tato funkcia skonvertuje cas UNIXovsky na normalny
+		// from.. ak true, tak $time je unix, ak nie, tak je zadany vo formate $format
+		if(!$format) $format = "Y-m-d";
+		if($from){
+			if(!$time) return "";
+			if($time <= 0) return '';
+			// ak nam nechce vratit rovnaky vysledok po strtotime, tak nastav zachranny rezim
+			$ret = @date($format, \AsyncWeb\Date\Time::getUnix($time));
+
+			if(\AsyncWeb\Date\Time::get(strtotime($ret)) != $time){
+				$ret = @date("c",\AsyncWeb\Date\Time::getUnix($time));//ISO 8601 
+			}
+			return $ret;
+		}else{
+			if(!$time) return 0;
+			$time1 = \AsyncWeb\Date\Time::get((int)strtotime($time));
+			if(\AsyncWeb\Date\Time::get(strtotime(date("Y-m-d",\AsyncWeb\Date\Time::getUnix($time1)))) == $time1 && mb_strlen($time,'UTF-8') == 10){ // je vyplneny iba datum vo formate YYYY-MM-DD
+				// pridaj k tomu 23hod, 59min, 59 sek
+				$time1 += \AsyncWeb\Date\Time::span(24*3600-1);
+			}
+			if(\AsyncWeb\Date\Time::get(strtotime(date("d.m.Y",\AsyncWeb\Date\Time::getUnix($time1)))) == $time1 && mb_strlen($time,'UTF-8') == 10){ // je vyplneny iba datum vo formate DD-MM-YYYY
+				// pridaj k tomu 23hod, 59min, 59 sek
+				$time1 += \AsyncWeb\Date\Time::span(24*3600-1);
+			}
+
+			return $time1;
+		}
+	}	
 }

@@ -1,0 +1,80 @@
+<div class="form-group">
+	{{#LabelText}}<label for="{{ID}}" class="control-label col-{{BT_SIZE}}-{{BT_WIDTH_OF_LABEL}}">{{.}}</label>{{/LabelText}}
+	
+	<div class="col-{{BT_SIZE}}-{{BT_WIDTH_10}} MFFormColumn {{^LabelText}}col-{{BT_SIZE}}-offset-{{BT_WIDTH_OF_LABEL}}{{/LabelText}}">
+
+	
+{{#Prepend}}
+	{{#After}}
+		<div class="input-group"><span class="input-group-addon">{{.}}</span>
+	{{/After}}
+	{{^After}}
+		<div class="input-group"><span class="input-group-addon">{{.}}</span>
+	{{/After}}
+{{/Prepend}}
+{{^Prepend}}
+	{{#After}}
+		<div class="input-group">
+	{{/After}}
+{{/Prepend}}
+		<input 
+			id="{{ID}}"
+			class="MFSubmit btn btn-primary{{#AddClass}} {{.}}{{/AddClass}}" 
+			type="submit"
+			{{#Name}} name="{{.}}"{{/Name}}
+			{{#Value}} value="{{.}}"{{/Value}}
+			{{#Title}} title="{{.}}"{{/Title}}
+			{{#Placeholder}} placeholder="{{.}}"{{/Placeholder}}
+			{{#DataContent}} data-content="{{.}}"{{/DataContent}}
+			{{#DataPlacement}} data-placement="{{.}}"{{/DataPlacement}}
+			{{#Disabled}} disabled{{/Disabled}} 
+		>
+	{{#ShowReset}}
+		<input 
+			id="{{ID}}_Reset"
+			class="MFSubmit btn btn-default{{#AddClass}} {{.}}{{/AddClass}}" 
+			type="submit"
+			{{#Name}} name="{{.}}_Reset"{{/Name}}
+			{{#ResetValue}} value="{{.}}"{{/ResetValue}}
+			{{#Title}} title="{{.}}"{{/Title}}
+			{{#Placeholder}} placeholder="{{.}}"{{/Placeholder}}
+			{{#DataContent}} data-content="{{.}}"{{/DataContent}}
+			{{#DataPlacement}} data-placement="{{.}}"{{/DataPlacement}}
+			{{#Disabled}} disabled{{/Disabled}} 
+		>
+
+	{{/ShowReset}}
+	
+	{{#ShowCancel}}
+		<a href="{{CancelPath}}"
+			id="{{ID}}_Cancel"
+			class="MFSubmit btn btn-default{{#AddClass}} {{.}}{{/AddClass}}" 
+			type="submit"
+			{{#Name}} name="{{.}}_Cancel"{{/Name}}
+			{{#ResetValue}} value="{{.}}"{{/ResetValue}}
+			{{#Title}} title="{{.}}"{{/Title}}
+			{{#Placeholder}} placeholder="{{.}}"{{/Placeholder}}
+			{{#DataContent}} data-content="{{.}}"{{/DataContent}}
+			{{#DataPlacement}} data-placement="{{.}}"{{/DataPlacement}}
+			{{#Disabled}} disabled{{/Disabled}} 
+		>{{TextCancel}}</a>
+ 
+	{{/ShowCancel}}
+	
+	
+
+{{#Prepend}}
+	{{#After}}
+		<span class="input-group-addon">{{.}}</span></div>
+	{{/After}}
+	{{^After}}
+		</div>
+	{{/After}}
+{{/Prepend}}
+{{^Prepend}}
+	{{#After}}
+		<span class="input-group-addon">{{.}}</span></div>
+	{{/After}}
+{{/Prepend}}
+	</div>
+</div>

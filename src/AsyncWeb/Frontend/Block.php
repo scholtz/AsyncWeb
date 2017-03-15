@@ -18,6 +18,9 @@ class Block{
 	protected $usesparams = array();
 	protected $name = "";
 	
+	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>10001,""=>10000);
+	public static $TEMPLATE_PATHS = array( __DIR__ . "/../DefaultTemplates"=>10001);
+	protected static $TEMPLATE_PATH_INITIALIZED = false;
 	
 	public function getUsesParams(){
 		return $this->usesparams;
@@ -25,7 +28,6 @@ class Block{
 	public function overRideOuterBlock(){
 		return false;
 	}
-	public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\"=>10001,""=>10000);
 	public static function registerBlockPath($namespace,$level=1){
 		Block::$BLOCKS_PATHS[$namespace] = $level;
 		asort(Block::$BLOCKS_PATHS);
@@ -34,8 +36,6 @@ class Block{
 		if(isset(Block::$BLOCKS_PATHS[$namespace])) unset(Block::$BLOCKS_PATHS[$namespace]);
 	}
 	
-	public static $TEMPLATE_PATHS = array();
-	protected static $TEMPLATE_PATH_INITIALIZED = false;
 	public static function registerTemplatePath($dir,$level=1){
 		if(!$dir || !is_dir($dir)){
 			throw new \Exception("Directory for templates does not exists!");

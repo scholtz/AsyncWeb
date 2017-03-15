@@ -1,0 +1,31 @@
+{{#Merged}}
+<input type="hidden" name="{{ID}}___UPDATE2" value="1" />
+{{/Merged}}
+{{^Merged}}
+<form 
+	id="{{ID}}"
+	class="form-horizontal" 
+	role="form" 
+	method="post" 
+	action="{{SubmitURL}}" 
+	{{#EncType}} enctype="{{.}}"{{/EncType}}
+	{{#OnSubmit}} onsubmit="{{.}}"{{/OnSubmit}}
+   >
+{{/Merged}}
+	{{#ShowUp}}
+		<a class="btn btn-xs btn-default pull-right" href="{{ShowUpURL}}">{{ShowUpText}}</a>
+	{{/ShowUp}}
+
+	{{#HeaderText}}<h3>{{.}}</h3>{{/HeaderText}}
+	<input type="hidden" value="{{OriginalRecordID}}" name="{{ID}}___ID".'" />
+	
+	
+	{{{HTML}}}
+	
+	<script type="text/javascript">$(function(){$(".MFCheckColumn").hide();$("#{{ID}} .MFFormColumn").dblclick(function(){  $(".MFCheckColumn").show(); }); });</script>
+	
+{{#Focus}}	<script language="javascript">$("#{{.}}").focus();</script>{{/Focus}}
+	
+{{^Merged}}
+</form>
+{{/Merged}}

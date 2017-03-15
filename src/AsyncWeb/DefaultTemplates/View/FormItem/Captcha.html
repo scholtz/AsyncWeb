@@ -1,0 +1,36 @@
+<div class="form-group">
+	{{#LabelText}}<label for="{{ID}}" class="control-label col-{{BT_SIZE}}-{{BT_WIDTH_OF_LABEL}}">{{.}}</label>{{/LabelText}}
+	<div class="col-{{BT_SIZE}}-{{BT_WIDTH_10}} MFFormColumn {{^LabelText}}col-{{BT_SIZE}}-offset-{{BT_WIDTH_OF_LABEL}}{{/LabelText}}">
+
+	
+{{#Prepend}}
+	{{#After}}
+		<div class="input-group"><span class="input-group-addon">{{.}}</span>
+	{{/After}}
+	{{^After}}
+		<div class="input-group"><span class="input-group-addon">{{.}}</span>
+	{{/After}}
+{{/Prepend}}
+{{^Prepend}}
+	{{#After}}
+		<div class="input-group">
+	{{/After}}
+{{/Prepend}}
+
+	{{{HTML}}}
+	
+{{#Prepend}}
+	{{#After}}
+		<span class="input-group-addon">{{.}}</span></div>
+	{{/After}}
+	{{^After}}
+		</div>
+	{{/After}}
+{{/Prepend}}
+{{^Prepend}}
+	{{#After}}
+		<span class="input-group-addon">{{.}}</span></div>
+	{{/After}}
+{{/Prepend}}
+	</div>
+</div>
