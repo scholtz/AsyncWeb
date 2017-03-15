@@ -61,7 +61,7 @@ class FormItemInstance implements \AsyncWeb\View\FormItemInterface{
 	protected function DataValidation(){
 		$ret = array();
 
-		if(isset($this->item["data"]["validation"]["DataValidation"]) && $this->item["data"]["validation"]["DataValidation"]){
+		if(isset($this->item["data"]["validation"])){
 			if(isset($this->item["data"]["validation"]["Modules"])) 		$ret["Modules"] = $this->item["data"]["validation"]["Modules"];
 			if(isset($this->item["data"]["validation"]["Format"])) 			$ret["Format"] = $this->item["data"]["validation"]["Format"];
 			if(isset($this->item["data"]["validation"]["Allowing"])) 		$ret["Allowing"] = $this->item["data"]["validation"]["Allowing"];
