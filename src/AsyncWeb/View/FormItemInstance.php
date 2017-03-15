@@ -100,7 +100,7 @@ class FormItemInstance implements \AsyncWeb\View\FormItemInterface{
 				}else{
 					$format1 = "Y-m-d";
 				}
-				$ret["Format"] = $format1;
+				//$ret["Format"] = $format1;
 			}else
 			if(isset($Min) || isset($Max) || isset($Step)){
 				$modules["number"] = true;
