@@ -10,6 +10,8 @@ class Captcha extends \AsyncWeb\View\FormItem\HTMLText{
 	}
 	
 	public function InsertForm($SubmittedValue = null){
+		if(!\AsyncWeb\View\MakeForm::$captchaPublickey) return;
+		
 		$Template = "View_FormItem_Captcha"; if(isset($this->item["form"]["template"]) && $this->item["form"]["template"]) $Template = Language::get($this->item["form"]["template"]);
 		$ID = $this->MakeItemId();
 		
