@@ -748,10 +748,10 @@ class ApiForm{
 
 		if($item["FormItemInstance"]->IsDictionary()){
 			$langupdates[$colname] = $item["FormItemInstance"]->Validate($colValue);
-			$langupdates[$colname] = $this->filters($data[$colname],$datatype,true);	
+			$langupdates[$colname] = $this->filters($langupdates[$colname],$datatype,true);	
 		}else{
 			$cols[$colname] = $item["FormItemInstance"]->Validate($colValue);
-			$cols[$colname] = $this->filters($data[$colname],$datatype,true);	
+			$cols[$colname] = $this->filters($cols[$colname],$datatype,true);	
 		}
 		
 
@@ -815,6 +815,7 @@ class ApiForm{
    
    if(!$this->db->u($this->data["table"],$row["ID"],$this->updateData)){
    	 \AsyncWeb\Storage\Log::log("ApiForm","Update oddo failed".$this->db->error(),ML__HIGH_PRIORITY);
+
 	 $this->exception = new \Exception(Language::get("Error while updating the record!" . ((isset($this->data["append_errors"]) && $this->data["append_errors"])?" ".$this->db->error():"")));
 	 throw $this->exception;
    }
