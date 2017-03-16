@@ -11,7 +11,11 @@ class Value extends \AsyncWeb\View\FormItemInstance{
 		if(isset($this->item["texts"]["value"])){//value neprehodnocuj podla Language::get
 			return $this->item["texts"]["value"];
 		}else{
-			return Language::get($this->item["texts"]["text"]);
+			$ret = Language::get($this->item["texts"]["text"]);
+			if(substr($ret,0,3)=="PHP"){
+				$ret= \AsyncWeb\System\Execute::run($ret,$params,false);
+			}
+			return $ret;
 		}
 		return $input;
 	}
