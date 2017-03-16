@@ -93,7 +93,7 @@ class FormItemInstance implements \AsyncWeb\View\FormItemInterface{
 			}else
 			if(isset($this->item["data"]["datatype"]) && ($this->item["data"]["datatype"] == "date"))
 			{
-				$modules["date"] = true;
+				//$modules["date"] = true;
 				
 				if(isset($this->item["data"]["format"])){
 					$format1 = $this->item["data"]["format"];
