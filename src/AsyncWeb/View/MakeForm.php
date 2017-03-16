@@ -941,13 +941,13 @@ class MakeForm{
 			$item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item,$this->data);
 		}
 		
-
+ 
 		if($item["FormItemInstance"]->IsDictionary()){
 			$langupdates[$colname] = $item["FormItemInstance"]->Validate($colValue);
-			$langupdates[$colname] = $this->filters($data[$colname],$datatype,true);	
+			$langupdates[$colname] = $this->filters($langupdates[$colname],$datatype,true);	
 		}else{
 			$cols[$colname] = $item["FormItemInstance"]->Validate($colValue);
-			$cols[$colname] = $this->filters($data[$colname],$datatype,true);	
+			$cols[$colname] = $this->filters($cols[$colname],$datatype,true);	
 		}
 		
 
