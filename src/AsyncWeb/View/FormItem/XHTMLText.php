@@ -14,6 +14,7 @@ class XHTMLText extends \AsyncWeb\View\FormItem\HTMLText{
 		$LabelText = false;		if(isset($this->item["texts"]["name"]) && $this->item["texts"]["name"]) $LabelText = Language::get($this->item["texts"]["name"]);
 		if(!$LabelText)			if(isset($this->item["name"]) && $this->item["name"]) $LabelText = Language::get($this->item["name"]);
 		$Help = false;			if(isset($this->item["texts"]["help"]) && $this->item["texts"]["help"]) $Help = Language::get($this->item["texts"]["help"]);
+		$Placeholder = false;			if(isset($this->item["texts"]["placeholder"]) && $this->item["texts"]["placeholder"]) $Help = Language::get($this->item["texts"]["placeholder"]);if(!$Placeholder) $Placeholder = $Help;
 		
 		$EditorName = "Editor".$ID;if(isset($this->item["data"]["editorName"]) && $this->item["data"]["editorName"]) $EditorName = $this->item["data"]["editorName"];
 		$Widht = $this->item["data"]["width"];
@@ -51,7 +52,7 @@ class XHTMLText extends \AsyncWeb\View\FormItem\HTMLText{
 			"Name"=>$Name,
 			"Value"=>$Value,
 			"Title"=>$Help,
-			"Placeholder"=>$Help,
+			"Placeholder"=>$Placeholder,
 			"DataContent"=>$Help,
 			"DataPlacement"=>$DataPlacement,
 			"Disabled"=>!$Editable,
