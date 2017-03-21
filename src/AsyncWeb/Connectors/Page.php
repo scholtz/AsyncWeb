@@ -52,7 +52,7 @@ class Page{
 				"Connection: keep-alive",
 				"Cache-Control: max-age=0"
 				);
-			if($curlparams && $curlparams[CURLOPT_HTTPHEADER]){
+			if($curlparams && isset($curlparams[CURLOPT_HTTPHEADER])){
 				foreach($curlparams[CURLOPT_HTTPHEADER] as $k=>$v){
 					foreach($header as $kk=>$row){
 						if(substr($row,0,strlen($k)+1) == $k.":") unset($header[$kk]);

@@ -21,7 +21,12 @@ class MenuItemBuilder{
 			}else
 			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Langs")){
 				if(is_array($arg->get())){
-					$langs = $arg->get();
+					
+					$arr = $arg->get();
+					if(isset($arr[\AsyncWeb\System\Language::get()])){
+						$path = $arr[\AsyncWeb\System\Language::get()];
+					}
+					$langs = $arr;
 				}
 			}else
 			if(is_a($arg,"\\AsyncWeb\\Menu\\Builder\\Execute")){

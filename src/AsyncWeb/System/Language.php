@@ -81,23 +81,26 @@ class Language{
 		if(!$lang) $lang = Language::getLang();
 
 		if(!isset(Language::$dictionary[$lang])){
-			if(Language::$gettingDictionary) return $term;
+			if(Language::$gettingDictionary) return;
 			Language::$gettingDictionary = true;
-			if($L = \AsyncWeb\Cache\Cache::get("lang_".$lang,"lang")){
-				//echo "got from cache\n";
-				Language::$dictionary[$lang] = $L;
-				$id2toid3  = \AsyncWeb\Cache\Cache::get("2to3","lang");
-				if($id2toid3){
-					Language::$id2toid3 = array_merge(Language::$id2toid3,$id2toid3);
-					Language::$id3toid2 = array_merge(Language::$id3toid2,\AsyncWeb\Cache\Cache::get("3to2","lang"));
+			try{
+				if($L = \AsyncWeb\Cache\Cache::get("lang_".$lang,"lang")){
+					//echo "got from cache\n";
+					Language::$dictionary[$lang] = $L;
+					$id2toid3  = \AsyncWeb\Cache\Cache::get("2to3","lang");
+					if($id2toid3){
+						Language::$id2toid3 = array_merge(Language::$id2toid3,$id2toid3);
+						Language::$id3toid2 = array_merge(Language::$id3toid2,\AsyncWeb\Cache\Cache::get("3to2","lang"));
+					}
+					Language::$reversedictionary[$lang] = \AsyncWeb\Cache\Cache::get("revl_".$lang,"lang");
+					
+				}else{
+					Language::$dictionary[$lang] = $L = Language::build($lang);
+					Language::makeCache($lang);
 				}
-				Language::$reversedictionary[$lang] = \AsyncWeb\Cache\Cache::get("revl_".$lang,"lang");
+			}catch(\Exception $exc){
 				
-			}else{
-				Language::$dictionary[$lang] = $L = Language::build($lang);
-				Language::makeCache($lang);
 			}
-			
 			Language::$gettingDictionary = false;
 		}
 	}
@@ -147,7 +150,11 @@ class Language{
 		if(!isset(Language::$dictionary[$lang])){
 			if(\AsyncWeb\DB\DB::$CONNECTING){return $term;}
 			Language::init($lang);
-			$L = Language::$dictionary[$lang];
+			if(isset(Language::$dictionary[$lang])){
+				$L = Language::$dictionary[$lang];
+			}else{
+				$L = array();
+			}
 		}else{
 			$L = Language::$dictionary[$lang];
 		}
