@@ -1176,13 +1176,13 @@ $fileout.='
 
 	$form  = '<?php
 
-namespace '.$this->Namespace.'\Block\Form\\'.$this->Folder.';
+namespace '.$this->Namespace.'\\Block\\Form\\'.$this->MyNamespace($class,false).';
 
 use AsyncWeb\System\Language;
 use AsyncWeb\Security\Auth;
 use AsyncWeb\DB\DB;
 
-class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
+class '.$this->ClassName($class).' extends \AsyncWeb\DefaultBlocks\Form{
 	protected $requiresAuthenticatedUser = true;
 	protected $requiresAllGroups = array("admin");
 	protected $type = "ApiForm";
@@ -1248,10 +1248,13 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 		$this->ProcessExtension();
 		foreach($this->datatypes as $class=>$this->datatypes[$class]){
 			$fileout = $this->GenerateForm($class);
-			
-
-			if($this->OutputFormsDirectory){
-				$outform = $this->OutputFormsDirectory."/".$this->Folder."/".$class.".php";
+			if($this->OutputFormsDirectory){ 
+				$outform = $this->OutputFormsDirectory."/".$this->Folder."/".$this->ConvertClassToDirectory($class).".php";
+				$dir = dirname($outform);
+				if(!is_dir($dir)) {
+					echo "Creating directory $dir\n";
+					mkdir($dir,0770,true);
+				}
 				if(!file_exists($outform) || md5_file($outform) != md5($fileout)) {
 					$res = file_put_contents($outform,$fileout);
 					echo $outform." ".$res."\n";
@@ -1297,13 +1300,18 @@ class '.$class.' extends \AsyncWeb\DefaultBlocks\Form{
 	public function ConvertClassToNamespaceName($class){
 		return str_replace("_","\\",$class);
 	}
-	public function MyNamespace($class){
+	public function MyNamespace($class,$useNm = true){
+		if($useNm){
+			$add = $this->Namespace.'\\'.$this->Folder;
+		}else{
+			$add = $this->Folder;
+		}
 		$arr = explode("_",$class);
 		array_pop($arr);
 		if($arr){
-			return $this->Namespace.'\\'.$this->Folder.'\\'.implode("\\",$arr);
+			return $add.'\\'.implode("\\",$arr);
 		}
-		return $this->Namespace.'\\'.$this->Folder;
+		return $add;
 	}
 	public function ClassName($class){
 		$arr = explode("_",$class);
