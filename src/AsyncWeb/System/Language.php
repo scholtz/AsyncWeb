@@ -284,6 +284,7 @@ class Language{
 		$L = array();
 		if (($handle = fopen($file, "r")) !== FALSE) {
 			while (($data = fgetcsv($handle, 1000000, ",")) !== FALSE) {
+				if(count($data) < 2) continue;
 				$L[$data[0]] = $data[1];
 			}
 			fclose($handle);
