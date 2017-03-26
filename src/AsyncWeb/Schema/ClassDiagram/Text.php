@@ -37,8 +37,8 @@ class Text{
 					foreach($this->datatypes[$extendsClass] as $type=>$datatype){
 						if(!isset($this->datatypes[$class][$type])) $this->datatypes[$class][$type] = $datatype;
 					}
-					if(!isset($this->doc[true][false][false][$currentClass][$class]["doc"])){
-						$this->doc[true][false][false][$currentClass][$class]["doc"] = $this->doc[true][false][false][$extendsClass][$extendsClass]["doc"];
+					if(!isset($this->doc[true][false][false][$extendsClass][$class]["doc"])){
+						$this->doc[true][false][false][$extendsClass][$class]["doc"] = $this->doc[true][false][false][$extendsClass][$extendsClass]["doc"];
 					}
 					break;
 				}
@@ -49,6 +49,7 @@ class Text{
 	}
 	public function ParseDirectory($dir = false){
 		$lineProcessed = 0;
+		$currentClass = "";
 		if(!$dir){
 			$dir = $this->SchemaDirectory;
 			$this->append = $this->optionality = $this->datatypes = $this->doc = $this->extendsClasses =  array();
