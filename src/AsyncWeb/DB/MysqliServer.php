@@ -165,7 +165,10 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
 		if($this->logqueries) $start = microtime(true);
 		$ret = @mysqli_query($link,$query);
 		$this->afrows = @mysqli_affected_rows($link);
-		if($this->logqueries) $res = file_put_contents($this->logfile,"D: ".(number_format(microtime(true)-$start,4))." A: ".$this->afrows." T:".date("c")." Q: ".$query."\n",FILE_APPEND);
+		if($this->logqueries){
+			if(!file_exists($logdir=dirname($this->logfile))) mkdir($logdir,0777,true);
+			$res = file_put_contents($this->logfile,"D: ".(number_format(microtime(true)-$start,4))." A: ".$this->afrows." T:".date("c")." Q: ".$query."\n",FILE_APPEND);
+		}
 		if($this->logqueries && $err = @mysqli_error($this->link)) $res = file_put_contents($this->logfile,"ERROR: ".(number_format(microtime(true)-$start,4))." ".$err."\n",FILE_APPEND);
 		return $ret;
 	}

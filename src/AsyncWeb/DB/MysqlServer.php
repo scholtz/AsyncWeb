@@ -155,7 +155,10 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
 		if($this->logqueries) $start = microtime(true);
 		$ret = @mysql_query($query,$link);
 		$this->afrows = @mysql_affected_rows($link);
-		if($this->logqueries) $res = file_put_contents($this->logfile,"D: ".(number_format(microtime(true)-$start,4))." A: ".$this->afrows." T:".date("c")." Q: ".$query."\n",FILE_APPEND);
+		if($this->logqueries){
+			if(!file_exists($logdir=dirname($this->logfile))) mkdir($logdir,0777,true);
+			$res = file_put_contents($this->logfile,"D: ".(number_format(microtime(true)-$start,4))." A: ".$this->afrows." T:".date("c")." Q: ".$query."\n",FILE_APPEND);
+		}
 		if($this->logqueries && $err = @mysql_error($this->link)) $res = file_put_contents($this->logfile,"ERROR: ".(number_format(microtime(true)-$start,4))." ".$err."\n",FILE_APPEND);
 		return $ret;
 	}
