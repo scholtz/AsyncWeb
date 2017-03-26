@@ -447,7 +447,7 @@ $fileout.='
 	if(isset($this->doc[false][false][true][$class]["Create"])){
 $fileout.='
 	/**
-	'.$this->doc[false][false][true][$class]["Create"]["doc"].'	
+	'.(isset($this->doc[false][false][true][$class]["Create"]["doc"])?$this->doc[false][false][true][$class]["Create"]["doc"]:"").'	
 ';
 	foreach($this->datatypes[$class] as $type=>$datatype){
 		if(isset($this->doc[false][true][false][$class][$type]["code"])) continue;
@@ -643,7 +643,7 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 	if(isset($this->doc[false][false][true][$class]["Update"])){
 		
 		$fileout.='	/**
-	'.$this->doc[false][false][true][$class]["Update"]["doc"].'	
+	'.(isset($this->doc[false][false][true][$class]["Update"]["doc"])?$this->doc[false][false][true][$class]["Update"]["doc"]:"").'	
 ';
 	foreach($this->datatypes[$class] as $type=>$datatype){
 		if(isset($this->doc[false][true][false][$class][$type]["code"])) continue;
@@ -880,7 +880,7 @@ $fileout.=$type."=..&";
 	if(isset($this->doc[false][false][true][$class]["Delete"])){
 		
 		$fileout.='	/**
-	'.$this->doc[false][false][true][$class]["Delete"]["doc"].'	
+	'.(isset($this->doc[false][false][true][$class]["Delete"]["doc"])?$this->doc[false][false][true][$class]["Delete"]["doc"]:"").'	
 ';
 	$fileout.='	
 	@param string $UID Unique identifier of the object to be deleted.
@@ -980,7 +980,7 @@ $fileout.='
 	if(isset($this->doc[false][false][true][$class]["Request"])){
 		
 		$fileout.='	/**
-	'.$this->doc[false][false][true][$class]["Request"]["doc"].'	
+	'.(isset($this->doc[false][false][true][$class]["Request"]["doc"])?$this->doc[false][false][true][$class]["Request"]["doc"]:"").'	
 ';
 	$fileout.='	
 	@param string $QueryBuilder Query Builder Array of ("Where"=>$where, "Offset"=>$offset, "Limit"=>$count, "Time"=>$time, "Sort"=>$order, "Cols"=>$cols, "GroupBy"=>$groupby, "Having"=>$having, "Distinct"=>$distinct)
