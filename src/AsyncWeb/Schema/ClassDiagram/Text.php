@@ -1246,7 +1246,8 @@ class '.$this->ClassName($class).' extends \AsyncWeb\DefaultBlocks\Form{
 	public function SaveFormToOutput(){
 		$this->ParseDirectory();
 		$this->ProcessExtension();
-		foreach($this->datatypes as $class=>$this->datatypes[$class]){
+		foreach($this->datatypes as $class=>$info){
+			
 			$fileout = $this->GenerateForm($class);
 			if($this->OutputFormsDirectory){ 
 				$outform = $this->OutputFormsDirectory."/".$this->Folder."/".$this->ConvertClassToDirectory($class).".php";
@@ -1265,7 +1266,7 @@ class '.$this->ClassName($class).' extends \AsyncWeb\DefaultBlocks\Form{
 	public function SaveToOutput(){
 		$this->ParseDirectory();
 		$this->ProcessExtension();
-		foreach($this->datatypes as $class=>$this->datatypes[$class]){
+		foreach($this->datatypes as $class=>$info){
 			$fileout = $this->GeneratePHPTop($class);
 			$fileout.= $this->GeneratePHPVariables($class);
 			$fileout.= $this->GeneratePHPConstructor($class);
