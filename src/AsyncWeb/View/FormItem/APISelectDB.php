@@ -20,10 +20,9 @@ class APISelectDB extends \AsyncWeb\View\FormItem\SelectDB{
 		
 		$DataPlacement = false;	if($Help) $DataPlacement = "bottom";
 
-		if(!$this->item["DBLINK"]){
+		if(!$this->db && $this->item["DBLINK"]){
 			$this->db = $this->item["DBLINK"];
 		}
-		
 		$Editable = true;		if(isset($this->item["editable"]) && !$this->item["editable"]){ $Editable = false; }
 		
 		$Options = array();

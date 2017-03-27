@@ -1196,16 +1196,28 @@ class '.$this->ClassName($class).' extends \AsyncWeb\DefaultBlocks\Form{
 
 			"table" => "'.$class.'",
 			"col" => array( ';
+			
+			
+			$shown = 0;
 			foreach($this->datatypes[$class] as $type=>$datatype){
+				$DBVs = "";
+				$show = false;
+				if($type=="Name") $show = true;
+				if($shown < 5) $show = true;
+				if($show){
+					$shown++;
+					$DBVs = ',"DBVs"';
+				}
+				
 				
 				if(isset($this->doc[false][true][false][$class][$type]["code"])) continue;
 				if(substr($datatype,-8) == "Instance") continue;
 				if($datatype == "int"){
-					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu","DBVs","DBVe")),';
+					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu"'.$DBVs.',"DBVe")),';
 				}elseif(strtolower($datatype) == "string"){
-					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu","DBVs","DBVe")),';
+					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu"'.$DBVs.',"DBVe")),';
 				}elseif(substr($datatype,-4) == "Enum"){
-					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu","DBVs","DBVe")),';
+					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu"'.$DBVs.',"DBVe")),';
 				}elseif(substr($datatype,-2) == "ID"){
 					$form.='	array(
 						"name"=>Language::get("'.$type.'"),
@@ -1220,10 +1232,10 @@ class '.$this->ClassName($class).' extends \AsyncWeb\DefaultBlocks\Form{
 							"nullValue"=>Language::get("Choose a value"),
 							"no_data"=>Language::get("Not selected"),
 						),
-						"usage"=>array("MFi","MFu")),
+						"usage"=>array("MFi","MFu"'.$DBVs.',"DBVe")),
 					';
 				}else{
-					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu","DBVs","DBVe")),';
+					$form.='	array("name"=>Language::get("'.$type.'"),"texts"=>array("default"=>""),"data"=>array("col"=>"'.$type.'"),"usage"=>array("MFi","MFu"'.$DBVs.',"DBVe")),';
 				}
 				$form.="\n";
 
