@@ -1445,7 +1445,6 @@ class ApiForm{
   }
   $formName = $name;
   $row = $this->db->gr($this->data["table"],$where);
-  
   if(!$row){
   	Messages::getInstance()->error(Language::get("Error while selecting information from the database".((isset($this->data["append_errors"]) && $this->data["append_errors"])?" ".$this->db->error():"")));
   	\AsyncWeb\Storage\Log::log("ApiForm","update2 no row selected",ML__HIGH_PRIORITY);
@@ -1482,6 +1481,8 @@ class ApiForm{
 		if($in=$this->inWhere($col)){
 			$colValue = $in["value"];
 			$item["editable"] = false;
+		}else{
+			$colValue = $row[$col];
 		}
    
 		$item["DBLINK"] = $this->db;
