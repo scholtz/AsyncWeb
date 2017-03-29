@@ -19,6 +19,7 @@ class System{
 	private static $dom = null;
 	public static function getDomain(){
 		if(System::$dom !== null) return System::$dom;
+		if(!isset($_SERVER["HTTP_HOST"])) return "localhost";
 		return $_SERVER["HTTP_HOST"];
 	}
 	public static function setDomain($domain){
