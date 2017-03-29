@@ -850,7 +850,14 @@ $fileout.=$type."=..&";
 				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "char";'."\n";
 				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "32";'."\n";
 				$fileout.='		$config["keys"][] = "'.$type.'";'."\n";			
+			}else
+			if($DataType == "userorgroup"){
+				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "char";'."\n";
+				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "32";'."\n";
+				$fileout.='		$config["keys"][] = "'.$type.'";'."\n";			
 			}else{
+				$fileout.='		$config["cols"]["'.$type.'"]["type"] = "varchar";'."\n";
+				$fileout.='		$config["cols"]["'.$type.'"]["length"] = "250";'."\n";
 				echo "WARNING: unknown data type $class.$type :: $datatype\n";
 			}
 		}
