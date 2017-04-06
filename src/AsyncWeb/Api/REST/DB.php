@@ -124,7 +124,7 @@ class DB extends \AsyncWeb\DB\DBServer {
 			}
 			
 			
-			$row = $this->gr($table,$ID,array(),$cols);
+			$row = $this->gr($table,$ID);
 			//throw new \Exception(var_export($id2,true));
 			if(!$row){
 				if(!$insert_new){
