@@ -189,6 +189,12 @@ class Text{
 					if(substr($rule,0,2) == ".`"){
 						$this->doc[$this->docforclass][$this->docforparam][$this->docforfunction][$currentClass][$this->docobject]["codeiter"][] = trim(substr($rule,2),"`");
 					}
+					if(substr($rule,0,2) == "<`"){
+						$this->doc[$this->docforclass][$this->docforparam][$this->docforfunction][$currentClass][$this->docobject]["codetop"][] = trim(substr($rule,2),"`");
+					}
+					if(substr($rule,0,2) == ">`"){
+						$this->doc[$this->docforclass][$this->docforparam][$this->docforfunction][$currentClass][$this->docobject]["codeend"][] = trim(substr($rule,2),"`");
+					}
 					
 				}
 				if(substr($datatype,-2) == "ID"){
@@ -498,6 +504,14 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 		foreach($vars as $var=>$v){if(isset($_REQUEST[$var])){$$var = $_REQUEST[$var];$vars[$var] = $_REQUEST[$var];}else{if(isset($_REQUEST[strtolower($var)])){$$var = $_REQUEST[strtolower($var)];$vars[$var] = $_REQUEST[strtolower($var)];}}}
 		$apiuser = \\'.$this->Namespace.'\Classes\Session::Validate($vars);
 		$session = \\'.$this->Namespace.'\Classes\Session::Instance($ApiKeySession);'."\n";
+		
+		if(isset($this->doc[false][false][true][$class]["Create"]["codetop"])){
+			$fileout.='		//source code for top of the script copied from schema file'."\n";
+			foreach($this->doc[false][false][true][$class]["Create"]["codetop"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
+		
 		if(isset($this->doc[true][false][false][$class][$class]["rule"]) && $this->doc[true][false][false][$class][$class]["rule"] == "userIsAllowedToSuggest"){
 			$fileout.='		// userIsAllowedToSuggest rule applies'."\n";
 			$fileout.='
@@ -627,11 +641,21 @@ $fileout.='"'.$type.'"=>$'.$type.',';
 		// perform insert into the database
 		if(DB::u(self::$TABLE,$ID,$update,$config)){
 			if(DB::error()) throw new \Exception(DB::error());
-			return $ID;
+			$ret= $ID;
 		}else{
 			if(DB::error()) throw new \Exception(DB::error());
-			return false;
+			$ret= false;
 		}
+		';
+		if(isset($this->doc[false][false][true][$class]["Create"]["codeend"])){
+			$fileout.='		//source code for end of the script copied from schema file'."\n";
+			foreach($this->doc[false][false][true][$class]["Create"]["codeend"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
+
+		$fileout.='
+		return $ret;
 	}'."\n\n";
 	}
 		return $fileout;
@@ -696,6 +720,15 @@ $fileout.=$type."=..&";
 		$session = \\'.$this->Namespace.'\Classes\Session::Instance($ApiKeySession);
 		
 		$instance = self::Instance($ID);'."\n";
+		
+		
+		if(isset($this->doc[false][false][true][$class]["Update"]["codetop"])){
+			$fileout.='		//source code for end of the script copied from schema file'."\n";
+			foreach($this->doc[false][false][true][$class]["Update"]["codetop"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
+		
 		if(isset($this->doc[true][false][false][$class][$class]["rule"]) && $this->doc[true][false][false][$class][$class]["rule"] == "userIsAllowedToSuggest"){
 			$fileout.='		if($instance->State == "Suggested" && $instance->SuggestedBy == $apiuser){
 			$State = "Suggested";
@@ -794,9 +827,15 @@ $fileout.=$type."=..&";
 		$fileout.='		if(count($update) > 0){'."\n";
 		$fileout.='			$ret= DB::u(self::$TABLE,$ID,$update,$config);'."\n";
 		$fileout.='			if(DB::error()) throw new \Exception(DB::error());'."\n";
-		$fileout.='			return $ret;'."\n";
-		$fileout.='		}else{return true;}'."\n";
+		$fileout.='		}else{$ret= true;}'."\n";
 		
+		if(isset($this->doc[false][false][true][$class]["Update"]["codeend"])){
+			$fileout.='		//source code for end of the script copied from schema file'."\n";
+			foreach($this->doc[false][false][true][$class]["Update"]["codeend"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
+		$fileout.='		return $ret;'."\n";
 		$fileout.='	}'."\n"."\n";
 	}
 		return $fileout;
@@ -914,6 +953,11 @@ $fileout.=$type."=..&";
 
 		$instance = self::Instance($ID);'."\n";
 
+		if(isset($this->doc[false][false][true][$class]["Delete"]["codetop"])){
+			foreach($this->doc[false][false][true][$class]["Delete"]["codetop"] as $line){
+				$fileout.='			'.$line."\n";
+			}
+		}
 		
 		if(isset($this->doc[false][false][true][$class]["Delete"]["code"])){
 			foreach($this->doc[false][false][true][$class]["Delete"]["code"] as $line){
@@ -964,15 +1008,25 @@ $fileout.=$type."=..&";
 		
 		
 $fileout.='
+		$ret= false;
 		if(!$UID && !$ID){
 			throw new \\'.$this->Namespace.'\Service\Exception\UnauthorizedException(Language::get("You must provide identifier in order to delete the object."));
 		}
 		if($ID){
-			return DB::delete(self::$TABLE,array(self::$COL_ID=>$ID));
+			$ret= DB::delete(self::$TABLE,array(self::$COL_ID=>$ID));
 		}elseif($UID){
-			return DB::delete(self::$TABLE,array(self::$COL_UID=>$UID));
+			$ret= DB::delete(self::$TABLE,array(self::$COL_UID=>$UID));
+		}';
+		
+		if(isset($this->doc[false][false][true][$class]["Delete"]["codeend"])){
+			$fileout.='		//source code for end of the script copied from schema file'."\n";
+			foreach($this->doc[false][false][true][$class]["Delete"]["codeend"] as $line){
+				$fileout.='		'.$line."\n";
+			}
 		}
-		return false;
+		
+		$fileout.='
+		return $ret;
 	}'."\n"."\n";
 	}
 	
@@ -1012,6 +1066,11 @@ $fileout.='
 		foreach($vars as $var=>$v){if(isset($_REQUEST[$var])){$$var = $_REQUEST[$var];$vars[$var] = $_REQUEST[$var];}else{if(isset($_REQUEST[strtolower($var)])){$$var = $_REQUEST[strtolower($var)];$vars[$var] = $_REQUEST[strtolower($var)];}}}
 		$apiuser = \\'.$this->Namespace.'\Classes\Session::Validate($vars);
 		$session = \\'.$this->Namespace.'\Classes\Session::Instance($ApiKeySession);'."\n";
+		if(isset($this->doc[false][false][true][$class]["Request"]["codetop"])){
+			foreach($this->doc[false][false][true][$class]["Request"]["codetop"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
 		if(isset($this->doc[false][false][true][$class]["Request"]["code"])){
 			foreach($this->doc[false][false][true][$class]["Request"]["code"] as $line){
 				$fileout.='		'.$line."\n";
@@ -1085,7 +1144,15 @@ $fileout.='
 		
 		$fileout .= '
 			$ret[] = self::Instance($row[self::$COL_ID]);
+		}';
+
+		if(isset($this->doc[false][false][true][$class]["Request"]["codeend"])){
+			foreach($this->doc[false][false][true][$class]["Request"]["codeend"] as $line){
+				$fileout.='		'.$line."\n";
+			}
 		}
+
+		$fileout.='
 		return $ret;
 	}'."\n";
 	}
@@ -1163,8 +1230,18 @@ $fileout.='
 		foreach($vars as $var=>$v){if(isset($_REQUEST[$var])){$$var = $_REQUEST[$var];$vars[$var] = $_REQUEST[$var];}else{if(isset($_REQUEST[strtolower($var)])){$$var = $_REQUEST[strtolower($var)];$vars[$var] = $_REQUEST[strtolower($var)];}}}
 		$apiuser = \\'.$this->Namespace.'\Classes\Session::Validate($vars);
 		$session = \\'.$this->Namespace.'\Classes\Session::Instance($ApiKeySession);'."\n";
+		if(isset($this->doc[false][false][true][$class][$method]["codetop"])){
+			foreach($this->doc[false][false][true][$class][$method]["codetop"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
 		if(isset($this->doc[false][false][true][$class][$method]["code"])){
 			foreach($this->doc[false][false][true][$class][$method]["code"] as $line){
+				$fileout.='		'.$line."\n";
+			}
+		}
+		if(isset($this->doc[false][false][true][$class][$method]["codeend"])){
+			foreach($this->doc[false][false][true][$class][$method]["codeend"] as $line){
 				$fileout.='		'.$line."\n";
 			}
 		}
