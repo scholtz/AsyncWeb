@@ -17,6 +17,7 @@ class Value extends \AsyncWeb\View\FormItemInstance{
 			}
 			return $ret;
 		}
+		$input = \AsyncWeb\Frontend\URLParser::v($input);
 		return $input;
 	}
 	

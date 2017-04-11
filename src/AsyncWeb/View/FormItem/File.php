@@ -2,6 +2,8 @@
 
 namespace AsyncWeb\View\FormItem;
 use AsyncWeb\System\Language;
+use AsyncWeb\Text\Texts;
+use AsyncWeb\DB\DB;
 
 
 class File extends \AsyncWeb\View\FormItemInstance{
@@ -82,7 +84,7 @@ class File extends \AsyncWeb\View\FormItemInstance{
 		$After = false;			if(isset($this->item["texts"]["after"]) && $this->item["texts"]["after"]) $After = Language::get($this->item["texts"]["after"]);
 		$Prepend = false;		if(isset($this->item["texts"]["prepend"]) && $this->item["texts"]["prepend"]) $Prepend = Language::get($this->item["texts"]["prepend"]);
 		$AddClass = false;		if(isset($this->item["form"]["class"]) && $this->item["form"]["class"]) $AddClass = $this->item["form"]["class"];
-		$Type = $this->item["data"]["datatype"];
+		$Type = "file";
 		$MFType = "MFFile";
 		
 		$Value = false; // file needs to be resent

@@ -9,6 +9,7 @@ class CheckBox extends \AsyncWeb\View\FormItem\NullableValue{
 		return "checkbox";
 	}
 	public function Validate($input = null){
+		$input = \AsyncWeb\Frontend\URLParser::v($input);
 		if($input === null) return null;
 		return $input || $input;
 	}

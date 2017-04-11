@@ -567,10 +567,10 @@ class ApiForm{
 		}
 		
 		if($item["FormItemInstance"]->IsDictionary()){
-			$langupdates[$colname] = $item["FormItemInstance"]->Validate(URLParser::v($name1));
+			$langupdates[$colname] = $item["FormItemInstance"]->Validate($name1);
 			$langupdates[$colname] = $this->filters($data[$colname],$datatype,true);	
 		}else{
-			$data[$colname] = $item["FormItemInstance"]->Validate(URLParser::v($name1));
+			$data[$colname] = $item["FormItemInstance"]->Validate($name1);
 			$data[$colname] = $this->filters($data[$colname],$datatype,true);	
 		}
 		

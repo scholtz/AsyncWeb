@@ -9,7 +9,8 @@ class HTMLText extends \AsyncWeb\View\FormItemInstance{
 		return null;
 	}
 	public function Validate($input = null){
-		$ret = $input;
+		$ret = \AsyncWeb\Frontend\URLParser::v($input);
+
 		if(isset($this->item["data"]["dictionary"]) && $this->item["data"]["dictionary"]){
 			if($ret){
 				if(class_exists("DetectIntrusion")){

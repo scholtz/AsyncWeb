@@ -787,7 +787,7 @@ class MakeForm{
 		}
 		$item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item,$this->data);
 	}
-	$data[$colname] = $item["FormItemInstance"]->Validate(URLParser::v($name1));
+	$data[$colname] = $item["FormItemInstance"]->Validate($name1);
 	$data[$colname] = $this->filters($data[$colname],$datatype,true);	
 
 

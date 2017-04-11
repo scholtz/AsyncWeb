@@ -12,6 +12,7 @@ class FormItemInstance implements \AsyncWeb\View\FormItemInterface{
 		return null;
 	}
 	public function Validate($input = null){
+		return $input;
 	}
 	public function IsDictionary(){
 		return isset($this->item["data"]["dictionary"]) && $this->item["data"]["dictionary"];

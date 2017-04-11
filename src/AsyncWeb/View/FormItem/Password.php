@@ -9,6 +9,7 @@ class Password extends \AsyncWeb\View\FormItemInstance{
 		return "password";
 	}
 	public function Validate($input = null){
+		$input = \AsyncWeb\Frontend\URLParser::v($input);
       	$ret = hash('sha256',$input);
 		if(isset($this->item["data"]["cohash"])){
 			$ret = hash('sha256',$this->item["data"]["cohash"].$ret);
