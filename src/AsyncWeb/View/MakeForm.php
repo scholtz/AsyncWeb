@@ -1838,7 +1838,8 @@ class MakeForm{
 		if(!isset($impl['AsyncWeb\\View\\FormItemInterface'])){
 			throw new \Exception(Language::get("Class $class must implement FormItemInterface"));
 		}
-		$instance = new $class();
+		$tmp=array();
+		$instance = new $class($tmp,$tmp);
 		$tag = $instance->TagName();
 		if(isset(self::$ItemsMap[$tag])) throw new \Exception(Language::get("Tag name $tag is already defined in view manager!"));
 		self::$ItemsMap["".$tag] = "".$class;
