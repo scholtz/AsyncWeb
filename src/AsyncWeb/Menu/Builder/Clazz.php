@@ -1,6 +1,4 @@
 <?php
-
 namespace AsyncWeb\Menu\Builder;
-
-class Clazz extends \AsyncWeb\Helpers\ValueObject {}
-
+class Clazz extends \AsyncWeb\Helpers\ValueObject {
+}

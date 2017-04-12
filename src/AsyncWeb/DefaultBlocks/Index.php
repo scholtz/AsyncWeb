@@ -1,10 +1,8 @@
 <?php
 namespace AsyncWeb\DefaultBlocks;
-
-
-class Index extends \AsyncWeb\Frontend\Block{
-	protected function initTemplate(){
-		$this->template = '<!DOCTYPE html>
+class Index extends \AsyncWeb\Frontend\Block {
+    protected function initTemplate() {
+        $this->template = '<!DOCTYPE html>
 <html lang="{{LANG}}">
 {{{Layout_Head}}}
 <body>
@@ -22,5 +20,5 @@ class Index extends \AsyncWeb\Frontend\Block{
 {{{Layout_Scripts}}}
 </body>
 </html>';
-	}
+    }
 }

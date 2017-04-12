@@ -1,8 +1,6 @@
 <?php
 namespace AsyncWeb\Async;
-
-class Ratchet extends AsyncEngine{
-	public function getFrontEndJS(){
-		
-	}
+class Ratchet extends AsyncEngine {
+    public function getFrontEndJS() {
+    }
 }

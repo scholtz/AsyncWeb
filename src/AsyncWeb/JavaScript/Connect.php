@@ -1,12 +1,9 @@
 <?php
-
-
 namespace AsyncWeb\JavaScript;
-
-class Connect{
-	public function get(&$request){
-		$ret = '';
-		$ret.='
+class Connect {
+    public function get(&$request) {
+        $ret = '';
+        $ret.= '
 // MIT License:
 //
 // Copyright (c) 2010-2012, Joe Walnes
@@ -205,10 +202,10 @@ class Connect{
     return ReconnectingWebSocket;
 }); 
 
-var conn = new ReconnectingWebSocket("ws://'.$request->getHost().':'.$request->getPort().'");
+var conn = new ReconnectingWebSocket("ws://' . $request->getHost() . ':' . $request->getPort() . '");
 
 
-';	
-		return $ret;
-	}
+';
+        return $ret;
+    }
 }

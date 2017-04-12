@@ -1,4 +1,4 @@
 <?php
 namespace AsyncWeb\Email;
-
-class Theme extends \AsyncWeb\Helpers\ValueObject{}
+class Theme extends \AsyncWeb\Helpers\ValueObject {
+}
