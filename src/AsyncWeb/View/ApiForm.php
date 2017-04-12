@@ -583,7 +583,6 @@ class ApiForm{
 			throw $e;
 		}
 	}
-	
 	$this->updateLangs = $langupdates;
 	
 		
@@ -715,15 +714,11 @@ class ApiForm{
    if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
    if(is_numeric($colname) && !isset($item["data"]["col"])) continue;
    if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
-   
+   if(!$colname) continue;
    $name = $colname;
    $n = $formName."_".$name;
    if(isset($item["data"]["var"])) $n = $item["data"]["var"];
-   $colValue = URLParser::v($n);
-   if($in=$this->inWhere($colname)){
-	 $colValue = $in["value"];
-	 $item["editable"] = false;
-   }
+   //$colValue = URLParser::v($n);
 
    	 	
    // nepokracuj ak je item typu part, ak nieje editovatelny, alebo sa nezmenil	
@@ -751,12 +746,17 @@ class ApiForm{
 		}
 
 		if($item["FormItemInstance"]->IsDictionary()){
-			$langupdates[$colname] = $item["FormItemInstance"]->Validate($colValue);
+			$langupdates[$colname] = $item["FormItemInstance"]->Validate($n);
 			$langupdates[$colname] = $this->filters($langupdates[$colname],$datatype,true);	
 		}else{
-			$cols[$colname] = $item["FormItemInstance"]->Validate($colValue);
+			$cols[$colname] = $item["FormItemInstance"]->Validate($n);
 			$cols[$colname] = $this->filters($cols[$colname],$datatype,true);	
 		}
+		
+	   if($in=$this->inWhere($colname)){
+		 $cols[$colname] = $in["value"];
+		 $item["editable"] = false;
+	   }
 		
 
     try{
@@ -765,7 +765,7 @@ class ApiForm{
      throw $e;
     }
    }
-   
+
   $this->updateData = $cols;
 
   $this->updateLangs = $langupdates;

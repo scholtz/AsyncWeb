@@ -915,12 +915,7 @@ class MakeForm{
    $name = $colname;
    $n = $formName."_".$name;
    if(isset($item["data"]["var"])) $n = $item["data"]["var"];
-   $colValue = URLParser::v($n);
-   if($in=$this->inWhere($colname)){
-	 $colValue = $in["value"];
-	 $item["editable"] = false;
-   }
-
+   
    	 	
    // nepokracuj ak je item typu part, ak nieje editovatelny, alebo sa nezmenil	
    if($item["form"]["type"] == "part") continue;
@@ -946,13 +941,18 @@ class MakeForm{
 		
  
 		if($item["FormItemInstance"]->IsDictionary()){
-			$langupdates[$colname] = $item["FormItemInstance"]->Validate($colValue);
+			$langupdates[$colname] = $item["FormItemInstance"]->Validate($n);
 			$langupdates[$colname] = $this->filters($langupdates[$colname],$datatype,true);	
 		}else{
-			$cols[$colname] = $item["FormItemInstance"]->Validate($colValue);
+			$cols[$colname] = $item["FormItemInstance"]->Validate($n);
 			$cols[$colname] = $this->filters($cols[$colname],$datatype,true);	
 		}
 		
+		if($in=$this->inWhere($colname)){
+			$cols[$colname] = $in["value"];
+			$item["editable"] = false;
+		}
+
 
    
     try{
