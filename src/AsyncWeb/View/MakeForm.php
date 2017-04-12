@@ -740,6 +740,8 @@ class MakeForm{
    if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
    $usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
   
+   if(is_numeric($colname) && !isset($item["data"]["col"])) continue;
+   
 	if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
 	$n = $formName."_".$colname;
 	
@@ -907,6 +909,7 @@ class MakeForm{
   
   foreach($this->data["col"] as $colname=>$item){
    $usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
+   if(is_numeric($colname) && !isset($item["data"]["col"])) continue;
    if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
    if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
    $name = $colname;

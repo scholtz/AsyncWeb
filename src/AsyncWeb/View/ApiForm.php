@@ -518,6 +518,8 @@ class ApiForm{
 		if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
 		$usg="MFi";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
 
+		if(is_numeric($colname) && !isset($item["data"]["col"])) continue;
+
 		if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
 		$n = $formName."_".$colname;
 
@@ -711,7 +713,9 @@ class ApiForm{
   foreach($this->data["col"] as $colname=>$item){
    $usg="MFu";if(isset($item["usage"]) && ((isset($item["usage"][$usg]) && $item["usage"][$usg]) || in_array($usg,$item["usage"]))){}else{continue;}
    if(isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
+   if(is_numeric($colname) && !isset($item["data"]["col"])) continue;
    if(isset($item["data"]["col"])) $colname = $item["data"]["col"];
+   
    $name = $colname;
    $n = $formName."_".$name;
    if(isset($item["data"]["var"])) $n = $item["data"]["var"];
