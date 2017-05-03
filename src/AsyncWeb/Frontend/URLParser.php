@@ -3,6 +3,7 @@ namespace AsyncWeb\Frontend;
 class URLParser {
     public static function get($templateid) {
         $arr = explode("/", URLParser::getCurrent());
+		$parsed = self::parse(URLParser::getCurrent());
         $itembase = $templateid;
         $replace = $templateid;
         if ($p = strpos($templateid, ":")) {
@@ -16,6 +17,9 @@ class URLParser {
                 return $itema[1];
             }
         }
+		if(isset($parsed["tmpl"][$itembase])){
+			$replace = $parsed["tmpl"][$itembase];
+		}
         return $replace;
     }
     public static function getCurrent() {
@@ -28,8 +32,18 @@ class URLParser {
         if (isset(URLParser::$parseCache[$url])) {
             return URLParser::$parseCache[$url];
         }
+		
+		$first = true;
         $arr = explode("/", $url);
         $ret = array();
+		
+		
+		// if last item contains dot (.), the loading file should be a file, so return 404 error because it should not be processed by URLParser
+		if(strpos($arr[count($arr)-1],".")){
+			header("HTTP/1.0 404 Not Found");
+			exit;
+		}
+		
         foreach ($arr as $item) {
             if (!$item) continue;
             if ($p = strpos($item, "=")) {
@@ -38,7 +52,12 @@ class URLParser {
                 if ($p = strpos($item, ":")) {
                     $ret["tmpl"][substr($item, 0, $p) ] = urldecode(substr($item, $p + 1));
                 } else {
-                    $ret["tmpl"][$item] = urldecode($item);
+					if($first){
+						$ret["tmpl"]["Content_Cat"] = str_replace("-","",ucwords(urldecode($item),"-"));
+					}else{
+						$ret["tmpl"][$item] = urldecode($item);	
+					}
+                    
                 }
             }
         }
@@ -47,6 +66,7 @@ class URLParser {
             $_REQUEST[$k] = $v;
         }
         URLParser::$parseCache[$url] = $ret;
+		
         return $ret;
     }
     public static function merge2(Array $arr1, Array $arr2) {

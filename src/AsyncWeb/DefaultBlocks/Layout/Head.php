@@ -13,9 +13,8 @@ class Head extends \AsyncWeb\Frontend\Block {
     <link href="/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 	<script src="/bower_components/jquery/dist/jquery.min.js" type="text/javascript"></script>
     <link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script async type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <link href="/bower_components/jasny-bootstrap/dist/css/jasny-bootstrap.min.css" rel="stylesheet">
-    <script async type="text/javascript" src="/bower_components/jasny-bootstrap/dist/js/jasny-bootstrap.min.js"></script>' : '
+    <script async type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>'.(file_exists("/bower_components/jasny-bootstrap/dist/css/jasny-bootstrap.min.css")?'<link href="/bower_components/jasny-bootstrap/dist/css/jasny-bootstrap.min.css" rel="stylesheet">
+    <script async type="text/javascript" src="/bower_components/jasny-bootstrap/dist/js/jasny-bootstrap.min.js"></script>':'') : '
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.css" rel="stylesheet">
 	<script src="//code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">

@@ -74,6 +74,7 @@ class Time {
         if ($locale && class_exists("\IntlDateFormatter")) {
             $format = \IntlDateFormatter::MEDIUM;
             if ($date > (self::get() - self::span(3600 * 24))) {
+				return date("H:i:s", $date);
                 $format = \IntlDateFormatter::SHORT;
             }
             $formatter = new \IntlDateFormatter($locale, $format, $format);

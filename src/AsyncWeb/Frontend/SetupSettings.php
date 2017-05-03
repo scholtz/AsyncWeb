@@ -4,7 +4,7 @@ use AsyncWeb\Frontend\URLParser;
 class SetupSettings {
     public static function show() {
         $err = '';
-        $blockspath = "../blocks/";
+        $namespace = "KBB";
         $templatespath = "../templates/";
         $dbtype = "0";
         $dbtypes = array("0" => "None", "mysql" => "MySQL", "oracle" => "Oracle", "postgresql" => "PostgreSQL");
@@ -12,33 +12,45 @@ class SetupSettings {
         $dbuser = "";
         $dbpass = "";
         $dbdb = "";
-        if (URLParser::v("blockspath") !== null) $blockspath = URLParser::v("blockspath");
-        if (URLParser::v("templatespath") !== null) $templatespath = URLParser::v("templatespath");
+        if (URLParser::v("namespace") !== null) $namespace = URLParser::v("namespace");
+        //if (URLParser::v("templatespath") !== null) $templatespath = URLParser::v("templatespath");
         if (URLParser::v("dbtype") !== null) $dbtype = URLParser::v("dbtype");
         if (URLParser::v("dbserver") !== null) $dbserver = URLParser::v("dbserver");
         if (URLParser::v("dbuser") !== null) $dbuser = URLParser::v("dbuser");
         if (URLParser::v("dbpass") !== null) $dbpass = URLParser::v("dbpass");
         if (URLParser::v("dbdb") !== null) $dbdb = URLParser::v("dbdb");
+        if (URLParser::v("basicauthon") !== null) $basicauthon = URLParser::v("basicauthon");
         if (URLParser::v("googleon") !== null) $googleon = URLParser::v("googleon");
         if (URLParser::v("goauthid") !== null) $goauthid = URLParser::v("goauthid");
         if (URLParser::v("goauthsecret") !== null) $goauthsecret = URLParser::v("goauthsecret");
         $googleonvalue = "";
         if ($googleon) $googleonvalue = ' checked="checked"';
+		$basicauthonvalue = "";
+		if ($basicauthon) $basicauthonvalue = ' checked="checked"';
+		
+		
         if (URLParser::v("mainmenuon") !== null) $mainmenuon = URLParser::v("mainmenuon");
         $mainmenuonvalue = "";
         if ($mainmenuon) $mainmenuonvalue = ' checked="checked"';
         $setup = false;
         if (URLParser::v("setup") !== null) $setup = URLParser::v("setup");
         if ($setup) {
-            if (!is_dir($blockspath)) {
-                if (!mkdir($blockspath)) {
-                    $err.= "Blocks path '$blockspath' does not exists and I am unable to create it!<br/>";
+			$namespaceSimplePath = "src/$namespace/src";
+            if (!is_dir($namespacePath = realpath("..")."/".$namespaceSimplePath)) {
+                if (!mkdir($namespacePath,0777,true)) {
+                    $err.= "Namespace directory '$namespacePath' does not exists and I am unable to create it!<br/>";
                 }
-            }
-            if (!is_dir($templatespath)) {
-                if (!mkdir($templatespath)) {
-                    $err.= "Templates path '$templatespath' does not exists and I am unable to create it!<br/>";
+                if (!mkdir($namespacePath."/Template")) {
+                    $err.= "I am unable to create templates directory!<br/>";
                 }
+                if (!mkdir($namespacePath."/Block")) {
+                    $err.= "I am unable to create block directory!<br/>";
+                }
+                if (!mkdir($namespacePath."/i18n")) {
+                    $err.= "I am unable to create it translation directory!<br/>";
+                }
+				
+				
             }
             if (isset($_SERVER['APPLICATION_ENV']) && $_SERVER['APPLICATION_ENV']) {
                 if (is_file($defaultconf = ($defaultpath = "../conf/" . $_SERVER['APPLICATION_ENV']) . "/settings.php")) {
@@ -49,7 +61,7 @@ class SetupSettings {
                 $defaultconf = $defaultpath . "/settings.php";
             }
             if (!is_dir($defaultpath)) {
-                if (!mkdir($defaultpath)) {
+                if (!mkdir($defaultpath,0777,true)) {
                     $err.= "Config path does not exists!<br/>";
                 }
             }
@@ -67,35 +79,55 @@ class SetupSettings {
                 $use[] = "\AsyncWeb\Frontend\BlockManagement";
                 $use[] = "\AsyncWeb\Frontend\Block";
                 $file.= "#templates setup\n";
-                $file.= "\AsyncWeb\Frontend\Block::\$BLOCK_PATH='" . $blockspath . "';\n";
-                $file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='" . $templatespath . "';\n\n";
+                //$file.= "\AsyncWeb\Frontend\Block::\$BLOCK_PATH='" . $blockspath . "';\n";
+                //$file.= "\AsyncWeb\Frontend\Block::\$TEMPLATES_PATH='" . $templatespath . "';\n\n";
+				
+				$file.= '\AsyncWeb\Frontend\Block::registerBlockPath("\\\\'.$namespace.'\\\\Block\\\\");'."\n";
+				$file.= '\AsyncWeb\Frontend\Block::registerTemplatePath("'.$namespacePath.'/Template");'."\n";
+				$file.= '\AsyncWeb\System\Language::registerLangPath("'.$namespacePath.'/i18n");'."\n";
+				
+				
+				$json = json_decode(file_get_contents("../composer.json"),true);
+				$json["autoload"]["psr-4"][$namespace."\\"] = $namespaceSimplePath;
+				$r = file_put_contents("../composer.json",json_encode($json,JSON_PRETTY_PRINT));
+				
                 switch ($dbtype) {
                     case "mysql":
                         $file.= "#DB setup\n";
-                        $use[] = "\AsyncWeb\DB\DB";
-                        $use[] = "\AsyncWeb\DB\MysqlServer";
                         try {
-                            $db = new \AsyncWeb\DB\MysqlServer(false, $dbserver, $dbuser, $dbpass, $dbdb);
+                            $db = new \AsyncWeb\DB\MysqliServer(false, $dbserver, $dbuser, $dbpass, $dbdb);
                         }
                         catch(\Exception $exc) {
                             $err.= $exc->getMessage() . "<br/>\n";
                         }
-                        $file.= "\AsyncWeb\DB\DB::\$DB_TYPE='\AsyncWeb\DB\MysqlServer';\n";
-                        $file.= "\AsyncWeb\DB\MysqlServer::\$SERVER='" . $dbserver . "';\n";
-                        $file.= "\AsyncWeb\DB\MysqlServer::\$LOGIN='" . $dbuser . "';\n";
-                        $file.= "\AsyncWeb\DB\MysqlServer::\$PASS='" . $dbpass . "';\n";
-                        $file.= "\AsyncWeb\DB\MysqlServer::\$DB='" . $dbdb . "';\n";
+                        $file.= "\AsyncWeb\DB\DB::\$DB_TYPE='\AsyncWeb\DB\MysqliServer';\n";
+                        $file.= "\AsyncWeb\DB\MysqliServer::\$SERVER='" . $dbserver . "';\n";
+                        $file.= "\AsyncWeb\DB\MysqliServer::\$LOGIN='" . $dbuser . "';\n";
+                        $file.= "\AsyncWeb\DB\MysqliServer::\$PASS='" . $dbpass . "';\n";
+                        $file.= "\AsyncWeb\DB\MysqliServer::\$DB='" . $dbdb . "';\n";
                     break;
                     case "0":
                     break;
                     default:
                         $err.= "Database type is not implemented yet!<br/>";
                 }
+				
+				
+				
                 if ($mainmenuon) {
                     $file.= '# Use MainMenu module
 \AsyncWeb\Menu\MainMenu::registerBuilder(new \AsyncWeb\Menu\DBMenu5(),-1000);
 ';
                 }
+				if($basicauthon){
+                    $file.= '
+					
+# Basic authentification
+
+$authProvider = new \AsyncWeb\Security\AuthServiceBasicUser();
+\AsyncWeb\Security\Auth::register($authProvider);
+';
+				}
                 if ($googleon) {
                     $file.= '
 					
@@ -151,12 +183,8 @@ $oauth->registerService("Google",$googleService,"https://www.googleapis.com/oaut
         if ($err) echo '<div class="alert alert-danger">' . $err . '</div>';
         echo '<form method="post" action="/setup=1">
 						<div>
-							<label for="pathblocks">Path to blocks</label>
-							<input class="form-control" value="' . $blockspath . '" name="blockspath" id="blockspath" />
-						</div>
-						<div>
-							<label for="templatespath">Path to templates</label>
-							<input class="form-control" value="' . $templatespath . '" name="templatespath" id="templatespath" />
+							<label for="pathblocks">Namespace of your project</label>
+							<input class="form-control" value="' . $namespace . '" name="namespace" id="namespace" />
 						</div>
 						<div>
 							<label for="dbtype">DB type</label>
@@ -208,6 +236,10 @@ $oauth->registerService("Google",$googleService,"https://www.googleapis.com/oaut
 						<div>
 							<label for="mainmenuon">Use MainMenu module</label>
 							<input class="" ' . $mainmenuonvalue . ' name="mainmenuon" id="mainmenuon" type="checkbox" />
+						</div>
+						<div>
+							<label for="basicauthon">Use basic authentification</label>
+							<input class="" ' . $basicauthonvalue . ' name="basicauthon" id="basicauthon" type="checkbox" />
 						</div>
 						<div>
 							<label for="googleon">Use Google authentification</label>
