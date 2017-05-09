@@ -3,6 +3,7 @@ namespace AsyncWeb\Text\Translate;
 use AsyncWeb\DB\DB;
 use AsyncWeb\Connectors\Page;
 class Bing implements \AsyncWeb\Text\TranslatorInterface {
+    public static $Use = true;
     public $APP_ID = null;
     protected $translatech;
     public function init() {
@@ -18,6 +19,7 @@ class Bing implements \AsyncWeb\Text\TranslatorInterface {
         $text = str_replace('"', "'", $text);
         $text = str_replace('[', "", $text);
         $text = str_replace(']', "", $text);
+		$appId = false;
         if (strlen($text) > 250) return $text;
         $id2 = md5($from . $to . $text);
         if ($usecache) {
@@ -43,6 +45,7 @@ class Bing implements \AsyncWeb\Text\TranslatorInterface {
                 }
             }
         }
+		if(!$appId) return false;
         curl_setopt($this->translatech, CURLOPT_URL, 'http://api.microsofttranslator.com/v2/ajax.svc/TranslateArray?appId=' . $appId . '&texts=["' . urlencode($text) . '"]&from="' . $from . '"&to="' . $to . '"&oncomplete=_mstc2&onerror=_mste2&loc=en&ctr=CzechRepublic&rgp=cce376b');
         $data = curl_exec($this->translatech);
         if (($pos = strpos($data, $t = 'TranslatedText":"')) !== false) {
@@ -61,4 +64,9 @@ class Bing implements \AsyncWeb\Text\TranslatorInterface {
         }
         return $text;
     }
+	public static $instance = null;
+	public static function Instance(){
+		if(!self::$instance) self::$instance = new \AsyncWeb\Text\Translate\Bing();
+		return self::$instance;
+	}
 }

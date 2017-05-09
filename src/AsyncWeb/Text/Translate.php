@@ -111,13 +111,22 @@ class Translate {
     }
     public static function get($text, $from = "sk", $to = "en", $usecache = true) {
         if ($from == $to) return $text;
-        $ret = Translate::getBing($text, $from, $to, $usecache);
-        if ($ret == $text) {
-            $ret = Translate::getGoogle($text, $from, $to, $usecache);
-            if ($ret != $text) {
-                if (rand(0, 100) > 90) Translate::$bingappid = null;
-            }
+		$ret = false;
+		if(\AsyncWeb\Text\Translate\Bing::$Use){
+			$ret = \AsyncWeb\Text\Translate\Bing::Instance()->Translate($text, $from, $to, $usecache);
+			if(!$ret || $ret == $text){
+				if (rand(0, 100) > 90) Translate::$bingappid = null;
+			}
+		}
+        if($ret && $ret != $text){
+			return $ret;
+		}
+		if(\AsyncWeb\Text\Translate\Google::$Use){
+			$ret = \AsyncWeb\Text\Translate\Google::Instance()->Translate($text, $from, $to, $usecache);
         }
-        return $ret;
+        if($ret && $ret != $text){
+			return $ret;
+		}
+        return $text;
     }
 }

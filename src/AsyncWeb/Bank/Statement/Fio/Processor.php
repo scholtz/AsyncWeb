@@ -5,6 +5,7 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
     public $debug = false;
     public $TABLE = "bank";
     public $emails = array();
+    public $from = "info";
     protected $token = null;
     protected $callbacks = array();
     public function __construct($token) {
@@ -90,7 +91,7 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
                 if ($key == "spec") continue;
                 $id = md5($id . $key . $value);
             }
-            $b = DB::gr(self::$TABLE, $id);
+            $b = DB::gr($this->TABLE, $id);
             if (!$b) {
                 if (strtotime($date) > time() - 3600 * 24) {
                     $data["time_create"] = time();
@@ -99,7 +100,7 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
                 }
                 $total+= $data["value"];
                 $data["state"] = 1;
-                $ret = DB::u(self::$TABLE, $id, $data);
+                $ret = DB::u($this->TABLE, $id, $data);
                 if ($ret === 1) {
                     $email.= "<div>Bank transaction: " . $data["account"] . "-" . $data["myaccount"] . ": " . $data["value"] . " " . $data["currency"];
                     if (@$data["var"] || @$data["spec"]) {
@@ -115,14 +116,14 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
             $totaln = $xpath->query("//closingBalance")->item(0);
             if ($totaln) {
                 if ($data["myaccount"]) {
-                    $row = DB::gr(self::$TABLE, array("myaccount" => $data["myaccount"]), array(), array("c" => "sum(value)"));
+                    $row = DB::gr($this->TABLE, array("myaccount" => $data["myaccount"]), array(), array("c" => "sum(value)"));
                     //var_dump($row["c"]);
                     $total = $totaln->nodeValue;
                     $rozdiel = $total - $row["c"];
                     if (abs($rozdiel) >= 0.01) {
                         $rozdiel = round($rozdiel, 3);
                         if ($this->debug) var_dump("Rozdiel: " . ($total - $row["c"]));
-                        DB::u(self::$TABLE, md5(uniqid()), array("myaccount" => $data["myaccount"], "value" => ($rozdiel), "currency" => "EUR", "date" => date("Y-m-d"), "note" => "Vysporiadanie rozdielu", "time_create" => time()));
+                        DB::u($this->TABLE, md5(uniqid()), array("myaccount" => $data["myaccount"], "value" => ($rozdiel), "currency" => "EUR", "date" => date("Y-m-d"), "note" => "Vysporiadanie rozdielu", "time_create" => time()));
                         $email.= "<div>Nasiel sa rozdiel na ucte!! Podla vypisu: $total Podla IS: " . $row["c"] . " Rozdiel: " . ($rozdiel) . "</div>\n";
                     }
                 }
@@ -132,7 +133,7 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
                 $email = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><div style="font-size:130%; color: navy; font-weight:bold;">Gimmick.In: Nové prevody na úète</div><div style="font-size: smaller; color:#999999;">Zostatok: ' . $total . ' EUR</div>' . $email . "<br/><div>Tento email je urceny vyhradne pre Samuela Zuba. Ak ste ho dostali omylom, vymazte ho a upozornite ho!!.</div><div>" . $this->user . " :: " . $this->account . "</div>";
                 if ($this->emails) {
                     foreach ($this->emails as $to) {
-                        \AsyncWeb\Email\Email::send($to, "Bankovy prevod", $email, FIOIB::$from, array(), "text/html; charset=UTF-8");
+                        \AsyncWeb\Email\Email::send($to, "Bankovy prevod", $email, $this->from, array(), "text/html; charset=UTF-8");
                     }
                 } else {
                 }
