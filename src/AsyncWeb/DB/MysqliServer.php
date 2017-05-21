@@ -244,7 +244,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                 $data["id2"] = $id;
                 return $this->insert($table, $data, $conf);
             }
-            $where = $id = $this->myAddSlashes($row["id"]);
+            $where = $id = $this->myAddSlashes($row["id2"]);
         }
         $qupdate = "";
         foreach ($data as $k => $v) {
@@ -334,14 +334,14 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
             if ($data[$key]) { //ak sa aktualizuje hodnota ktora nie je null, false alebo "0", tak nepouzivaj kontrolu datovych typov
                 if ((!array_key_exists($key, $data) || !array_key_exists($key, $row)) || ($data[$key] != $row[$key])) {
                     if ($key != "od" && $key != "do") {
-                        //if($data[$key] !== $row[$key]){echo "idem zaktualizovat $key\n";}
+                        //if($data[$key] !== $row[$key]){echo "idem zaktualizovat $key ".var_export($data[$key],true)."!=".var_export($row[$key],true)."\n";}
                         $updateNeeded = true;
                     }
                 }
             } else {
                 if ((!array_key_exists($key, $data) || !array_key_exists($key, $row)) || ($data[$key] !== $row[$key])) {
                     if ($key != "od" && $key != "do") {
-                        //if($data[$key] !== $row[$key]){echo "idem zaktualizovat $key\n";}
+                        //if($data[$key] !== $row[$key]){echo "idem zaktualizovat $key ".var_export($data[$key],true)."!=".var_export($row[$key],true)."\n";}
                         $updateNeeded = true;
                     }
                 }
@@ -748,7 +748,9 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
             //foreach ($data as $key=>$value){
             //	$this->query("ALTER TABLE `$table` ADD `$key` VARCHAR( 250 ) NULL After `id2` ");
             //}
-            
+            if($err = $this->error()){
+				throw new \Exception($err);
+			}
         }
         foreach ($data as $key => $value) {
             if (!$key) continue;

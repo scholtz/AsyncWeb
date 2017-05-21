@@ -236,7 +236,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
                 $data["id2"] = $id;
                 return $this->insert($table, $data, $conf);
             }
-            $where = $id = $this->myAddSlashes($row["id"]);
+            $where = $id = $this->myAddSlashes($row["id2"]);
         }
         $qupdate = "";
         foreach ($data as $k => $v) {
