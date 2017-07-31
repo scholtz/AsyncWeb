@@ -2,7 +2,7 @@
 namespace AsyncWeb\System;
 class System {
     public static function isSecure() {
-        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
     }
     public static function getOS() {
         if (PHP_OS == "Linux") return "linux";
