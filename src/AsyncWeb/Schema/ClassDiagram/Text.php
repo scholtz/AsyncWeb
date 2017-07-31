@@ -138,16 +138,18 @@ class Text {
                     $params = trim($params, "()");
                     $paramsarr = array();
                     foreach (explode(",", trim($params)) as $param) {
+						$thisparam = explode(" ",trim($param));
+						$out = array();
                         $param = trim($param);
                         if ($param) {
-                            $thisparam = explode(" ", $param);
-                            if (count($thisparam) == 2) {
-                                $name = trim($thisparam[1]);
-                                $datatype = trim($thisparam[0]);
-                            } else {
+							if(preg_match("/\s*(?P<datatype>\S+)\s+(?P<name>\S+)\s*/",$param,$out)){
+								$name = $out["name"];
+								$datatype = $out["datatype"];
+							}else{
                                 $name = $param;
                                 $datatype = "string";
-                            }
+							}
+							
                             if (!preg_match("/^[a-zA-Z0-9\_]+$/", $name)) {
                                 throw new \Exception(\AsyncWeb\System\Language::get("Parameter '%param%' in class '%class%' contains invalid characters", array("%class%" => $currentClass, "%param%" => $name)));
                             }
