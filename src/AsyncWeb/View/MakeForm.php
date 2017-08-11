@@ -1512,6 +1512,9 @@ class MakeForm {
                 $name = $formName . "_" . $col;
                 if (isset($item["data"]["var"])) $name = $item["data"]["var"];
                 $colValue = null;
+				if(isset($row[$col])){
+					$colValue = $row[$col];
+				}
                 if ($form_submitted) $colValue = URLParser::v($name);
                 if ($in = $this->inWhere($col)) {
                     $colValue = $in["value"];
