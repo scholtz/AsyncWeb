@@ -89,27 +89,37 @@ class Email {
             echo "Setting theme: $theme\n";
         }
         if ($theme && substr($sendAs, 0, 10) != 'text/plain') {
-            $row = DB::gr("emailstyles", array("name" => $theme));
-            if ($row) {
-                $template = Language::get($row["text"]);
-                try {
-                    $message = \AsyncWeb\Text\Template::loadTemplate($template, array("email" => $message), false, $dbg);
-                    if ($dbg) {
-                        echo "THEME OK:$template\n";
-                        echo strlen($message) . "\n";
-                    }
-                }
-                catch(\Exception $exc) {
-                    if ($dbg) {
-                        echo "THEME FILE NOT FOUND:$template: " . $exc->getMessage() . "\n";
-                    }
-                }
-                /**/
-            } else {
-                if ($dbg) {
-                    echo "THEME NOT FOUND IN DB!\n";
-                }
-            }
+			
+			try {
+				$message = \AsyncWeb\Text\Template::loadTemplate($t="Email_".strtoupper(substr(Language::getLang(),0,2))."_".$theme, array("email" => $message), false, $dbg);
+				if ($dbg) {
+					echo "THEME OK:$t\n";
+					echo strlen($message) . "\n";
+				} 
+			}
+			catch(\Exception $exc) {
+				if ($dbg) {
+					echo "THEME DEFAULT LOCATION NOT FOUND:$t: " . $exc->getMessage() . "\n";
+				}
+				
+				$row = DB::gr("emailstyles", array("name" => $theme));
+				if ($row) {
+					$template = Language::get($row["text"]);
+					try {
+						$message = \AsyncWeb\Text\Template::loadTemplate($template, array("email" => $message), false, $dbg);
+						if ($dbg) {
+							echo "THEME OK:$template\n";
+							echo strlen($message) . "\n";
+						}
+					}
+					catch(\Exception $exc) {
+						if ($dbg) {
+							echo "THEME NOT FOUND:$t: " . $exc->getMessage() . "\n";
+						}
+					}
+					/**/
+				} 
+			}
         }
         $email = $to;
         $emailwname = $email;

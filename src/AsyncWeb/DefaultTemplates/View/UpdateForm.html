@@ -17,9 +17,7 @@
 	{{/ShowUp}}
 
 	{{#HeaderText}}<h3>{{.}}</h3>{{/HeaderText}}
-	<input type="hidden" value="{{OriginalRecordID}}" name="{{ID}}___ID".'" />
-	
-	
+	<input type="hidden" value="{{OriginalRecordID}}" name="{{ID}}___ID" />
 	{{{HTML}}}
 	
 	<script type="text/javascript">$(function(){$(".MFCheckColumn").hide();$("#{{ID}} .MFFormColumn").dblclick(function(){  $(".MFCheckColumn").show(); }); });</script>

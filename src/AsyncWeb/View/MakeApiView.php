@@ -143,6 +143,8 @@ class MakeApiView {
                 $dvc = null;
                 if ($info["form"]["type"] == "checkbox") {
                     $dvc = new CheckBoxDataViewCell($info["filter"]["option"]);
+                } elseif (isset($info["form"]["dvc"]) && is_a($info["form"]["dvc"],"\\AsyncWeb\\View\\DataViewCell")) {
+                    $dvc = $info["form"]["dvc"];
                 } elseif (@$info["data"]["datatype"] == "number") {
                     $dvc = new NumberDataViewCell();
                 } elseif (@$info["filter"]["type"] == "date") {

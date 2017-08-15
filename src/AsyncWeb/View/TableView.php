@@ -178,7 +178,7 @@ class BasicDataViewCell implements DataViewCell {
             }
             $ret.= '<tr><td></td><td><input class="btn btn-default btn-xs" style="width:100%; min-width:150px" type="submit" value="' . \AsyncWeb\System\Language::get("New condition") . '" onclick="trid = Math.round(Math.random()*100000); $(\'#' . $tid . ' tr:last\').before(\'' . $this->generateEmptyFilterRow($key) . '\');return false;"  /></td>';
             $ret.= '<td><input class="btn btn-primary btn-xs" type="submit" value="' . \AsyncWeb\System\Language::get("Apply filter") . '" onclick="' . TSAjax::applyFilterScript($key, $DataTableId) . '" style="width:100%; min-width:150px"/></td><td colspan="10"></td></tr>';
-            $ret.= '</table></div>';
+            $ret.= '</table></div></form>';
             return $ret;
         }
         public function getClass() {
