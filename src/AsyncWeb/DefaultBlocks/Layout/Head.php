@@ -5,7 +5,7 @@ class Head extends \AsyncWeb\Frontend\Block {
     public static $USE_SIDEBAR = true;
     public static $USE_DATATABLE = true;
     public static $USE_WEBSOCKET = false;
-    public static $USE_BOWER = false;
+    public static $USE_BOWER = false;// in settings: \AsyncWeb\DefaultBlocks\Layout\Head::$USE_BOWER = true; in htdocs run command bower install font-awesome jquery bootstrap jasny-bootstrap
     protected function initTemplate() {
         $this->template = '<meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
