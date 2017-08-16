@@ -81,7 +81,9 @@ class URLParser {
         $ret = "";
         if (isset($arr["tmpl"])) {
             foreach ($arr["tmpl"] as $k => $v) {
-                if ($k == $v) {
+				if(\AsyncWeb\Menu\MainMenu::$CATEGORY_TAG_NAME && \AsyncWeb\Menu\MainMenu::$CATEGORY_TAG_NAME == $k){
+					$ret.= '/' . urlencode($v);
+				}elseif ($k == $v) {
                     $ret.= '/' . urlencode($k);
                 } else {
                     $ret.= '/' . urlencode($k) . ":" . urlencode($v);

@@ -11,6 +11,7 @@ use AsyncWeb\Frontend\URLParser;
 class MainMenu {
     public static $USE_MAIN_MENU = false;
     public static $PAGE = "main"; // filtruj system pre ktory sa zobrazuje menu
+    public static $SHOW_CATEGORY_TAG_NAME = false;
     public static $CATEGORY_TAG_NAME = "Content_Cat";
     public static $DROPDOWN_CARET = ' <span class="caret"></span>';
     public static $editingmenu = false;
@@ -211,7 +212,8 @@ class MainMenu {
             $path = "/";
         } elseif (isset($cur["langs"][$lang])) {
             $path = $cur["langs"][$lang];
-            $path = "/" . MainMenu::$CATEGORY_TAG_NAME . ":" . $path;
+			
+            $path = "/" . (MainMenu::$SHOW_CATEGORY_TAG_NAME? MainMenu::$CATEGORY_TAG_NAME . ":" : "") . $path;
         } else {
             $path = $cur["path"];
         }
