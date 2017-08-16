@@ -14,6 +14,7 @@ class Email {
     public static $defaultprepend = null;
     public static $defaultSenderEmail = "";
     public static $defaultSendAs = 'text/plain; charset="utf-8"';
+	public static $AttachmentToEveryEmail = array();
     public static function send() {
         //$to,$subject,$message,$from = "",$attachment=array(),$sendAs='text/plain; charset="utf-8"',$sign=array(),$dbg=false
         $to = "";
@@ -26,6 +27,7 @@ class Email {
         $dbg = false;
         $theme = "";
         $prepend = "";
+		$themevariables = array();
         $args = func_get_args();
         $i = 0;
         while (($arg = array_shift($args)) !== null) {
@@ -55,6 +57,9 @@ class Email {
                 continue;
             } elseif (is_a($arg, "\\AsyncWeb\\Email\\Debug")) {
                 $dbg = $arg->get();
+                continue;
+            } elseif (is_a($arg, "\\AsyncWeb\\Email\\ThemeVariables") && is_array($arg->get())) {
+                $themevariables = $arg->get();
                 continue;
             } elseif (is_a($arg, "\\AsyncWeb\\Email\\Prepend")) {
                 $prepend = $arg->get();
@@ -90,8 +95,13 @@ class Email {
         }
         if ($theme && substr($sendAs, 0, 10) != 'text/plain') {
 			
+			$themevariables["email"] = $message;
+			$themevariables["subject"] = $subject;
+			if(!isset($themevariables["domain"])) $themevariables["domain"] = \AsyncWeb\System\System::getDomain();
+			
+			
 			try {
-				$message = \AsyncWeb\Text\Template::loadTemplate($t="Email_".strtoupper(substr(Language::getLang(),0,2))."_".$theme, array("email" => $message), false, $dbg);
+				$message = \AsyncWeb\Text\Template::loadTemplate($t="Email_".strtoupper(substr(Language::getLang(),0,2))."_".$theme, $themevariables , false, $dbg);
 				if ($dbg) {
 					echo "THEME OK:$t\n";
 					echo strlen($message) . "\n";
@@ -106,7 +116,7 @@ class Email {
 				if ($row) {
 					$template = Language::get($row["text"]);
 					try {
-						$message = \AsyncWeb\Text\Template::loadTemplate($template, array("email" => $message), false, $dbg);
+						$message = \AsyncWeb\Text\Template::loadTemplate($template, $themevariables, false, $dbg);
 						if ($dbg) {
 							echo "THEME OK:$template\n";
 							echo strlen($message) . "\n";
