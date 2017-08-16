@@ -93,35 +93,75 @@ class Block {
         }
     }
     public static function exists($name, $checkBlockOnly = false) {
-        Block::initTemplatePath();
+		if (self::$DEBUG_TIME) {
+			$debug_iter = 1;
+			echo \AsyncWeb\Date\Timer1::show();
+			echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
+		}
+
+		Block::initTemplatePath();
         $name = Block::normalizeName($name);
         $BLOCK_PATH = Block::$BLOCK_PATH;
         if (substr($BLOCK_PATH, -1) != "/") $BLOCK_PATH.= "/";
         if ($blockready = \AsyncWeb\IO\File::exists($f = $BLOCK_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $name) . ".php")) {
             return $blockready;
         }
+		if (self::$DEBUG_TIME) {
+			echo \AsyncWeb\Date\Timer1::show();
+			echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
+		}
         foreach (Block::$BLOCKS_PATHS as $namespace => $t) {
+			if (self::$DEBUG_TIME) {
+				echo \AsyncWeb\Date\Timer1::show();
+				echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
+			}
             if (!$namespace) {
                 if (isset(Block::$BLOCK_PATH)) {
                     if ($blockready = \AsyncWeb\IO\File::exists($f = Block::$BLOCK_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $name) . ".php")) {
+						if (self::$DEBUG_TIME) {
+							echo \AsyncWeb\Date\Timer1::show();
+							echo "BLOCK Exists return file " . ($debug_iter++) . " $name $tid\n";
+						}
                         return $file;
                     }
                 }
             } else {
+				
+				if (self::$DEBUG_TIME) {
+					echo \AsyncWeb\Date\Timer1::show();
+					echo "BLOCK Exists before class_exists '" .$namespace . $name ."' ". ($debug_iter++) . " $name $tid\n";
+				}
+				
                 if (class_exists($n = $namespace . $name)) {
+					if (self::$DEBUG_TIME) {
+						echo \AsyncWeb\Date\Timer1::show();
+						echo "BLOCK Exists return true " . ($debug_iter++) . " $name $tid\n";
+					}
                     return true;
                 }
             }
         }
+		if (self::$DEBUG_TIME) {
+			echo \AsyncWeb\Date\Timer1::show();
+			echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
+		}
         if ($checkBlockOnly) {
             return false;
         }
+		if (self::$DEBUG_TIME) {
+			echo \AsyncWeb\Date\Timer1::show();
+			echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
+		}
         foreach (Block::$TEMPLATE_PATHS as $dir => $t) {
             $n = Block::normalizeTemplatePath($name);
             if ($file = \AsyncWeb\IO\File::exists($f = $dir . "/" . $n . ".html")) {
                 return $file;
             }
         }
+		if (self::$DEBUG_TIME) {
+			echo \AsyncWeb\Date\Timer1::show();
+			echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
+		}
         $TEMPLATES_PATH = Block::$TEMPLATES_PATH;
         if (substr($TEMPLATES_PATH, -1) != "/") $TEMPLATES_PATH.= "/";
         $n = Block::normalizeTemplatePath($name);
