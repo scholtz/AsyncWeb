@@ -218,6 +218,9 @@ class MakeForm {
                 }
             }
         }
+		if(!isset($this->data["col"])){
+			throw new \Exception(Language::get("Table schema does not contain any column"));
+		}
         foreach ($this->data["col"] as $k => $col) {
             if (!isset($col["usage"])) {
                 if (is_numeric($k)) {
@@ -271,7 +274,7 @@ class MakeForm {
             $this->data["useForms"] = true;
         }
         /*if(!$data["table"]){
-        Messages::die_error("Configuration error 0x319487189.");exit;
+        Messages::die_error("Configuration error 0x319487189.");exit;
         }/**/
         // zkontroluj ci bol odoslany formular
         if (!$merged) $this->check_update();
@@ -294,8 +297,9 @@ class MakeForm {
                 DB::delete(MakeForm::$N2NData["table"], $row["id2"]);
             }
             //do not process with delete
-            \AsyncWeb\HTTP\Header::s("location", array("REMOVE_VARIABLES" => "1"));
-            exit;
+            if(\AsyncWeb\HTTP\Header::s("location", array("REMOVE_VARIABLES" => "1"))){
+				exit;
+			}
             return false;
         }
     }
@@ -328,8 +332,9 @@ class MakeForm {
         }
         if ($this->exception) {
             \AsyncWeb\Text\Msg::err($this->exception->getMessage());
-            Header::s("reload", array($this->data["uid"] . "___INSERT" => "", "insert_data_" . $this->data["uid"] => "", $this->data["uid"] . "___CANCEL" => "", $this->data["uid"] . "___ID" => "", $this->data["uid"] . "___UPDATE2" => "", $this->data["uid"] . "___UPDATE1" => "", $this->data["uid"] . "___ID" => "", $this->data["uid"] . "___DELETE" => ""));
-            exit;
+            if(Header::s("reload", array($this->data["uid"] . "___INSERT" => "", "insert_data_" . $this->data["uid"] => "", $this->data["uid"] . "___CANCEL" => "", $this->data["uid"] . "___ID" => "", $this->data["uid"] . "___UPDATE2" => "", $this->data["uid"] . "___UPDATE1" => "", $this->data["uid"] . "___ID" => "", $this->data["uid"] . "___DELETE" => ""))){
+				exit;
+			}
         }
         return false;
     }
@@ -552,7 +557,7 @@ class MakeForm {
             if (isset($item["data"]["unique"]) && $item["data"]["unique"]) {
                 $row = DB::gr($this->data["table"], array($item["data"]["col"] => URLParser::v($item)));
                 if ($row) {
-                    if (!(null !== URLParser::v($form_name . "___ID")) || ($row["id"] != URLParser::v($form_name . "___ID")) || ($row["id"] == URLParser::v($form_name . "___ID") && $update_ignore == false)) {
+					if (!(null !== URLParser::v($form_name . "___ID")) || ($row["id"] != URLParser::v($form_name . "___ID")) || ($row["id"] == URLParser::v($form_name . "___ID") && $update_ignore == false)) {
                         $this->item = $item;
                         throw new \Exception($this->getExceptionText($item, "uniqueException"));
                     }
@@ -639,8 +644,9 @@ class MakeForm {
             }
             $del = array(array("col" => $this->data["tableN2Ncol2"], "op" => "is", "value" => null));
             DB::delete($this->data["tableN2N"], $del);
-            Header::reload(array($this->data["uid"] . "___CANCEL" => ""));
-            return true;
+            if(Header::reload(array($this->data["uid"] . "___CANCEL" => ""))){
+				return true;
+			}
         }
         /**
          * Checks if the insert form was submitted
@@ -793,8 +799,9 @@ class MakeForm {
                     }
                     if (!$text || $text == "insertSucces" || $text == "insertSuccess") $text = Language::get("New item has been successfully inserted");
                     Messages::getInstance()->mes($text);
-                    Header::s("reload", array($this->data["uid"] . "___INSERT" => "", "insert_data_" . $this->data["uid"] => ""));
-                    exit;
+                    if(Header::s("reload", array($this->data["uid"] . "___INSERT" => "", "insert_data_" . $this->data["uid"] => ""))){
+						exit;
+					}
                 }
                 return true;
             } else {
@@ -953,9 +960,9 @@ class MakeForm {
                 }
                 if (!$text || $text == "updateSucces" || $text == "updateSuccess") $text = Language::get("Item has been successfully updated");
                 Messages::getInstance()->mes($text); //
-                Header::s("reload", array($this->data["uid"] . "___ID" => "", $this->data["uid"] . "___UPDATE2" => "", $this->data["uid"] . "___UPDATE1" => ""));
-                exit;
-                exit;
+				if(Header::s("reload", array($this->data["uid"] . "___ID" => "", $this->data["uid"] . "___UPDATE2" => "", $this->data["uid"] . "___UPDATE1" => ""))){
+					exit;
+				}
             }
             return true;
         }
@@ -1038,9 +1045,9 @@ class MakeForm {
                     }
                     if (!$text || $text == "deleteSucces") $text = Language::get("Deletion has been successfully commited");
                     Messages::getInstance()->mes($text); //$this->data["uid"]."___DELETE"
-                    Header::s("reload", array($this->data["uid"] . "___ID" => "", $this->data["uid"] . "___DELETE" => ""));
-                    exit;
-                    exit;
+                    if(Header::s("reload", array($this->data["uid"] . "___ID" => "", $this->data["uid"] . "___DELETE" => ""))){
+						exit;
+					}
                 }
                 return true;
             } else {
@@ -1482,15 +1489,17 @@ class MakeForm {
             $where["id"] = (int)URLParser::v($name . "___ID");
             $formName = $name;
             $row = DB::gr($this->data["table"], $where);
-            if (!$row) {
-                Messages::message(Language::get("Error while selecting information from the database"));
+			if (!$row) {
+      			Messages::message(Language::get("Error while selecting information from the database"));
                 \AsyncWeb\Storage\Log::log("MakeForm", "update2 no row selected", ML__HIGH_PRIORITY);
                 if (MakeForm::$redirectAfterSuccess == "?") {
-                    Header::s("reload", array($this->data["uid"] . "___ID" => "", $this->data["uid"] . "___UPDATE2" => "", $this->data["uid"] . "___UPDATE1" => ""));
+                    $hres = Header::s("reload", array($this->data["uid"] . "___ID" => "", $this->data["uid"] . "___UPDATE2" => "", $this->data["uid"] . "___UPDATE1" => ""));
                 } else {
-                    Header::s("location", MakeForm::$redirectAfterSuccess);
+                    $hres = Header::s("location", MakeForm::$redirectAfterSuccess);
                 }
-                exit;
+				if($hres){
+					exit;
+				}
             }
             $text = "";
             $ret = "";

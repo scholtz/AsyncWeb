@@ -14,14 +14,23 @@ namespace AsyncWeb\HTTP;
 class Header {
     public static function send($text, $b = null) {
         @header($text, $b);
+		return true;
     }
     public static function reload($value) {
+		
         return Header::s("reload", $value);
     }
     public static function s($type, $value = "") {
         switch ($type) {
             case "reload":
-                $url = "";
+				if(\AsyncWeb\Storage\Session::get("__AW__HEADER__LAST_RELOAD"))
+				if(\AsyncWeb\Storage\Session::get("__AW__HEADER__LAST_RELOAD") > microtime(true) - 0.5){
+					\AsyncWeb\Text\Msg::err(\AsyncWeb\System\Language::get("Website has detected too fast redirect"));
+					return false;
+				}
+				\AsyncWeb\Storage\Session::set("__AW__HEADER__LAST_RELOAD",microtime(true));
+
+				$url = "";
                 if ($_SERVER["SERVER_PORT"] == 443) {
                     $url = "https://";
                 } else {
@@ -34,7 +43,7 @@ class Header {
                     $uri = $_SERVER["REQUEST_URI"];
                 }
                 $url.= $uri;
-                Header::send("Location: $url");
+                return Header::send("Location: $url");
             break;
             case "location":
                 if ($value == "?") return Header::s("reload", array("REMOVE_VARIABLES" => "1"));
@@ -55,10 +64,10 @@ class Header {
                         $value = $prot . @$_SERVER["HTTP_HOST"] . $value;
                     }
                 }
-                Header::send("Location: $value");
+                return Header::send("Location: $value");
                 break;
             default:
-                Header::send("$type: $value");
+                return Header::send("$type: $value");
             }
     }
 }
