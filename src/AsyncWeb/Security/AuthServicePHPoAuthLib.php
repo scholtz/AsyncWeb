@@ -28,17 +28,21 @@ class AuthServicePHPoAuthLib implements AuthService {
         foreach ($this->services as $service) {
             $class = get_class($service);
             $class = str_replace("OAuth\\OAuth2\\Service\\", "", $class);
+            $class = str_replace("AsyncWeb\\Security\\Service\\", "", $class);
             //$url = $currentUri->getRelativeUri() . '?go='.$class;
             $url = \AsyncWeb\System\Path::make(array("go" => $class));
             $text = "Login with " . $class . "!";
             if ($icon) {
-                $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with ' . $class . '"><i style="" class="fa fa-' . $this->icon . '"></i></div>';
+                $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-' . $this->icon . '"></i></div>';
             } else {
                 if ($class == "Google") {
-                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with ' . $class . '"><i style="" class="fa fa-google"></i></div>';
+                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-google"></i></div>';
                 }
                 if ($class == "Vkontakte") {
-                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:50px;" title="Login with ' . $class . '"><i style="" class="fa fa-vk"></i></div>';
+                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-vk"></i></div>';
+                }
+                if ($class == "Azure" || $class == "Microsoft") {
+                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-windows"></i></div>';
                 }
             }
             $ret.= "<a href='$url'>" . $text . "</a>";
@@ -59,8 +63,9 @@ class AuthServicePHPoAuthLib implements AuthService {
                     $service = $this->services[$provider];
                     $service->requestAccessToken($_GET['code']);
                     // Send a request with it
-                    $result = json_decode($service->request($this->info[$provider]), true);
-                    if (!$result["email"]) {
+					$result = json_decode($service->request($this->info[$provider]), true);
+					
+					if (!$result["email"]) {
                         throw new \AsyncWeb\Exceptions\SecurityException("Authorisation service did not provide your email address!");
                     }
                     $result["id3"] = $result["id"];
@@ -73,6 +78,9 @@ class AuthServicePHPoAuthLib implements AuthService {
                     }
                     $result["active"] = "1";
                     $result["last_access"] = \AsyncWeb\Date\Time::get();
+					foreach($result as $k=>$v){
+						if(is_array($v)) unset($result[$k]);
+					}
                     \AsyncWeb\DB\DB::u(AuthServicePHPoAuthLib::$DB_TABLE_USERS, $id2, $result);
                     Auth::auth(array("userid" => $id2), $this);
                     if ($path = \AsyncWeb\Storage\Session::get("oauth_path")) {
