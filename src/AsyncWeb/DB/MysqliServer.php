@@ -875,6 +875,16 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                             if (@$value["op"]) switch ($value["op"]) {
                                 case 'is':
                                     $op = "is";
+                                case 'in':
+                                    $op = "in";
+									if(is_array($value["value"])){
+										$val = "";
+										foreach($value["value"] as $valueitem){
+											if($val) $val.= ',';
+											$val .= "'".self::myAddSlashes($valueitem)."'";
+										}
+										$value["value"] = "($val)";
+									}
                                 break;
                                 case 'isnot':
                                     $op = "is not";
@@ -915,7 +925,10 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                                 $is_op = false;
                                 continue;
                             }
-                            if (@$value["value"] !== null) {
+                            if (@$value["value"] !== null && $op == "in") {
+                                $value1 = $value["value"];
+                                $where1.= " $colsep$col$colsep $op $value1";
+                            } elseif (@$value["value"] !== null) {
                                 $value1 = $this->myAddSlashes(@$value["value"]);
                                 $where1.= " $colsep$col$colsep $op '$value1'";
                             } elseif (@$value["col2"] !== null) {
