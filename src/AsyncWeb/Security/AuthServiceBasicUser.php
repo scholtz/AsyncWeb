@@ -8,6 +8,9 @@ class AuthServiceBasicUser implements AuthService {
     public function SERVICE_ID() {
         return $this->name;
     }
+    public function SERVICE_Group() {
+        return "Basic user authentication";
+    }
     protected static $DB_TABLE_USERS = "users";
     protected $info = array();
     protected $name = "BasicUserAuth";

@@ -20,7 +20,7 @@ class Auth {
         Auth::$CHECKING = true;
         $ret = false;
         foreach (Auth::$services as $service) {
-            if ($service->check()) {
+			if ($service->check()) {
                 $ret = true;
             }
         }
@@ -89,7 +89,7 @@ class Auth {
     public static function showControllerForm() {
         $k = Auth::checkControllers();
         if (isset(Auth::$controllers[$k])) {
-            return Auth::$controllers[$k]->form();
+            return \AsyncWeb\Text\Template::loadTemplate("Security_ControllerForm",array("Legend"=>$k,"Content"=>Auth::$controllers[$k]->form()));
         }
     }
     public static function auth(Array $data, AuthService $service) {
@@ -166,8 +166,10 @@ class Auth {
         return false;
     }
     protected static $services = array();
+    protected static $groups = array();
     public static function register(\AsyncWeb\Security\AuthService $service) {
         Auth::$services[$service->SERVICE_ID() ] = $service;
+        Auth::$groups[$service->SERVICE_Group() ][] = $service;
     }
     public static function serviceIsRegistered($id) {
         return isset(Auth::$services[$id]);
@@ -184,8 +186,13 @@ class Auth {
     }
     public static function loginForm() {
         $ret = '';
-        foreach (Auth::$services as $service) {
-            $ret.= $service->loginForm();
+        foreach (Auth::$groups as $k=>$services) {
+			$Content = "";
+			foreach($services as $service){
+				$Content .= \AsyncWeb\Text\Template::loadTemplate("Security_LoginForm",array("Legend"=>\AsyncWeb\System\Language::get($service->SERVICE_ID()),"Content"=>$service->loginForm()));
+			}
+			
+			$ret.= \AsyncWeb\Text\Template::loadTemplate("Security_LoginGroup",array("Legend"=>\AsyncWeb\System\Language::get($k),"Content"=>$Content));
         }
         if ($ret) {
             //$ret='<fieldset><legend>'.\AsyncWeb\System\Language::get("Log in using").'</legend>'.$ret.'</fieldset>';

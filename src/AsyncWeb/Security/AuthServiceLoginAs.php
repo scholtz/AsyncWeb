@@ -6,6 +6,9 @@ class AuthServiceLoginAs implements AuthService {
     public function SERVICE_ID() {
         return "\\AsyncWeb\\Security\\AuthServiceLoginAs";
     }
+    public function SERVICE_Group() {
+        return "Login as service";
+    }
     public function check(Array $data = array()) {
         if ($data) {
             return $this->checkData($data);

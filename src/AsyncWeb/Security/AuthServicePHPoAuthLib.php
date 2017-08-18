@@ -5,6 +5,9 @@ class AuthServicePHPoAuthLib implements AuthService {
     public function SERVICE_ID() {
         return $this->name;
     }
+    public function SERVICE_Group() {
+        return "oAuth Group";
+    }
     public static $TABLE_ASSOC = "users_superconnection";
     protected $services = array();
     protected $info = array();
