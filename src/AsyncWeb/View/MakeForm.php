@@ -1167,7 +1167,11 @@ class MakeForm {
             // Language::get should be used instead
             $ret = "";
             $ret = $this->filters($item, null, $safe);
-            return Language::get($ret);
+			if(is_array($ret)){
+				return $ret;
+			}else{
+				return Language::get($ret);
+			}
         }
         private function makeItemId(&$item) {
             if (!isset($item["data"]["col"])) return $this->data["uid"] . "-0";
