@@ -324,7 +324,48 @@ class Block {
             echo \AsyncWeb\Date\Timer1::show();
             echo "BLOCK __construct before init " . ($debug_iter++) . " $name $tid" . "\n";
         }
-        $this->init();
+		
+		 $show = true;
+		
+        if ($this->requiresAuthenticatedUser || $this->requiresAnyGroup || $this->requiresAllGroups) {
+			$show = false;
+            if (self::$DEBUG_TIME) {
+                echo \AsyncWeb\Date\Timer1::show();
+                echo "BLOCK __construct before init() " . $this->name . " " . $this->tid . "\n";
+            }
+            if (\AsyncWeb\Security\Auth::check()) {
+                $show = true;
+            }
+            if (self::$DEBUG_TIME) {
+                echo \AsyncWeb\Date\Timer1::show();
+                echo "BLOCK __construct before init() " . $this->name . " " . $this->tid . "\n";
+            }
+        }
+        if (self::$DEBUG_TIME) {
+            echo \AsyncWeb\Date\Timer1::show();
+            echo "BLOCK __construct before init " . ($debug_iter++) . " " . $this->name . " " . $this->tid . "\n";
+        }
+        if (is_array($this->requiresAnyGroup) && count($this->requiresAnyGroup) > 0) {
+           
+            foreach ($this->requiresAnyGroup as $group) {
+                if (\AsyncWeb\Objects\Group::is_in_group($group)) {
+                    $show = true;
+                    break;
+                }
+            }
+        }
+        if (is_array($this->requiresAllGroups) && count($this->requiresAllGroups) > 0) {
+			if($show)
+            foreach ($this->requiresAllGroups as $group) {
+                if (!\AsyncWeb\Objects\Group::is_in_group($group)) {
+                    $show = false;
+                    break;
+                }
+            }
+        }
+		if($show){
+			$this->init();
+		}
         if (self::$DEBUG_TIME) {
             echo \AsyncWeb\Date\Timer1::show();
             echo "BLOCK __construct after init " . ($debug_iter++) . " $name $tid" . "\n";
