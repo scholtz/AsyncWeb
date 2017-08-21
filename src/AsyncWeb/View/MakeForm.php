@@ -489,6 +489,13 @@ class MakeForm {
                         throw new \Exception($this->getExceptionText($item, "dataTypeException"));
                     }
                 }
+            } elseif ($data_type == "datetime-local") {
+                if (URLParser::v($name1)) {
+                    if (strtotime(URLParser::v($name1)) == - 1) {
+                        $this->item = $item;
+                        throw new \Exception($this->getExceptionText($item, "dataTypeException"));
+                    }
+                }
             } elseif ($data_type == "date_string") {
                 if (URLParser::v($name1) == - 1) {
                     $this->item = $item;
@@ -577,6 +584,9 @@ class MakeForm {
             if ($type == "date") {
                 $ret = $this->convertDate($value, false);
                 return $ret;
+            }
+            if ($type == "datetime-local") {
+                return $ret = strtotime($value);
             }
             if ($type == "date_string") {
                 return date("Y-m-d", \AsyncWeb\Date\Time::getUnix($this->convertDate($value, false)));
