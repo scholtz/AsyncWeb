@@ -151,7 +151,11 @@ class MakeApiView {
                     $format = "d.m.Y";
                     if ($info["filter"]["format"]) $format = $info["filter"]["format"];
                     $dvc = new DateDataViewCell($format);
-                } elseif (@$info["data"]["datatype"] == "date") {
+                } elseif (@$info["data"]["datatype"] == "datetime-local") {
+                    $format = "d.m.Y H:i";
+                    if ($info["filter"]["format"]) $format = $info["filter"]["format"];
+                    $dvc = new DateDataViewCell($format);
+				} elseif (@$info["data"]["datatype"] == "date") {
                     $format = "d.m.Y";
                     $dvc = new DateDataViewCell($format);
                 } elseif (@$info["data"]["fromTable"] && @$info["data"]["fromColumn"]) {
