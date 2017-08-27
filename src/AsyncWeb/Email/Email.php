@@ -170,10 +170,28 @@ class Email {
         $mes.= "--$mime_boundary$nl";
         $mes.= "Content-Type: $sendAs" . $nl;
         $mes.= "Content-Transfer-Encoding: base64" . $nl . $nl . chunk_split(base64_encode($message)) . $nl;
+		
+		foreach(self::$AttachmentToEveryEmail as $att){
+			$attachment[] = $att;
+		}
+		
+		
         foreach ($attachment as $priloha) {
             $mes.= "--$mime_boundary$nl";
             $mes.= "Content-Type: " . $priloha["content-type"] . "$nl";
-            if ($priloha["name"]) $mes.= "Content-disposition: attachment; filename=" . $priloha["name"] . $nl;
+			if(isset($priloha["cid"])){
+				$mes.= "Content-ID: <" . $priloha["cid"] . ">$nl";
+				$mes.= "X-Attachment-Id: " . $priloha["cid"] . "$nl";
+			}
+			if(isset($priloha["Content-Disposition"])){
+				$add = "";
+				if(isset($priloha["name"])){
+					$add = '; filename="'.$priloha["name"].'"';
+				}
+				$mes.= "Content-Disposition: " . $priloha["Content-Disposition"] . $add . "$nl";
+			}else{
+				if ($priloha["name"]) $mes.= "Content-disposition: attachment; filename=" . $priloha["name"] . $nl;
+			}
             $mes.= "Content-Transfer-Encoding: base64$nl$nl";
             $mes.= chunk_split(base64_encode($priloha["data"])) . $nl;
         }
@@ -189,6 +207,9 @@ class Email {
             DB::insert("emails", array("to" => $emailwname, "subject" => $subject, "message" => $message, "from" => $fromwname, "result" => false), array("cols" => array("message" => array("type" => "text"))));
             return false;
         }
+		
+		
+		
         if ($sign) {
             $boddy.= "--$mime_boundary--$nl";
             $boddy = $headers . $nl . $mes;
