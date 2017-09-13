@@ -323,7 +323,7 @@ class MysqlServer extends \AsyncWeb\DB\DBServer {
         $updateNeeded = false;
         if ($row[$do] > 0) $data[$do] = $row[$do];
         foreach ($data as $key => $value) {
-            if ($data[$key] || is_bool($data[$key])) { //ak sa aktualizuje hodnota ktora nie je null, false alebo "0", tak nepouzivaj kontrolu datovych typov
+            if ($data[$key] || is_bool($data[$key]) || is_int($data[$key])) { //ak sa aktualizuje hodnota ktora nie je null, false alebo "0", tak nepouzivaj kontrolu datovych typov
                 if ((!array_key_exists($key, $data) || !array_key_exists($key, $row)) || ($data[$key] != $row[$key])) {
                     if ($key != "od" && $key != "do") {
                         //if($data[$key] !== $row[$key]){echo "idem zaktualizovat $key\n";}
