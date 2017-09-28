@@ -1,6 +1,6 @@
 <?php
 namespace AsyncWeb\CLI\Command;
-class CollectPhrases implements \AsyncWeb\CLI\Command {
+class CollectPhrases implements \AsyncWeb\CLI\ICommand {
     public static $DEBUG = false;
     protected function traverse($dir) {
         if (CollectPhrases::$DEBUG) echo $dir . "\n";
@@ -47,7 +47,7 @@ class CollectPhrases implements \AsyncWeb\CLI\Command {
                         continue;
                     }
                     $key = substr($f, $pos, $end - $pos);
-                    var_dump($key);
+                    
                     $pos = $end;
                     $ret[$key][$file] = \AsyncWeb\System\Language::get($key, \AsyncWeb\System\Language::$DEFAULT_LANGUAGE);
                 }
@@ -119,6 +119,6 @@ class CollectPhrases implements \AsyncWeb\CLI\Command {
         echo \AsyncWeb\System\Language::get("File has been successfully saved: %file%", array("%file%" => $output)) . "\n";
     }
     public function help() {
-        echo "Usage: php bin/cli.php CollectPhrases [--dir=DIR] [--rewrite=1] --output=out.csv\n";
+        echo "Usage: php bin/Command.php CollectPhrases [--dir=DIR] [--rewrite=1] --output=out.csv\n";
     }
 }

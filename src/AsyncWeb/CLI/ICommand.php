@@ -1,6 +1,6 @@
 <?php
 namespace AsyncWeb\CLI;
-interface Command {
+interface ICommand {
     public function execute();
     public function help();
 }

@@ -106,6 +106,20 @@ class SetupSettings {
                         $file.= "\AsyncWeb\DB\MysqliServer::\$PASS='" . $dbpass . "';\n";
                         $file.= "\AsyncWeb\DB\MysqliServer::\$DB='" . $dbdb . "';\n";
                     break;
+                    case "oracle":
+                        $file.= "#DB setup\n";
+                        try {
+                            $db = new \AsyncWeb\DB\Oracle11gServer(false, $dbserver, $dbuser, $dbpass, $dbdb);
+                        }
+                        catch(\Exception $exc) {
+                            $err.= $exc->getMessage() . "<br/>\n";
+                        }
+                        $file.= "\AsyncWeb\DB\DB::\$DB_TYPE='\AsyncWeb\DB\Oracle11gServer';\n";
+                        $file.= "\AsyncWeb\DB\Oracle11gServer::\$SERVER='" . $dbserver . "';\n";
+                        $file.= "\AsyncWeb\DB\Oracle11gServer::\$LOGIN='" . $dbuser . "';\n";
+                        $file.= "\AsyncWeb\DB\Oracle11gServer::\$PASS='" . $dbpass . "';\n";
+                        $file.= "\AsyncWeb\DB\Oracle11gServer::\$DB='" . $dbdb . "';\n";
+                    break;
                     case "0":
                     break;
                     default:
