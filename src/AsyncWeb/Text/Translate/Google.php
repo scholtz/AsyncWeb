@@ -19,16 +19,25 @@ class Google implements \AsyncWeb\Text\TranslatorInterface {
         if (!$appid) throw new Exception("Unable to translate because you did not set the APP ID for google translator. Please see your Google Developer Console.");
 		
 		if(!class_exists("\\Google\\Cloud\\Translate\\TranslateClient")){
-			var_dump("a");exit;
 			throw new \Exception("google translate client is not installed. Please run composer require google/cloud-translate");
 		}
 		$translate = new \Google\Cloud\Translate\TranslateClient(["projectId" => Google::$APP_ID]);
 		try{
 			$translation = $translate->translate($text, [
 				'source' => $from,
-				'target' => $to
+				'target' => $to,
 			]);
-			return $translation['text'];
+			$ret = $translation['text'];
+			
+			for($i = 1;$i < 10; $i++){
+				if(strpos($text,"%$i") !== false){
+					$ret = str_replace("% $i","%$i",$ret);
+				}
+			}
+			/**/
+			
+			DB::u($this->CACHE_TABLE, $id2, array("from" => $from, "to" => $to, "text" => $text, "translation" => $ret, "json" => json_encode($translation)));
+			return $ret;
 		}catch(\Exception $exc){
 			throw $exc;
 		}
