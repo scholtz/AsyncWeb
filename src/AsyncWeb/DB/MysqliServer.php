@@ -875,6 +875,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                             if (@$value["op"]) switch ($value["op"]) {
                                 case 'is':
                                     $op = "is";
+								break;
                                 case 'in':
                                     $op = "in";
 									if(is_array($value["value"])){
