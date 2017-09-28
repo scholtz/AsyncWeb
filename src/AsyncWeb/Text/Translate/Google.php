@@ -17,11 +17,21 @@ class Google implements \AsyncWeb\Text\TranslatorInterface {
         if (Google::$APP_ID) $appid = Google::$APP_ID;
         if ($this->CUSTOM_APP_ID) $appid = $this->CUSTOM_APP_ID;
         if (!$appid) throw new Exception("Unable to translate because you did not set the APP ID for google translator. Please see your Google Developer Console.");
-        $page = Page::get($path = "https://www.googleapis.com/language/translate/v2?q=" . rawurlencode($text) . "&target=" . $to . "&source=" . $from . "&fields=translations%2FtranslatedText&key=" . rawurlencode($appid), false, false);
-        $json = json_decode($page, true);
-        $ret = @$json["data"]["translations"][0]["translatedText"];
-        $r = DB::u($this->CACHE_TABLE, $id2, array("from" => $from, "to" => $to, "text" => $text, "translation" => $ret, "json" => $page));
-        return $ret;
+		
+		if(!class_exists("\\Google\\Cloud\\Translate\\TranslateClient")){
+			var_dump("a");exit;
+			throw new \Exception("google translate client is not installed. Please run composer require google/cloud-translate");
+		}
+		$translate = new \Google\Cloud\Translate\TranslateClient(["projectId" => Google::$APP_ID]);
+		try{
+			$translation = $translate->translate($text, [
+				'source' => $from,
+				'target' => $to
+			]);
+			return $translation['text'];
+		}catch(\Exception $exc){
+			throw $exc;
+		}
     }
 	public static $instance = null;
 	public static function Instance(){
