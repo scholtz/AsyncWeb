@@ -11,7 +11,17 @@ class Google implements \AsyncWeb\Text\TranslatorInterface {
         $id2 = md5($k = "G:$from-$to-$text");
         if ($usecache) {
             $row = DB::gr($this->CACHE_TABLE, $id2);
-            if ($row && $row["translation"]) return $row["translation"];
+            if ($row && $row["translation"]) {
+				$ret =  $row["translation"];
+				
+				for($i = 1;$i < 10; $i++){
+					if(strpos($text,"%$i") !== false){
+						$ret = str_replace("% $i"," %$i",$ret);
+					}
+				}
+
+				return $ret;
+			}
         }
         $appid = false;
         if (Google::$APP_ID) $appid = Google::$APP_ID;
@@ -28,12 +38,14 @@ class Google implements \AsyncWeb\Text\TranslatorInterface {
 				'target' => $to,
 			]);
 			$ret = $translation['text'];
+			$ret = html_entity_decode($ret);
 			
 			for($i = 1;$i < 10; $i++){
 				if(strpos($text,"%$i") !== false){
-					$ret = str_replace("% $i","%$i",$ret);
+					$ret = str_replace("% $i"," %$i",$ret);
 				}
 			}
+			
 			/**/
 			
 			DB::u($this->CACHE_TABLE, $id2, array("from" => $from, "to" => $to, "text" => $text, "translation" => $ret, "json" => json_encode($translation)));

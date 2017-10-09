@@ -40,12 +40,17 @@ class AuthServicePHPoAuthLib implements AuthService {
             } else {
                 if ($class == "Google") {
                     $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-google"></i></div>';
-                }
+                }else
+                if ($class == "Linkedin") {
+                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-linkedin"></i></div>';
+                }else
                 if ($class == "Vkontakte") {
                     $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-vk"></i></div>';
-                }
+                }else
                 if ($class == "Azure" || $class == "Microsoft") {
                     $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-windows"></i></div>';
+                }else{
+                    $text = '<div style="border:1px solid gray; width:60px;height:60px;display:inline-block;margin:5px; vertical-align:middle;text-align:center;font-size:43px;" title="Login with ' . $class . '"><i style="" class="fa fa-'.strtolower($class).'"></i></div>';
                 }
             }
             $ret.= "<a href='$url'>" . $text . "</a>";
