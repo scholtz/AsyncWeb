@@ -1538,11 +1538,6 @@ class MakeForm {
 				if(isset($row[$col])){
 					$colValue = $row[$col];
 				}
-                if ($form_submitted) $colValue = URLParser::v($name);
-                if ($in = $this->inWhere($col)) {
-                    $colValue = $in["value"];
-                    $item["editable"] = false;
-                }
                 if (!isset($item["BT_SIZE"])) $item["BT_SIZE"] = $this->BT_SIZE;
                 if (!isset($item["BT_WIDTH_OF_LABEL"])) $item["BT_WIDTH_OF_LABEL"] = $this->BT_WIDTH_OF_LABEL;
                 if (!isset($item["BT_WIDTH_9"])) $item["BT_WIDTH_9"] = 12 - 1 - $this->BT_WIDTH_OF_LABEL;
@@ -1556,6 +1551,20 @@ class MakeForm {
                     }
                     $item["FormItemInstance"] = new self::$ItemsMap[$item["form"]["type"]]($item, $this->data);
                 }
+				
+                if ($form_submitted){
+					$colValue = URLParser::v($name);
+				}else{
+					if ($colValue && $item["FormItemInstance"]->IsDictionary()) {
+						$colValue = \AsyncWeb\System\Language::get($colValue);
+					}
+				}
+                if ($in = $this->inWhere($col)) {
+                    $colValue = $in["value"];
+                    $item["editable"] = false;
+                }
+
+				
                 $ret.= $item["FormItemInstance"]->UpdateForm($colValue);
                 switch ($item["form"]["type"]) {
                     case 'submit':
