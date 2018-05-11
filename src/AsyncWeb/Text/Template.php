@@ -9,22 +9,20 @@ namespace AsyncWeb\Text;
 use AsyncWeb\IO\File;
 class Template {
     public static function exists($name) {
-        $path = \AsyncWeb\Frontend\Block::$TEMPLATES_PATH;
-        $path = rtrim($path, "/");
-        $path = $path . "/" . $file;
-        $fullpath = File::exists($path, $dbg);
         try {
-            return \AsyncWeb\Frontend\Block::exists($name);
+            if($ret = \AsyncWeb\Frontend\Block::exists($name)){
+                return $ret;
+            }
         }
         catch(\Exception $exc) {
         }
-        if (!$fullpath) {
-            $file = "../templates/emailtemplate.html";
-        }
-        if (!($fullpath = File::exists($file))) {
-            return false;
-        }
-        return $fullpath;
+
+        $path = \AsyncWeb\Frontend\Block::$TEMPLATES_PATH;
+        $path = rtrim($path, "/");
+        $path = $path . "/" . $name;
+        $fullpath = File::exists($path, $dbg);
+        if($fullpath) return $fullpath;
+        return File::exists("../templates/emailtemplate.html");
     }
     public static function loadTemplate($name, array $data, $engine = false, $dbg = false) {
         $path = self::exists($name);
