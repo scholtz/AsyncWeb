@@ -47,6 +47,10 @@ class DB {
         DB::connect();
         return DB::$connection->query($query, $link, $params);
     }
+    public static function free($res) {
+        DB::connect();
+        return DB::$connection->free($res);
+    }
     public static function fetch_assoc($res) {
         DB::connect();
         return DB::$connection->fetch_assoc($res);
