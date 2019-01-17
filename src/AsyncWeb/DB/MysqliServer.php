@@ -354,11 +354,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
             //}
             
         }
-		//var_Dump($table);
-		if($table == "entsog_interconnections"){
-			var_dump("a");exit;
-		}
-        $cols = "";
+	    $cols = "";
         $rows = "";
         if (is_array($id)) {
             if (!@$row[$id2] && $id && @$id[$id2]) $row[$id2] = $id[$id2];
