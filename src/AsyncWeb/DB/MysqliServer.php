@@ -144,7 +144,9 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
         if ($link == null) $link = $this->link;
         $this->lastquery = $query;
         if ($this->logqueries) $start = microtime(true);
-        $ret = @mysqli_query($link, $query);
+		//echo "$query\n";
+        $ret = mysqli_query($link, $query);
+		//echo mysqli_num_rows($ret)."\n";
         $this->afrows = @mysqli_affected_rows($link);
         if ($this->logqueries) {
             if (!file_exists($logdir = dirname($this->logfile))) mkdir($logdir, 0777, true);
@@ -352,6 +354,10 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
             //}
             
         }
+		//var_Dump($table);
+		if($table == "entsog_interconnections"){
+			var_dump("a");exit;
+		}
         $cols = "";
         $rows = "";
         if (is_array($id)) {
@@ -363,6 +369,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
         if (!$row) $updateNeeded = true;
         if (!$updateNeeded) return true;
         $row2 = $this->gr($table, $where);
+        if(!$row2) $row2 = [];
         if (isset($config["tracktable"])) {
             foreach ($row as $col => $val) {
                 if ($col == "od") continue;
@@ -875,7 +882,6 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                             if (@$value["op"]) switch ($value["op"]) {
                                 case 'is':
                                     $op = "is";
-								break;
                                 case 'in':
                                     $op = "in";
 									if(is_array($value["value"])){
@@ -1032,8 +1038,9 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                 $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
             }
             $info = $this->getInfo("DB::get");
-            $ret = $this->query($q = "select $info $qdistinct$qcols from $t where ($add $add1) $qgroupby $qhaving $ord $limit");
+			$ret = $this->query($q = "select $info $qdistinct$qcols from $t where ($add $add1) $qgroupby $qhaving $ord $limit");
             //file_put_contents("mysql.txt",$q."\n",FILE_APPEND);
+			
             return $ret;
         }
         private function checkIndex($table, $filter = array(), $order = array(), $od = "od", $do = "do") {
