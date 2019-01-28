@@ -344,6 +344,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                 if ((!array_key_exists($key, $data) || !array_key_exists($key, $row)) || ($data[$key] !== $row[$key])) {
                     if ($key != "od" && $key != "do") {
                         //if($data[$key] !== $row[$key]){echo "idem zaktualizovat $key ".var_export($data[$key],true)."!=".var_export($row[$key],true)."\n";}
+			if($data[$key] === "" && $row[$key] === "0") continue;//if data from database is returned as int value, and we are putting empty string to it, it means that we want that default int value in place, so do not do any update
                         $updateNeeded = true;
                     }
                 }
