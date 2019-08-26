@@ -172,9 +172,13 @@ class URLParser {
         }
         return $ret;
     }
+    public static $CONVERT_HTML_BEFORE_DBINSERT = true;
     public static function v($name) {
         $data = URLParser::parse();
         if (!isset($data["var"][$name])) {
+            if(!self::$CONVERT_HTML_BEFORE_DBINSERT){
+                return $_REQUEST[$name];
+            }
             /**
              Converts all input to htmlspecialchars. in DB all input should be converted (f.e. " &quot;
              it is prevention against XSS
