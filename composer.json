@@ -3,7 +3,7 @@
   , "description": "PHP WebSocket frontend and server libraries"
   , "keywords": ["AsyncWeb","Asynchonous web","WebSockets", "Server", "Ratchet", "Sockets", "Frontend"]
   , "homepage": "https://github.com/scholtz/AsyncWeb/"
-  , "license": "GNU GPL 2"
+  , "license": "GPL-3.0-or-later"
   , "version": "2.0.5-stable"
   , "authors": [
         {
