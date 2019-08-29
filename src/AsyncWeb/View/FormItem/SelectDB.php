@@ -60,6 +60,7 @@ class SelectDB extends \AsyncWeb\View\FormItem\NullableValue {
         $reto = "";
         $sel = false;
         foreach ($options as $k => $v) {
+            $option=array();
             $k = "" . $k;
             $option["OptionID"] = $k;
             if ($SubmittedValue == $k) {
