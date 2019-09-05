@@ -8,6 +8,8 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
     public $from = "info";
     protected $token = null;
     protected $callbacks = array();
+	public $interval = 30;
+
     public function __construct($token) {
         $this->token = trim($token);
     }
@@ -130,7 +132,7 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
             }
             $sendtoall = false;
             if ($email) {
-                $email = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><div style="font-size:130%; color: navy; font-weight:bold;">Gimmick.In: Nové prevody na úète</div><div style="font-size: smaller; color:#999999;">Zostatok: ' . $total . ' EUR</div>' . $email . "<br/><div>Tento email je urceny vyhradne pre Samuela Zuba. Ak ste ho dostali omylom, vymazte ho a upozornite ho!!.</div><div>" . $this->user . " :: " . $this->account . "</div>";
+                $email = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><div style="font-size:130%; color: navy; font-weight:bold;">Gimmick.In: NovÃ© prevody na ÃºÃ¨te</div><div style="font-size: smaller; color:#999999;">Zostatok: ' . $total . ' EUR</div>' . $email . "<br/><div>Tento email je urceny vyhradne pre Samuela Zuba. Ak ste ho dostali omylom, vymazte ho a upozornite ho!!.</div><div>" . $this->user . " :: " . $this->account . "</div>";
                 if ($this->emails) {
                     foreach ($this->emails as $to) {
                         \AsyncWeb\Email\Email::send($to, "Bankovy prevod", $email, $this->from, array(), "text/html; charset=UTF-8");
@@ -149,7 +151,7 @@ class Processor implements \AsyncWeb\Bank\Statement\ProcessorInterface {
         return true;
     }
     private function getXMLStatement() {
-        $from = date("Y-m-d", time() - 3600 * 24 * 30);
+        $from = date("Y-m-d", time() - 3600 * 24 * $this->interval);
         $to = date("Y-m-d");
         $token = $this->token;
         $page = "https://www.fio.cz/ib_api/rest/periods/$token/$from/$to/transactions.xml";
