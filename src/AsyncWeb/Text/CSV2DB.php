@@ -1,5 +1,7 @@
 <?php
 namespace AsyncWeb\Text;
+use AsyncWeb\DB\DB;
+use AsyncWeb\Text\Texts;
 
 class CSV2DB{
     
