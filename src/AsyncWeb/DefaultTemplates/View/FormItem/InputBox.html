@@ -23,7 +23,7 @@
 {{/Prepend}}
 		{{#MaxFileSize}}<input type="hidden" name="MAX_FILE_SIZE" value="{{.}}" />{{/MaxFileSize}}
 		<input 
-			onchange="document.getElementById('{{ID}}_CHANGED').checked=true"
+			onchange="document.getElementById('{{Name}}_CHANGED').checked=true"
 			id="{{ID}}"
 			class="{{#MFType}}{{.}}{{/MFType}}{{^MFType}}MFInput{{/MFType}} form-control{{#AddClass}} {{.}}{{/AddClass}}" 
 			{{#Type}} type="{{.}}"{{/Type}}
