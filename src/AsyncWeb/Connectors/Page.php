@@ -4,11 +4,75 @@ use AsyncWeb\DB\DB;
 use AsyncWeb\Date\Time;
 use AsyncWeb\Connectors\MyCurl;
 use AsyncWeb\Cache\Cache;
+use AsyncWeb\Text\Texts;
 class Page {
     public static $debug = false;
     public static $cookieFile = "cookies.txt";
     public static $ua = "Mozilla/5.0 (Windows; U; Windows NT 5.1; sk; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)";
     public static $info = null;
+    /**
+        If $path has not been yet downloaded or if etag validation does not match the data, then execute download and store to $table
+        
+        Returns true, if file has been just downloaded, false if etag validation succeed
+    */
+    public static function downloadWithEtag($path,$table){
+
+        $oldrow = DB::qbr($table,["where"=>["id2"=>md5($path)],"cols"=>["headers"]]);
+        $oldheaders = [];
+        if($oldrow && $oldrow["headers"]){
+            foreach(explode("\n",$oldrow["headers"]) as $row){
+                if(($pos=strpos($row,":")) !== false){
+                    $oldheaders[Texts::clear(substr($row,0,$pos))] = trim(substr($row,$pos+1));
+                }
+            }
+        }
+
+        if(isset($oldheaders["etag"])){
+            $headers = [];
+            $headersstr = Page::get($path,"","1",[
+                CURLOPT_RETURNTRANSFER=>true,
+                CURLOPT_NOBODY=>true,
+                CURLOPT_FILETIME=>true,
+                CURLOPT_HEADER=>true,
+                CURLOPT_ENCODING=>"gzip"
+                ]);
+                
+            foreach(explode("\n",$headersstr) as $row){
+                if(($pos=strpos($row,":")) !== false){
+                    $headers[Texts::clear(substr($row,0,$pos))] = trim(substr($row,$pos+1));
+                }
+            }
+        }
+        
+        if(!isset($oldheaders["etag"]) || $oldheaders["etag"] != $headers["etag"]){
+            //echo "New etag for $path: ".$headers["etag"]."\n";
+            
+            //echo "downloading..";
+            $text = Page::get($path,"","1",[
+                CURLOPT_FILETIME=>true,
+                CURLOPT_HEADER=>true,
+                CURLOPT_ENCODING=>"gzip"
+            ]);
+            //echo " done ".date("c")."\n";
+            $headers = "";
+            MyCurl::divideHeaders($text,$headers,true);
+            Page::save($path,$text,$table,$headers,Page::$info);
+            return true;
+        }else{
+            //echo "$path has not been changed\n";
+            return false;
+        }
+        
+    }
+    public static function headers2array($headersstr){
+        $headers = [];
+        foreach(explode("\n",$headersstr) as $row){
+            if(($pos=strpos($row,":")) !== false){
+                $headers[Texts::clear(substr($row,0,$pos))] = trim(substr($row,$pos+1));
+            }
+        }
+        return $headers;
+    }
     public static function get($page, $post = "", $showHeaders = "1", $curlparams = array()) {
         $n = 1;
         $i = 0;
