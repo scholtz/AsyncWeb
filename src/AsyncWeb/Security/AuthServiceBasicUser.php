@@ -31,29 +31,29 @@ class AuthServiceBasicUser implements AuthService {
 		<div class="row">
 		<div class="col-md-6">
 		<div class="row">
-		<div class="col-md-offset-3 col-md-9"><h4>Basic authentication</h4></div>
+		<div class="col-md-offset-3 col-md-9"><h4>'.Language::get("Basic authentication").'</h4></div>
 		<div class="col-md-12">
 		<input type="hidden" id="BasicUserAuthHash" name="BasicUserAuthHash" value="' . \AsyncWeb\Storage\Session::set("__BasicUserAuthHash__", $authcode) . '">
 		<form action="' . $_SERVER["REQUEST_URI"] . '" class="form-horizontal" method="post" id="BasicUserAuthForm" onsubmit="AUTH_heslo.value=sha256(sha256(\'OFiapci@ifp##!Q-\'+sha256(AUTH_heslo.value)) + BasicUserAuthHash.value);hashing.value=\'SHA256\'; return true;">
 		<input type="hidden" id="__AUTHENTICATE__" name="__AUTHENTICATE__" value="1">
 		<input type="hidden" id="hashing" name="hashing" value="none">
 			<div class="form-group row">
-			  <label for="uname9" class="col-md-3 control-label">User Name</label>
+			  <label for="uname9" class="col-md-3 control-label">'.Language::get("User Name").'</label>
 			  <div class="col-md-9">
-				<input type="text" class="form-control" name="uname9" id="uname9" placeholder="Your user name">
+				<input type="text" class="form-control" name="uname9" id="uname9" placeholder="'.Language::get("Your user name").'">
 			  </div>
 			</div>
 			
 			<div class="form-group row">
-			  <label for="AUTH_heslo" class="col-md-3 control-label">Password</label>
+			  <label for="AUTH_heslo" class="col-md-3 control-label">'.Language::get("Password").'</label>
 			  <div class="col-md-9">
-				<input type="password" class="form-control" name="AUTH_heslo" id="AUTH_heslo" placeholder="Your password">
+				<input type="password" class="form-control" name="AUTH_heslo" id="AUTH_heslo" placeholder="'.Language::get("Your password").'">
 			  </div>
 			</div>
 			 
 			<div class="form-group row">
 			  <div class="col-md-offset-3 col-md-9">
-				<input id="AW__LOGIN_BTN" type="submit" class="btn btn-primary" value="Log in">
+				<input id="AW__LOGIN_BTN" type="submit" class="btn btn-primary" value="'.Language::get("Log in").'">
 			  </div>
 			</div>
 			
@@ -70,7 +70,7 @@ class AuthServiceBasicUser implements AuthService {
 		</div>
 		<div class="col-md-6"> 
 		<div class="row">
-		<div class="col-md-offset-4 col-md-8"><h4>Registration</h4></div>
+		<div class="col-md-offset-4 col-md-8"><h4>' . Language::get("Registration") . '</h4></div>
 		<div class="col-md-12">
 		 {{{Form_BasicAuthRegistration}}}
 		</div>
