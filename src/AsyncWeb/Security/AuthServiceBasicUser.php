@@ -94,11 +94,13 @@ class AuthServiceBasicUser implements AuthService {
             if (URLParser::v("hashing") == "none") {
                 $hash = $row["password"];
                 $tocheck = hash('sha256', $row["cohash"] . hash('sha256', URLParser::v("AUTH_heslo")));
+                $tocheck4 = hash('sha256', $row["cohash"] . $tocheck);
             } else {
                 $hash = hash('sha256', $row["password"] . $authcode);
                 $tocheck = URLParser::v("AUTH_heslo");
+                $tocheck4 = hash('sha256', $row["cohash"] . $tocheck);
             }
-            if ($hash == $tocheck) {
+            if ($hash == $tocheck || $hash == $tocheck4) {
                 Auth::auth(array("userid" => $row["id2"]), $this);
                 \AsyncWeb\HTTP\Header::s("reload", array("__AUTHENTICATE__" => ""));
                 exit;
