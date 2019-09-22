@@ -15,7 +15,7 @@ class Page {
         
         Returns true, if file has been just downloaded, false if etag validation succeed
     */
-    public static function downloadWithEtag($path,$table){
+    public static function downloadWithEtag($path,$table, $largeFileName = false){
 
         $oldrow = DB::qbr($table,["where"=>["id2"=>md5($path)],"cols"=>["headers"]]);
         $oldheaders = [];
@@ -56,6 +56,10 @@ class Page {
             //echo " done ".date("c")."\n";
             $headers = "";
             MyCurl::divideHeaders($text,$headers,true);
+            if($largeFileName && strlen($text) >= 100000000){
+                file_put_contents($largeFileName,$text);
+                $text = "file://$largeFileName";
+            }
             Page::save($path,$text,$table,$headers,Page::$info);
             return true;
         }else{
@@ -198,6 +202,11 @@ class Page {
         if ($returnMD5) $col = "md5";
         $row = DB::gr($table, array("id2" => $id2), array(), array($col => $col));
         if (!$row) return null;
+        
+        if(strpos($row[$col],"file://") === 0){
+            return file_get_contents(substr($row[$col],7));
+        }
+        
         if (!$returnMD5) return gzuncompress($row[$col]);
         return $row[$col];
     }
