@@ -62,6 +62,7 @@ class CSV2DB{
                 $update[$c] = $v;
             }
             DB::u($table,$id,$update,$config);
+            \AsyncWeb\System\CPU\LoadBalancer::get()->wait();
         
         }
         
