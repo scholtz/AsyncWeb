@@ -947,386 +947,385 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                             $where1.= " $colsep$col$colsep='$value'";
                         }
                         $is_op = false;
-                    }
-                }
-            } else {
-                $value = $this->myAddSlashes($where);
-                $where1 = " id2 = '$value'";
-            }
-            $add = $where1;
-            $od = $this->myAddSlashes($od);
-            $do = $this->myAddSlashes($do);
-            $id2 = $this->myAddSlashes($id2);
-            $limit = "";
-            if ($offset !== null && $count !== null) {
-                $offset = $this->myAddSlashes($offset);
-                $count = $this->myAddSlashes($count);
-                $offset++;
-                $offset--;
-                $count++;
-                $count--;
-                $limit = " limit $offset,$count";
-            }
-            $ord = "";
-            if ($order) {
-                foreach ($order as $k => $data) {
-                    if (is_array($data)) {
-                        if ($ord) $ord.= ", ";
-                        $ord.= "`" . $data["col"] . "` " . @$data["type"];
-                    } else {
-                        if ($ord) $ord.= ", ";
-                        $ord.= "`" . $k . "` " . $data;
-                    }
-                }
-                $ord = " order by " . $ord . "";
-            }
-            $add1 = "";
-            if ($fast) {
-                if ($use_do || $forceoddo) {
-                    $add1 = "and (`$do` = 0)";
-                }
-            } else {
-                if ($use_do || $forceoddo) {
-                    $add1 = "and (`$do` <= 0 or `$do` > '$time')";
-                }
-                if ($use_od || $forceoddo) {
-                    $add1 = "and `$od` <= '$time'" . $add1;
                 }
             }
-            $qcols = "";
-            if (!is_array($cols)) {
-                $cols = array($cols);
-            }
-            foreach ($cols as $name => $col) {
-                if ($qcols) $qcols.= ",";
-                if (is_array($col)) {
-                    \AsyncWeb\Storage\Log::log("HCK", "ARRAY in SQL:table=$table:where=" . print_r($where, true) . ":name=$name:col=" . print_r($col, true), ML__TOP_SEC_LEVEL);
-                    echo "Security issue has been raised! Action has been logged.";
-                    exit;
-                }
-                $colsep = "`";
-                if (strpos($col, " ")) $colsep = "";
-                if (strpos($col, "`")) $colsep = "";
-                if (strpos($col, "(")) $colsep = "";
-                $qcols.= "$colsep$col$colsep";
-                if (!is_numeric($name)) {
-                    $qcols.= " as `$name`";
-                }
-            }
-            if (!$qcols) $qcols = "*";
-            $qgroupby = "";
-            if (!$groupby) $groupby = array();
-            foreach ($groupby as $g) {
-                if ($qgroupby) $qgroupby.= ",";
-                $qgroupby.= $g;
-            }
-            if ($qgroupby) $qgroupby = "group by ($qgroupby)";
-            $qhaving = "";
-            if (!$having) $having = array();
-            foreach ($having as $g) {
-                if ($qhaving) $qhaving.= ",";
-                $qhaving.= $g;
-            }
-            if ($qhaving) $qhaving = "having ($qgroupby)";
-            $qdistinct = "";
-            if ($distinct) $qdistinct = "distinct ";
-            $table = str_replace("`", "", $table);
-            $t = "`" . self::myAddSlashes($table) . "`";
-            if (strpos($table, ".") !== false) {
-                $ta = explode(".", $table);
-                $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
-            }
-            $info = $this->getInfo("DB::get");
-			$ret = $this->query($q = "select $info $qdistinct$qcols from $t where ($add $add1) $qgroupby $qhaving $ord $limit");
-            //file_put_contents("mysql.txt",$q."\n",FILE_APPEND);
-			
-            return $ret;
+        } else {
+            $value = $this->myAddSlashes($where);
+            $where1 = " id2 = '$value'";
         }
-        private function checkIndex($table, $filter = array(), $order = array(), $od = "od", $do = "do") {
-            $ret = false;
-            if (class_exists("DB")) {
-                if (!DB::$repairIndexesImmidiently && !$this->checkIndexes) return true;
-            } else {
-                if (!$this->checkIndexes) return true;
-            }
-            if (!count($filter)) return true;
-            if (!$filter) return true;
-            if ($table == "ZZZMysqlUpdate") return true;
-            if ($table == "ZZZMysqlTablesKeys") return true;
-            $keys = array();
-            if ($filter && is_array($filter)) foreach ($filter as $key => $val) {
-                if (is_array($val)) {
-                    if (isset($val['col'])) {
-                        $keys[$val["col"]] = $val["col"];
-                    }
+        $add = $where1;
+        $od = $this->myAddSlashes($od);
+        $do = $this->myAddSlashes($do);
+        $id2 = $this->myAddSlashes($id2);
+        $limit = "";
+        if ($offset !== null && $count !== null) {
+            $offset = $this->myAddSlashes($offset);
+            $count = $this->myAddSlashes($count);
+            $offset++;
+            $offset--;
+            $count++;
+            $count--;
+            $limit = " limit $offset,$count";
+        }
+        $ord = "";
+        if ($order) {
+            foreach ($order as $k => $data) {
+                if (is_array($data)) {
+                    if ($ord) $ord.= ", ";
+                    $ord.= "`" . $data["col"] . "` " . @$data["type"];
                 } else {
-                    $keys[$key] = $key;
+                    if ($ord) $ord.= ", ";
+                    $ord.= "`" . $k . "` " . $data;
                 }
             }
-            if ($order && is_array($order)) foreach ($order as $key => $val) {
-                if (!is_numeric($key)) {
-                    $keys[$key] = $key;
-                }
+            $ord = " order by " . $ord . "";
+        }
+        $add1 = "";
+        if ($fast) {
+            if ($use_do || $forceoddo) {
+                $add1 = "and (`$do` = 0)";
             }
-            $schema = $this->defaultDB;
-            if (class_exists("DB")) {
-                if (DB::$repairIndexesImmidiently) {
-                    $table = str_replace("`", "", $table);
-                    $t = "`" . self::myAddSlashes($table) . "`";
-                    if (strpos($table, ".") !== false) {
-                        $ta = explode(".", $table);
-                        $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
-                    }
-                    $res = $this->query("SHOW INDEX FROM $t");
-                    $indexes = array();
-                    while ($row = $this->fetch_assoc($res)) {
-                        $indexes[$row["Key_name"]][$row["Column_name"]] = $row["Column_name"];
-                    }
-                    foreach ($keys as $key) {
-                        if (!isset($indexes[$key])) {
-                            $this->query("ALTER TABLE $table ADD INDEX ( `$key` )");
-                        }
-                    }
-                    return;
-                }
+        } else {
+            if ($use_do || $forceoddo) {
+                $add1 = "and (`$do` <= 0 or `$do` > '$time')";
             }
-            foreach ($keys as $key) {
-                $id2 = md5($schema . " - " . $table . " - " . $key);
-                $this->u("ZZZMysqlTablesKeys", $id2, array("schema" => $schema, "table" => $table, "key" => $key));
-            }
-            return true;
-            foreach ($filter as $key => $val) {
-                if (strpos($val, "(")) {
-                    unset($filter[$key]);
-                    continue;
-                }
-                $ar = @explode("*", $val);
-                if (count($ar) > 1) {
-                    foreach ($ar as $v) {
-                        $filter[$v] = $v;
-                    }
-                }
-                $ar = @explode("/", $val);
-                if (count($ar) > 1) {
-                    foreach ($ar as $v) {
-                        $filter[$v] = $v;
-                    }
-                }
-            }
-            $table = str_replace("`", "", $table);
-            $t = "`" . self::myAddSlashes($table) . "`";
-            if (strpos($table, ".") !== false) {
-                $ta = explode(".", $table);
-                $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
-            }
-            $res = $this->query("SHOW INDEX FROM $t");
-            $indexes = array();
-            while ($row = $this->fetch_assoc($res)) {
-                $indexes[$row["Key_name"]][$row["Column_name"]] = $row["Column_name"];
-            }
-            foreach ($indexes as $index) {
-                $min = true;
-                foreach ($index as $key => $value) {
-                    if (!array_key_exists($value, $filter)) {
-                        $min = false;
-                    }
-                }
-                if ($min) {
-                    $max = true;
-                    foreach ($filter as $key => $value) {
-                        if (is_numeric($key)) continue;
-                        if (@!array_key_exists($key, $index)) {
-                            $max = false;
-                        }
-                    }
-                }
-                if ($min && $max) {
-                    $ret = true;
-                }
-            }
-            // nenasiel sa index
-            $id2 = md5($table);
-            $cols = array();
-            foreach ($filter as $key => $value) {
-                if (is_numeric($key)) continue;
-                $id2 = md5($id2 . $key);
-                $cols[] = $key;
-            }
-            $config = array();
-            $config["cols"]["data"]["type"] = "text";
-            if (!$ret) {
-                if ($cols) {
-                    $ret1 = $this->u("ZZZMysqlUpdate", $id2, array("id2" => $id2, "table" => $table, "data" => serialize($cols)), $config);
-                }
-            }
-            //if($err = $this->error()){ echo $err;exit;}
-            $hasOd = false;
-            foreach ($filter as $key => $value) {
-                if ($key == $od) $hasOd = true;
-            }
-            $hasDo = false;
-            foreach ($filter as $key => $value) {
-                if ($key == $do) $hasDo = true;
-            }
-            if (!$hasOd) {
-                $filter[$od] = $od;
-            }
-            if (!$hasDo) {
-                $filter[$do] = $do;
-            }
-            if (!$hasOd || !$hasDo) {
-                $ret = $ret && $this->checkIndex($table, $filter);
+            if ($use_od || $forceoddo) {
+                $add1 = "and `$od` <= '$time'" . $add1;
             }
         }
-        public function cleanUp($table, $type = "deleted", $time = 0) {
-            $table = $tab = str_replace("`", "", $table);
-            $t = "`" . self::myAddSlashes($table) . "`";
-            if (strpos($table, ".") !== false) {
-                $ta = explode(".", $table);
-                $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
-                $tab = $ta[1];
-            }
-            $res = DB::query("show create table $t");
-            $row = DB::f($res);
-            $q = $row["Create Table"];
-            $q = str_replace("CREATE TABLE `", "CREATE TABLE IF NOT EXISTS `", $q);
-            $q = str_replace("`$tab", "`${tab}_archive", $q);
-            $q = str_replace("`id` int(11) NOT NULL AUTO_INCREMENT,", "`id0` int(11) NOT NULL AUTO_INCREMENT,\n`id` int(11) NOT NULL,", $q);
-            $q = str_replace("PRIMARY KEY (`id`),", "PRIMARY KEY (`id0`),KEY (`id`),", $q);
-            DB::query($q);
+        $qcols = "";
+        if (!is_array($cols)) {
+            $cols = array($cols);
         }
-        public function clean($db, $dba, $table, $type = "archiveObsolete", $t = 1, $optimize = true, $where = array(), $dbg = false, $table2 = false) {
-            $dbg = $dbg || $this->debug || self::$debug2;
-            if ($dbg) echo "self::clean()/" . date("c") . "\n";
-            $colrow = "";
-            $db = $this->myAddSlashes($db);
-            $dba = $this->myAddSlashes($dba);
-            if (!$table2) $table2 = $table;
-            $table = $this->myAddSlashes($table);
-            $table2 = $this->myAddSlashes($table2);
-            $res = $this->query("select * from information_schema.columns where table_schema = '" . $db . "' and table_name = '" . $table . "'");
-            $in = array();
-            $inarchive = array();
-            if (!$res || !$this->num_rows($res)) {
-                if ($dbg) echo "nemam tabulku\n";
-                return false;
+        foreach ($cols as $name => $col) {
+            if ($qcols) $qcols.= ",";
+            if (is_array($col)) {
+                \AsyncWeb\Storage\Log::log("HCK", "ARRAY in SQL:table=$table:where=" . print_r($where, true) . ":name=$name:col=" . print_r($col, true), ML__TOP_SEC_LEVEL);
+                echo "Security issue has been raised! Action has been logged.";
+                exit;
             }
-            $types = array();
-            while ($row = $this->f($res)) {
-                if ($row["COLUMN_NAME"] == "id") continue;
-                $col = $in[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
-                $types[$row["COLUMN_NAME"]] = $row["COLUMN_TYPE"];
-                if ($colrow) $colrow.= ",";
-                $colrow.= "`$col`";
+            $colsep = "`";
+            if (strpos($col, " ")) $colsep = "";
+            if (strpos($col, "`")) $colsep = "";
+            if (strpos($col, "(")) $colsep = "";
+            $qcols.= "$colsep$col$colsep";
+            if (!is_numeric($name)) {
+                $qcols.= " as `$name`";
             }
-            $res = $this->query("select * from information_schema.columns where table_schema = '" . $dba . "' and table_name = '" . $table2 . "'");
-            $inarchive = array();
-            $notin = array();
-            if (!$res || !$this->num_rows($res)) {
-                // vytvor tabulku
-                $row = $this->f($this->query("show create table $db.$table"));
-                $q = $row["Create Table"];
-                $q = str_replace("CREATE TABLE `$table", "CREATE TABLE $dba.`$table2", $q);
-                DB::query($q);
-                if ($e = $this->error()) {
-                    if ($dbg) echo "unable to create table in archive\n";
-                    return false;
+        }
+        if (!$qcols) $qcols = "*";
+        $qgroupby = "";
+        if (!$groupby) $groupby = array();
+        foreach ($groupby as $g) {
+            if ($qgroupby) $qgroupby.= ",";
+            $qgroupby.= $g;
+        }
+        if ($qgroupby) $qgroupby = "group by ($qgroupby)";
+        $qhaving = "";
+        if (!$having) $having = array();
+        foreach ($having as $g) {
+            if ($qhaving) $qhaving.= ",";
+            $qhaving.= $g;
+        }
+        if ($qhaving) $qhaving = "having ($qgroupby)";
+        $qdistinct = "";
+        if ($distinct) $qdistinct = "distinct ";
+        $table = str_replace("`", "", $table);
+        $t = "`" . self::myAddSlashes($table) . "`";
+        if (strpos($table, ".") !== false) {
+            $ta = explode(".", $table);
+            $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
+        }
+        $info = $this->getInfo("DB::get");
+        $ret = $this->query($q = "select $info $qdistinct$qcols from $t where ($add $add1) $qgroupby $qhaving $ord $limit");
+        //file_put_contents("mysql.txt",$q."\n",FILE_APPEND);
+        
+        return $ret;
+    }
+    private function checkIndex($table, $filter = array(), $order = array(), $od = "od", $do = "do") {
+        $ret = false;
+        if (class_exists("DB")) {
+            if (!DB::$repairIndexesImmidiently && !$this->checkIndexes) return true;
+        } else {
+            if (!$this->checkIndexes) return true;
+        }
+        if (!count($filter)) return true;
+        if (!$filter) return true;
+        if ($table == "ZZZMysqlUpdate") return true;
+        if ($table == "ZZZMysqlTablesKeys") return true;
+        $keys = array();
+        if ($filter && is_array($filter)) foreach ($filter as $key => $val) {
+            if (is_array($val)) {
+                if (isset($val['col'])) {
+                    $keys[$val["col"]] = $val["col"];
+                }
+            } else {
+                $keys[$key] = $key;
+            }
+        }
+        if ($order && is_array($order)) foreach ($order as $key => $val) {
+            if (!is_numeric($key)) {
+                $keys[$key] = $key;
+            }
+        }
+        $schema = $this->defaultDB;
+        if (class_exists("DB")) {
+            if (DB::$repairIndexesImmidiently) {
+                $table = str_replace("`", "", $table);
+                $t = "`" . self::myAddSlashes($table) . "`";
+                if (strpos($table, ".") !== false) {
+                    $ta = explode(".", $table);
+                    $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
+                }
+                $res = $this->query("SHOW INDEX FROM $t");
+                $indexes = array();
+                while ($row = $this->fetch_assoc($res)) {
+                    $indexes[$row["Key_name"]][$row["Column_name"]] = $row["Column_name"];
+                }
+                foreach ($keys as $key) {
+                    if (!isset($indexes[$key])) {
+                        $this->query("ALTER TABLE $table ADD INDEX ( `$key` )");
+                    }
+                }
+                return;
+            }
+        }
+        foreach ($keys as $key) {
+            $id2 = md5($schema . " - " . $table . " - " . $key);
+            $this->u("ZZZMysqlTablesKeys", $id2, array("schema" => $schema, "table" => $table, "key" => $key));
+        }
+        return true;
+        foreach ($filter as $key => $val) {
+            if (strpos($val, "(")) {
+                unset($filter[$key]);
+                continue;
+            }
+            $ar = @explode("*", $val);
+            if (count($ar) > 1) {
+                foreach ($ar as $v) {
+                    $filter[$v] = $v;
                 }
             }
-            while ($row = $this->f($res)) {
-                if ($row["COLUMN_NAME"] == "id") continue;
-                $inarchive[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
-            }
-            if ($dbg) var_dump($in);
-            foreach ($in as $col) {
-                if (!$inarchive[$col]) {
-                    $type = $types[$col];
-                    if ($dbg) echo "upravujem strukturu tabulky archivu pre stlpec $col: " . date("c") . "\n";
-                    $q = "ALTER TABLE `$dba`.`$table2` ADD `$col` $type NULL DEFAULT NULL AFTER `id2` ;";
-                    if ($dbg) echo $q . "\n";
-                    DB::query($q);
-                    if ($dbg) echo "done: " . date("c") . "\n";
-                    //if($dbg) echo "table structures does not match! ($col) \n";return false;
-                    
+            $ar = @explode("/", $val);
+            if (count($ar) > 1) {
+                foreach ($ar as $v) {
+                    $filter[$v] = $v;
                 }
             }
-            if ($e = $this->error()) {
-                if ($dbg) echo "$q:$e\n";
-                return false;
-            }
-            $t = Time::get(Time::get() - Time::span($t));
-            $addLog2Lock = ", log2 write";
-            if ($table == "log2") {
-                $addLog2Lock = "";
-            }
-            if ($this->checkIndexes) {
-                $addLog2Lock.= ", ZZZMysqlTablesKeys write";
-            }
-            $this->query($q = "LOCK TABLES `$dba`.`$table2` write,`$db`.`$table` write $addLog2Lock");
-            if ($e = $this->error()) {
-                $this->query("UNLOCK TABLES");
-                if ($dbg) echo "$q:$e\n";
-                return false;
-            }
-            $mywhere = "";
-            switch ($type) {
-                case "archiveObsolete":
-                    $mywhere = " where (do > 0 and do < $t)";
-                break;
-                case "archiveOld":
-                    $mywhere = " where (od < $t)";
-                break;
-                case "archiveAll":
-                    $mywhere = "";
-                break;
-                case "checkStructure":
-                    $mywhere = " and 1=2";
-                break;
-            }
-            foreach ($where as $col => $value) {
-                if (is_array($value)) {
-                    if ($dbg) echo "array in where\n";
-                    return false;
-                }
-                if ($mywhere) {
-                    $mywhere.= " and ";
-                } else {
-                    $mywhere = " where ";
-                }
-                $value = $this->myAddSlashes($value);
-                $mywhere.= "`$col`='$value'";
-            }
-            $q = "insert into `$dba`.`$table2` ($colrow) select $colrow from $db.$table $mywhere";
-            if ($dbg) {
-                echo $q . "\n";
-                //exit;
-                
-            }
-            $res = $this->query($q);
-            if ($e = $this->error()) {
-                $this->query("UNLOCK TABLES");
-                if ($dbg) echo "$q:$e\n";
-                return false;
-            }
-            $rows = $this->affected_rows($res);
-            if ($dbg) {
-                echo "moved rows: $rows\n";
-            }
-            if ($rows) {
-                $this->query($q = "delete from $db.$table $mywhere");
-                if ($e = $this->error()) {
-                    $this->query("UNLOCK TABLES");
-                    if ($dbg) echo "$q:$e\n";
-                    return false;
+        }
+        $table = str_replace("`", "", $table);
+        $t = "`" . self::myAddSlashes($table) . "`";
+        if (strpos($table, ".") !== false) {
+            $ta = explode(".", $table);
+            $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
+        }
+        $res = $this->query("SHOW INDEX FROM $t");
+        $indexes = array();
+        while ($row = $this->fetch_assoc($res)) {
+            $indexes[$row["Key_name"]][$row["Column_name"]] = $row["Column_name"];
+        }
+        foreach ($indexes as $index) {
+            $min = true;
+            foreach ($index as $key => $value) {
+                if (!array_key_exists($value, $filter)) {
+                    $min = false;
                 }
             }
-            $this->query($q = "UNLOCK TABLES");
-            if ($optimize) $this->query($q = "OPTIMIZE TABLE `$table`");
-            if ($e = $this->error()) {
-                if ($dbg) echo "$q:$e\n";
-                return false;
+            if ($min) {
+                $max = true;
+                foreach ($filter as $key => $value) {
+                    if (is_numeric($key)) continue;
+                    if (@!array_key_exists($key, $index)) {
+                        $max = false;
+                    }
+                }
             }
-            return true;
+            if ($min && $max) {
+                $ret = true;
+            }
+        }
+        // nenasiel sa index
+        $id2 = md5($table);
+        $cols = array();
+        foreach ($filter as $key => $value) {
+            if (is_numeric($key)) continue;
+            $id2 = md5($id2 . $key);
+            $cols[] = $key;
+        }
+        $config = array();
+        $config["cols"]["data"]["type"] = "text";
+        if (!$ret) {
+            if ($cols) {
+                $ret1 = $this->u("ZZZMysqlUpdate", $id2, array("id2" => $id2, "table" => $table, "data" => serialize($cols)), $config);
+            }
+        }
+        //if($err = $this->error()){ echo $err;exit;}
+        $hasOd = false;
+        foreach ($filter as $key => $value) {
+            if ($key == $od) $hasOd = true;
+        }
+        $hasDo = false;
+        foreach ($filter as $key => $value) {
+            if ($key == $do) $hasDo = true;
+        }
+        if (!$hasOd) {
+            $filter[$od] = $od;
+        }
+        if (!$hasDo) {
+            $filter[$do] = $do;
+        }
+        if (!$hasOd || !$hasDo) {
+            $ret = $ret && $this->checkIndex($table, $filter);
         }
     }
-    
+    public function cleanUp($table, $type = "deleted", $time = 0) {
+        $table = $tab = str_replace("`", "", $table);
+        $t = "`" . self::myAddSlashes($table) . "`";
+        if (strpos($table, ".") !== false) {
+            $ta = explode(".", $table);
+            $t = "`" . self::myAddSlashes($ta[0]) . "`.`" . self::myAddSlashes($ta[1]) . "`";
+            $tab = $ta[1];
+        }
+        $res = DB::query("show create table $t");
+        $row = DB::f($res);
+        $q = $row["Create Table"];
+        $q = str_replace("CREATE TABLE `", "CREATE TABLE IF NOT EXISTS `", $q);
+        $q = str_replace("`$tab", "`${tab}_archive", $q);
+        $q = str_replace("`id` int(11) NOT NULL AUTO_INCREMENT,", "`id0` int(11) NOT NULL AUTO_INCREMENT,\n`id` int(11) NOT NULL,", $q);
+        $q = str_replace("PRIMARY KEY (`id`),", "PRIMARY KEY (`id0`),KEY (`id`),", $q);
+        DB::query($q);
+    }
+    public function clean($db, $dba, $table, $type = "archiveObsolete", $t = 1, $optimize = true, $where = array(), $dbg = false, $table2 = false) {
+        $dbg = $dbg || $this->debug || self::$debug2;
+        if ($dbg) echo "self::clean()/" . date("c") . "\n";
+        $colrow = "";
+        $db = $this->myAddSlashes($db);
+        $dba = $this->myAddSlashes($dba);
+        if (!$table2) $table2 = $table;
+        $table = $this->myAddSlashes($table);
+        $table2 = $this->myAddSlashes($table2);
+        $res = $this->query("select * from information_schema.columns where table_schema = '" . $db . "' and table_name = '" . $table . "'");
+        $in = array();
+        $inarchive = array();
+        if (!$res || !$this->num_rows($res)) {
+            if ($dbg) echo "nemam tabulku\n";
+            return false;
+        }
+        $types = array();
+        while ($row = $this->f($res)) {
+            if ($row["COLUMN_NAME"] == "id") continue;
+            $col = $in[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
+            $types[$row["COLUMN_NAME"]] = $row["COLUMN_TYPE"];
+            if ($colrow) $colrow.= ",";
+            $colrow.= "`$col`";
+        }
+        $res = $this->query("select * from information_schema.columns where table_schema = '" . $dba . "' and table_name = '" . $table2 . "'");
+        $inarchive = array();
+        $notin = array();
+        if (!$res || !$this->num_rows($res)) {
+            // vytvor tabulku
+            $row = $this->f($this->query("show create table $db.$table"));
+            $q = $row["Create Table"];
+            $q = str_replace("CREATE TABLE `$table", "CREATE TABLE $dba.`$table2", $q);
+            DB::query($q);
+            if ($e = $this->error()) {
+                if ($dbg) echo "unable to create table in archive\n";
+                return false;
+            }
+        }
+        while ($row = $this->f($res)) {
+            if ($row["COLUMN_NAME"] == "id") continue;
+            $inarchive[$row["COLUMN_NAME"]] = $row["COLUMN_NAME"];
+        }
+        if ($dbg) var_dump($in);
+        foreach ($in as $col) {
+            if (!$inarchive[$col]) {
+                $type = $types[$col];
+                if ($dbg) echo "upravujem strukturu tabulky archivu pre stlpec $col: " . date("c") . "\n";
+                $q = "ALTER TABLE `$dba`.`$table2` ADD `$col` $type NULL DEFAULT NULL AFTER `id2` ;";
+                if ($dbg) echo $q . "\n";
+                DB::query($q);
+                if ($dbg) echo "done: " . date("c") . "\n";
+                //if($dbg) echo "table structures does not match! ($col) \n";return false;
+                
+            }
+        }
+        if ($e = $this->error()) {
+            if ($dbg) echo "$q:$e\n";
+            return false;
+        }
+        $t = Time::get(Time::get() - Time::span($t));
+        $addLog2Lock = ", log2 write";
+        if ($table == "log2") {
+            $addLog2Lock = "";
+        }
+        if ($this->checkIndexes) {
+            $addLog2Lock.= ", ZZZMysqlTablesKeys write";
+        }
+        $this->query($q = "LOCK TABLES `$dba`.`$table2` write,`$db`.`$table` write $addLog2Lock");
+        if ($e = $this->error()) {
+            $this->query("UNLOCK TABLES");
+            if ($dbg) echo "$q:$e\n";
+            return false;
+        }
+        $mywhere = "";
+        switch ($type) {
+            case "archiveObsolete":
+                $mywhere = " where (do > 0 and do < $t)";
+            break;
+            case "archiveOld":
+                $mywhere = " where (od < $t)";
+            break;
+            case "archiveAll":
+                $mywhere = "";
+            break;
+            case "checkStructure":
+                $mywhere = " and 1=2";
+            break;
+        }
+        foreach ($where as $col => $value) {
+            if (is_array($value)) {
+                if ($dbg) echo "array in where\n";
+                return false;
+            }
+            if ($mywhere) {
+                $mywhere.= " and ";
+            } else {
+                $mywhere = " where ";
+            }
+            $value = $this->myAddSlashes($value);
+            $mywhere.= "`$col`='$value'";
+        }
+        $q = "insert into `$dba`.`$table2` ($colrow) select $colrow from $db.$table $mywhere";
+        if ($dbg) {
+            echo $q . "\n";
+            //exit;
+            
+        }
+        $res = $this->query($q);
+        if ($e = $this->error()) {
+            $this->query("UNLOCK TABLES");
+            if ($dbg) echo "$q:$e\n";
+            return false;
+        }
+        $rows = $this->affected_rows($res);
+        if ($dbg) {
+            echo "moved rows: $rows\n";
+        }
+        if ($rows) {
+            $this->query($q = "delete from $db.$table $mywhere");
+            if ($e = $this->error()) {
+                $this->query("UNLOCK TABLES");
+                if ($dbg) echo "$q:$e\n";
+                return false;
+            }
+        }
+        $this->query($q = "UNLOCK TABLES");
+        if ($optimize) $this->query($q = "OPTIMIZE TABLE `$table`");
+        if ($e = $this->error()) {
+            if ($dbg) echo "$q:$e\n";
+            return false;
+        }
+        return true;
+    }
+}
