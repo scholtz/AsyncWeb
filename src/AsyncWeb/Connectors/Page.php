@@ -15,7 +15,7 @@ class Page {
         
         Returns true, if file has been just downloaded, false if etag validation succeed
     */
-    public static function downloadWithEtag($path,$table, $largeFileName = false){
+    public static function downloadWithEtag($path,$table, $largeFileName = false, $showText = false, $append = []){
 
         $oldrow = DB::qbr($table,["where"=>["id2"=>md5($path)],"cols"=>["headers"]]);
         $oldheaders = [];
@@ -45,25 +45,35 @@ class Page {
         }
         
         if(!isset($oldheaders["etag"]) || $oldheaders["etag"] != $headers["etag"]){
-            //echo "New etag for $path: ".$headers["etag"]."\n";
+            if($showText) echo "New etag for $path: ".$headers["etag"]."\n";
             
-            //echo "downloading..";
+            if($showText) echo "downloading..";
             $text = Page::get($path,"","1",[
                 CURLOPT_FILETIME=>true,
                 CURLOPT_HEADER=>true,
                 CURLOPT_ENCODING=>"gzip"
             ]);
-            //echo " done ".date("c")."\n";
+            $err = Page::$lastCurlError;
+            if($showText) echo date("c")." saving ";
             $headers = "";
             MyCurl::divideHeaders($text,$headers,true);
             if($largeFileName && strlen($text) >= 100000000){
+                if($showText) echo " to $largeFileName ";
                 file_put_contents($largeFileName,$text);
                 $text = "file://$largeFileName";
+            }else{
+                if($showText) echo " to DB ";
             }
-            Page::save($path,$text,$table,$headers,Page::$info);
+            Page::save($path,$text,$table,$headers,Page::$info, $err, $append);
+            if($showText) echo " saved ".date("c")."\n";
             return true;
         }else{
-            //echo "$path has not been changed\n";
+            
+            if($showText) echo "$path has not been changed\n";
+            
+            $id2 = md5($path);
+            $col = "checked";
+            $row = DB::u($table, array("id2" => $id2), [$col=>time()], false,false,false);
             return false;
         }
         
@@ -122,7 +132,9 @@ class Page {
             }
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
             if ($curlparams) curl_setopt_array($ch, $curlparams);
+            Page::$lastCurlError = false;
             $output = curl_exec($ch);
+            Page::$lastCurlError = curl_error($ch);
             if (Page::$debug) echo (curl_error($ch));
             $n = curl_errno($ch);
             Page::$info = curl_getinfo($ch);
@@ -137,8 +149,10 @@ class Page {
         }
         return $output;
     }
+    public static $lastCurlError = false;
+    
     private static $usedtables = array();
-    public static function save($path, &$data, $table, $headers = "", $chinfo = false, $err = "") {
+    public static function save($path, &$data, $table, $headers = "", $chinfo = false, $err = "", $append = []) {
         $id2 = md5($path);
         $oldmd5 = Page::load($path, $table, true);
         $config = array("cols" => array("data" => array("type" => "blob", "binary" => true), "headers" => array("type" => "text"), "info" => array("type" => "text"),));
@@ -148,6 +162,12 @@ class Page {
         Page::$usedtables[$table] = true;
         }/**/
         $save = array();
+        if($append){
+            foreach($append as $k=>$v){
+                $save[$k] = $v;
+            }
+        }
+        
         if ($headers === true) {
             $head = "";
             MyCurl::divideHeaders($data, $head);
@@ -165,7 +185,6 @@ class Page {
         } else {
             $save["md5"] = $md5;
             $save["web"] = $path;
-            $save["data"] = gzcompress($data, 9);
             $save["time"] = Time::get();
             if ($chinfo) {
                 $info = "";
@@ -184,6 +203,7 @@ class Page {
                 $save["err"] = $err;
             }
             $save["checked"] = Time::get();
+            $save["data"] = gzcompress($data, 9);
             DB::u($table, md5($path), $save, $config);
             echo DB::error();
         }
