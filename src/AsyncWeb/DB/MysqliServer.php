@@ -40,6 +40,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
     public $logqueries = false;
     public $logfile = "";
     protected $tryrepair = true;
+    public static $DEFAULT_DATA_TYPE = "varchar(250)";
     public function __construct($defaultsettings = true, $server = "", $login = "", $pass = "", $db = "") {
         if ($defaultsettings) {
             if (self::$instance) return self::$instance;
@@ -585,7 +586,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                                 break;
                             default:
                                 $lastcol = $this->getLastUsedColumn($table);
-                                DB::query($q = "ALTER TABLE $t ADD `$col` VARCHAR( 250 ) NULL DEFAULT $default AFTER `$lastcol` ;");
+                                DB::query($q = "ALTER TABLE $t ADD `$col` ".MysqliServer::$DEFAULT_DATA_TYPE." NULL DEFAULT $default AFTER `$lastcol` ;");
                             }
                         }
                     }
@@ -696,7 +697,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                     if (!$l) $l = 250;
                     $new_table_q.= "`$key` varchar($l) NULL DEFAULT $default,";
                 } else {
-                    $new_table_q.= "`$key` varchar(250) collate utf8_unicode_ci NULL DEFAULT $default,\n";
+                    $new_table_q.= "`$key` ".MysqliServer::$DEFAULT_DATA_TYPE." collate utf8_unicode_ci NULL DEFAULT $default,\n";
                 }
             }
             if (isset($config["cols"]) && is_array($config["cols"])) foreach ($config["cols"] as $key => $colConfig) {
@@ -729,7 +730,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                     if (!$l) $l = 250;
                     $new_table_q.= "`$key` varchar($l) NULL DEFAULT $default,";
                 } else {
-                    $new_table_q.= "`$key` varchar(250) collate utf8_unicode_ci NULL DEFAULT $default,\n";
+                    $new_table_q.= "`$key` ".MysqliServer::$DEFAULT_DATA_TYPE." collate utf8_unicode_ci NULL DEFAULT $default,\n";
                 }
             }
             $new_table_q.= "
@@ -743,14 +744,14 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                 $new_table_q.= "KEY `$key` (`$key`),";
             }
             $new_table_q.= "
-  KEY `id2` (`id2`),
+  KEY `id2` (`id2`) USING HASH,
   KEY `od` (`od`),
   KEY `do` (`do`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1000000 ;
 ";
             $this->query($new_table_q);
             //foreach ($data as $key=>$value){
-            //	$this->query("ALTER TABLE `$table` ADD `$key` VARCHAR( 250 ) NULL After `id2` ");
+            //	$this->query("ALTER TABLE `$table` ADD `$key` ".MysqliServer::$DEFAULT_DATA_TYPE." NULL After `id2` ");
             //}
             if($err = $this->error()){
 				throw new \Exception($err);
@@ -794,7 +795,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
         $e = $this->error();
         if ($e && $this->tryrepair && !isset($this->spracovanet[$t1])) {
             foreach ($data as $key => $value) {
-                $this->query($q = "ALTER TABLE $t ADD `$key` VARCHAR( 250 ) NULL After `id2` ");
+                $this->query($q = "ALTER TABLE $t ADD `$key` ".MysqliServer::$DEFAULT_DATA_TYPE." NULL After `id2` ");
             }
         }
         $this->spracovanet[$t1] = true;
