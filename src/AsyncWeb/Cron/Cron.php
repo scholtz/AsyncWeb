@@ -38,6 +38,7 @@ class Cron {
                 
             } else {
                 $res = exec("ps -Ao pid | grep " . $d[0]);
+                $res = $res == $d[0];
             }
             if (!$res) {
                 $ret = 4;
