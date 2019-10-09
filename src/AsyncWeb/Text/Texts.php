@@ -138,6 +138,12 @@ class Texts {
         if (substr($url, -1) == "-") $url = substr($url, 0, -1);
         return $url;
     }
+    /**
+     * This function splits sentence or long text to array of words. It is utf safe.
+     */
+    public static function splitStringToWordsArray($text){
+        return preg_split("/[^\w]*([\s]+[^\w]*|$)/u", $text, -1, PREG_SPLIT_NO_EMPTY);
+    }
 }
 /**
  * Class for transliterating Cyrillic to Latinic
