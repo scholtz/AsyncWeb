@@ -216,4 +216,3 @@ CREATE TABLE IF NOT EXISTS `cron_status` (
         }
     }
 }
-?>
