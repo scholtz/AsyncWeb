@@ -222,13 +222,17 @@ class Page {
         if ($returnMD5) $col = "md5";
         $row = DB::gr($table, array("id2" => $id2), array(), array($col => $col));
         if (!$row) return null;
-        
+        if ($returnMD5) return $row[$col];
         if(strpos($row[$col],"file://") === 0){
-            return file_get_contents(substr($row[$col],7));
+            $content = file_get_contents(substr($row[$col],7));
+        }else{
+            $content = gzuncompress($row[$col]);
         }
         
-        if (!$returnMD5) return gzuncompress($row[$col]);
-        return $row[$col];
+        if(substr($content,0,5) == "HTTP/"){
+            MyCurl::divideHeaders($content,$headers,true);
+        }
+        return $content;
     }
     /**
      * Resolve a URL relative to a base path. This happens to work with POSIX
