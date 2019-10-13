@@ -38,19 +38,30 @@ class LoadBalancer {
         $inst = $this;
     }
     
-    public function wait(){
+    public function wait($showmsg = false){
         $load = sys_getloadavg();
-        if($inst->tier1Delay && $load[0] > $this->tier1){
-            usleep($inst->tier1Delay);
+        if($showmsg){
+            echo ($load[0]/$this->cores)." ".$this->tier1Delay." ".$this->tier1;
         }
-        if($inst->tier2Delay && $load[0] > $this->tier2){
-            usleep($inst->tier2Delay);
+        if($this->tier1Delay && $load[0]/$this->cores > $this->tier1){
+            if($showmsg){
+                echo "1";
+            }
+            usleep($this->tier1Delay);
+        }
+        if($this->tier2Delay && $load[0]/$this->cores > $this->tier2){
+            if($showmsg){
+                echo "2";
+            }
+            usleep($this->tier2Delay);
         }
 
-        while($inst->tier3Delay && $load[0] > $this->tier3){
-            usleep($inst->tier3Delay);
+        while($this->tier3Delay && $load[0]/$this->cores > $this->tier3){
+            if($showmsg){
+                echo "3";
+            }
+            usleep($this->tier3Delay);
             $load = sys_getloadavg();
         }
     }
-    
 }
