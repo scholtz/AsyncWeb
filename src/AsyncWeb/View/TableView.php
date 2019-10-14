@@ -841,7 +841,8 @@ class BasicDataViewCell implements DataViewCell {
                     } elseif (\AsyncWeb\IO\File::exists("img/icons/folder.png")) {
                         $icon = '<img src="/img/icons/folder.png" width="20" height="20" alt=" ' . \AsyncWeb\System\Language::get("Menu") . '" title="' . \AsyncWeb\System\Language::get("Table menu") . '" />';
                     }
-                    $ret.= '&nbsp;<a id="menuboxicon_' . $parentid . '" onclick="' . TSAjax::makeTableMenuScript($this) . '"  class="clickable float_right button" title="' . \AsyncWeb\System\Language::get("Table menu") . '">' . $icon . '</a>' . '<div class="menuboxbox collapse" id="menuboxbox_' . $parentid . '">' . TSAjax::makeTableMenuScript($this, true) . '</div>';
+                    $ret.= '&nbsp;<div class="dropdown"><button type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" title='.\AsyncWeb\System\Language::get("Table menu").'>'. $icon . '</button>' . '<div class="dropdown-menu dropdown-menu-right">' . TSAjax::makeTableMenuScript($this, true) . '</div></div>';
+//                    $ret.= '&nbsp;<a id="menuboxicon_' . $parentid . '" onclick="' . TSAjax::makeTableMenuScript($this) . '"  class="clickable float_right button" title="' . \AsyncWeb\System\Language::get("Table menu") . '">' . $icon . '</a>' . '<div class="menuboxbox collapse" id="menuboxbox_' . $parentid . '">' . TSAjax::makeTableMenuScript($this, true) . '</div>';
                 }
             }
             $ret.= '</th>';
@@ -1589,7 +1590,7 @@ class BasicDataViewCell implements DataViewCell {
             $DataTableId = $THViewCell->getTableId();
             $ret = "";
             if ($showmenu) {
-                $ret.= '<div class="menubox panel panel-default"><div class="panel-body">';
+                $ret.= '<div class="menubox panel panel-default dropdown-item"><div class="panel-body">';
                 $tv = $THViewCell->getTableView();
                 $i = 0;
                 if ($tv) {
