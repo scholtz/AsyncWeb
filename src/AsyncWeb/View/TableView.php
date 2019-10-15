@@ -841,8 +841,11 @@ class BasicDataViewCell implements DataViewCell {
                     } elseif (\AsyncWeb\IO\File::exists("img/icons/folder.png")) {
                         $icon = '<img src="/img/icons/folder.png" width="20" height="20" alt=" ' . \AsyncWeb\System\Language::get("Menu") . '" title="' . \AsyncWeb\System\Language::get("Table menu") . '" />';
                     }
-                    $ret.= '&nbsp;<div class="dropdown"><button type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" title='.\AsyncWeb\System\Language::get("Table menu").'>'. $icon . '</button>' . '<div class="dropdown-menu dropdown-menu-right">' . TSAjax::makeTableMenuScript($this, true) . '</div></div>';
-//                    $ret.= '&nbsp;<a id="menuboxicon_' . $parentid . '" onclick="' . TSAjax::makeTableMenuScript($this) . '"  class="clickable float_right button" title="' . \AsyncWeb\System\Language::get("Table menu") . '">' . $icon . '</a>' . '<div class="menuboxbox collapse" id="menuboxbox_' . $parentid . '">' . TSAjax::makeTableMenuScript($this, true) . '</div>';
+                    $ret.= '&nbsp;<div class="dropdown"><button type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" title='.\AsyncWeb\System\Language::get("Table menu").'>'. $icon . '</button>' . '<div class="dropdown-menu dropdown-menu-right">
+                    ' . TSAjax::makeTableMenuScript($this, true) . '</div></div>';
+                    /*
+                        $ret.= '&nbsp;<a id="menuboxicon_' . $parentid . '" onclick="' . TSAjax::makeTableMenuScript($this) . '"  class="clickable float_right button" title="' . \AsyncWeb\System\Language::get("Table menu") . '">' . $icon . '</a>' . '<div class="menuboxbox collapse" id="menuboxbox_' . $parentid . '">' . TSAjax::makeTableMenuScript($this, true) . '</div>';
+                    */
                 }
             }
             $ret.= '</th>';
@@ -1590,7 +1593,7 @@ class BasicDataViewCell implements DataViewCell {
             $DataTableId = $THViewCell->getTableId();
             $ret = "";
             if ($showmenu) {
-                $ret.= '<div class="menubox panel panel-default dropdown-item"><div class="panel-body">';
+                $ret.= '<div class="menubox panel panel-default dropdown"><div class="panel-body">';
                 $tv = $THViewCell->getTableView();
                 $i = 0;
                 if ($tv) {
@@ -1681,7 +1684,6 @@ class BasicDataViewCell implements DataViewCell {
             $this->text = $text;
         }
         public function showMenu() {
-            $ret = '<div class="table_menu_item">';
             $id = "";
             if ($this->TableView) $id = $this->TableView->getId();
             $showIcon = false;
@@ -1690,35 +1692,29 @@ class BasicDataViewCell implements DataViewCell {
             } else {
                 if (\AsyncWeb\IO\File::exists($this->icon)) $showIcon = true;
             }
-            if ($showIcon) {
-                $ret.= '<a title="' . $this->text . '" href="' . $this->href . '">';
-                $ret.= '<img src="' . $this->icon . '" width="30" height="30" alt="" />';
-                $ret.= '</a> ';
-            }
-            $ret.= '<a title="' . $this->text . '" href="' . $this->href . '">';
+            $ret.= '<a title="' . $this->text . '" href="' . $this->href . '" class="dropdown-item">';
             if (substr($this->icon, 0, 2) == "fa ") {
                 $ret.= '<i class="' . $this->icon . '"></i>';
+            }else{
+                if ($showIcon) {
+                    $ret.= '<img src="' . $this->icon . '" width="30" height="30" alt="" />';
+                }
             }
             $ret.= $this->text;
             $ret.= '</a>';
-            $ret.= '</div>';
             return $ret;
         }
     }
     class TableMenuExportXML extends BasicTableMenuItem {
         public function showMenu() {
-            $ret = '<div class="table_menu_item">';
             $id = "";
             if ($this->TableView) $id = $this->TableView->getId();
-            $ret.= '<a title="' . \AsyncWeb\System\Language::get("Export to XML") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-xml"), "showmenubox" => "", "AJAX" => "")) . '">';
+            $ret.= '<a class="dropdown-item" title="' . \AsyncWeb\System\Language::get("Export to XML") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-xml"), "showmenubox" => "", "AJAX" => "")) . '">';
             if (\AsyncWeb\IO\File::exists("img/icons/file_download_xml.png")) {
-                $ret.= '<img src="/img/icons/file_download_xml.png" width="30" height="30" alt="XML" />';
+                $ret.= '<img src="/img/icons/file_download_xml.png" width="30" height="30" alt="XML" /> ';
             }
-            $ret.= '</a> ';
-            $ret.= '<a title="' . \AsyncWeb\System\Language::get("Export to XML") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-xml"), "showmenubox" => "", "AJAX" => "")) . '">';
             $ret.= \AsyncWeb\System\Language::get("Export to XML");
             $ret.= '</a>';
-            $ret.= '</div>';
             return $ret;
         }
         public function check() {
@@ -1766,18 +1762,15 @@ class BasicDataViewCell implements DataViewCell {
     }
     class TableMenuExportHTML extends BasicTableMenuItem {
         public function showMenu() {
-            $ret = '<div class="table_menu_item">';
             $id = "";
             if ($this->TableView) $id = $this->TableView->getId();
-            $ret.= '<a title="' . \AsyncWeb\System\Language::get("Export to HTML") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-html"), "showmenubox" => "", "AJAX" => "")) . '">';
+            $ret.= '<a class="dropdown-item" title="' . \AsyncWeb\System\Language::get("Export to HTML") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-html"), "showmenubox" => "", "AJAX" => "")) . '">';
             if (\AsyncWeb\IO\File::exists("img/icons/file_download_html.png")) {
-                $ret.= '<img src="/img/icons/file_download_html.png" width="30" height="30" alt="HTML" />';
+                $ret.= '<img src="/img/icons/file_download_html.png" width="30" height="30" alt="HTML" /> ';
             }
-            $ret.= '</a> ';
-            $ret.= '<a title="' . \AsyncWeb\System\Language::get("Export to HTML") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-html"), "showmenubox" => "", "AJAX" => "")) . '">';
+            
             $ret.= \AsyncWeb\System\Language::get("Export to HTML");
             $ret.= '</a>';
-            $ret.= '</div>';
             return $ret;
         }
         public function check() {
@@ -1839,18 +1832,14 @@ class BasicDataViewCell implements DataViewCell {
     }
     class TableMenuExportCSV extends BasicTableMenuItem {
         public function showMenu() {
-            $ret = '<div class="table_menu_item">';
             $id = "";
             if ($this->TableView) $id = $this->TableView->getId();
-            $ret.= '<a title="' . \AsyncWeb\System\Language::get("Export to Excel") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-csv"), "showmenubox" => "", "AJAX" => "")) . '">';
+            $ret.= '<a class="dropdown-item" title="' . \AsyncWeb\System\Language::get("Export to Excel") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-csv"), "showmenubox" => "", "AJAX" => "")) . '">';
             if (\AsyncWeb\IO\File::exists("img/icons/file_download_excel.png")) {
-                $ret.= '<img src="/img/icons/file_download_excel.png" width="30" height="30" alt="Excel" />';
+                $ret.= '<img src="/img/icons/file_download_excel.png" width="30" height="30" alt="Excel" /> ';
             }
-            $ret.= '</a> ';
-            $ret.= '<a title="' . \AsyncWeb\System\Language::get("Export to Excel") . '" href="' . \AsyncWeb\System\Path::make(array('DTV_export' => md5($id . "-csv"), "showmenubox" => "", "AJAX" => "")) . '">';
             $ret.= \AsyncWeb\System\Language::get("Export to Excel");
             $ret.= '</a>';
-            $ret.= '</div>';
             return $ret;
         }
         public function check() {
@@ -2302,4 +2291,3 @@ class BasicDataViewCell implements DataViewCell {
                 return $ret;
             }
         }
-        
