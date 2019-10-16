@@ -101,6 +101,9 @@ class Time {
                 $ret = @date("c", \AsyncWeb\Date\Time::getUnix($time)); //ISO 8601
                 
             }
+            if($format == "Y-m-d"){
+                $ret = substr($ret,0,10);
+            }
             return $ret;
         } else {
             if (!$time) return 0;
