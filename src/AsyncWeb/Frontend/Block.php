@@ -16,8 +16,8 @@ class Block {
     protected $clients = array();
     protected $usesparams = array();
     protected $name = "";
-    public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\" => 10001, "" => 10000);
-    public static $TEMPLATE_PATHS = array(__DIR__ . "/../DefaultTemplates" => 10001);
+    public static $BLOCKS_PATHS = array("\\AsyncWeb\\DefaultBlocks\\" => 10000, "" => 10001);
+    public static $TEMPLATE_PATHS = array(__DIR__ . "/../DefaultTemplates" => 10002);
     protected static $TEMPLATE_PATH_INITIALIZED = false;
     public function getUsesParams() {
         return $this->usesparams;
