@@ -20,13 +20,16 @@ class AuthServiceBasicUser implements AuthService {
         }
         return $this->checkAuth();
     }
+    public static $USE_AuthServiceForm = false;
     public function loginForm() {
         if (function_exists("openssl_random_pseudo_bytes")) {
             $authcode = \bin2hex(\openssl_random_pseudo_bytes(5));
         } else {
             $authcode = md5(uniqid());
         }
-        //$authcode = "41e2ca9549";
+        if(self::$USE_AuthServiceForm){
+            return "{{{Content_Auth_AuthServiceForm}}}";
+        }
         $ret = '
 		<div class="row">
 		<div class="col-md-6">
