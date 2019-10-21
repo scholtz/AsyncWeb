@@ -60,10 +60,12 @@ Password: $pass";
     }
     protected function initTemplateForm() {
         $ret = "";
+        $this->preInit();
         $form = new \AsyncWeb\View\MakeForm($this->formSettings);
         $form->BT_WIDTH_OF_LABEL = 4;
         $form->check_update();
         $ret.= $form->show($this->showType);
         $this->template = $ret;
+        $this->postInit();
     }
 }
