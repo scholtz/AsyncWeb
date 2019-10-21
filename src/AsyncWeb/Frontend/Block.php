@@ -51,10 +51,16 @@ class Block {
         $path = trim($path, "/");
         return $path;
     }
+    public static function normalizeTemplatePathWithLang($name) {
+        $ret = self::normalizeTemplatePath($name).".".\AsyncWeb\System\Language::getLang();
+        return $ret;
+    }
     public static function templateHasPriorityOverBlock($name) {
         $name = Block::normalizeName($name);
         $merged = array_merge(Block::$BLOCKS_PATHS, Block::$TEMPLATE_PATHS);
         asort($merged);
+
+
         foreach ($merged as $namespace => $t) {
             if (!$namespace) {
                 if (isset(Block::$BLOCK_PATH)) {
@@ -63,8 +69,14 @@ class Block {
                     }
                 }
                 if (isset(Block::$TEMPLATES_PATH)) {
+                    $n = Block::NormalizeTemplatePathWithLang($name);
+                    $f = Block::$TEMPLATES_PATH . "/" . $n . ".html";
+                    if ($file = \AsyncWeb\IO\File::exists($f)) {
+                        return $file;
+                    }
                     $n = Block::NormalizeTemplatePath($name);
-                    if ($file = \AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH . "/" . $n . ".html")) {
+                    $f = Block::$TEMPLATES_PATH . "/" . $n . ".html";
+                    if ($file = \AsyncWeb\IO\File::exists($f)) {
                         return $file;
                     }
                 }
@@ -75,8 +87,14 @@ class Block {
                     }
                 }
                 if (isset(Block::$TEMPLATE_PATHS[$namespace])) {
+                    $n = Block::NormalizeTemplatePathWithLang($name);
+                    $f = $namespace . "/" . $n . ".html";
+                    if ($file = \AsyncWeb\IO\File::exists($f)) {
+                        return $file;
+                    }
                     $n = Block::normalizeTemplatePath($name);
-                    if ($file = \AsyncWeb\IO\File::exists($f = $namespace . "/" . $n . ".html")) {
+                    $f = $namespace . "/" . $n . ".html";
+                    if ($file = \AsyncWeb\IO\File::exists($f)) {
                         return $file;
                     }
                 }
@@ -153,8 +171,14 @@ class Block {
 			echo "BLOCK Exists " . ($debug_iter++) . " $name $tid\n";
 		}
         foreach (Block::$TEMPLATE_PATHS as $dir => $t) {
+            $n = Block::normalizeTemplatePathWithLang($name);
+            $f = $dir . "/" . $n . ".html";
+            if ($file = \AsyncWeb\IO\File::exists($f)) {
+                return $file;
+            }
             $n = Block::normalizeTemplatePath($name);
-            if ($file = \AsyncWeb\IO\File::exists($f = $dir . "/" . $n . ".html")) {
+            $f = $dir . "/" . $n . ".html";
+            if ($file = \AsyncWeb\IO\File::exists($f)) {
                 return $file;
             }
         }
@@ -212,6 +236,7 @@ class Block {
                             }
                         } else {
                             if (class_exists($n = $namespace . $name)) {
+                
                                 $name = $n;
                                 break;
                             }
@@ -230,8 +255,10 @@ class Block {
                 if (self::$DEBUG_TIME) {
                     echo \AsyncWeb\Date\Timer1::show();
                     echo "BLOCK CREATE " . ($debug_iter++) . " $name $tid\n";
-                }
-                return new $name($name, $tid, $template);
+                }                                
+                
+                $ret = new $name($name, $tid, $template);
+                return $ret;
             }
             if (self::$DEBUG_TIME) {
                 echo \AsyncWeb\Date\Timer1::show();
@@ -258,6 +285,8 @@ class Block {
             echo "BLOCK __construct " . ($debug_iter++) . " $name $tid" . "\n";
         }
         $this->template = $template;
+        
+        
         $this->tid = $tid;
         try {
             if (self::$DEBUG_TIME) {
@@ -292,7 +321,11 @@ class Block {
         }
         if ($this->template === null) {
             foreach (Block::$TEMPLATE_PATHS as $dir => $t) {
-                if ($this->template === null && $file = \AsyncWeb\IO\File::exists($f = $dir . "/" . $n . ".html")) {
+                $fLang = realpath($dir) . "/" . $n .".".\AsyncWeb\System\Language::getLang(). ".html";
+                $f = realpath($dir) . "/" . $n . ".html";
+                if ($this->template === null && $file = \AsyncWeb\IO\File::exists($fLang)) {
+                    $this->template = file_get_contents($fLang, true);
+                } elseif ($this->template === null && $file = \AsyncWeb\IO\File::exists($f)) {
                     $this->template = file_get_contents($f, true);
                 } elseif ($this->template === null) {
                     $nparent = Block::normalizeTemplatePath(get_parent_class($this));
@@ -303,15 +336,19 @@ class Block {
                 }
             }
         }
+
         if ($this->template === null) {
             if (self::$DEBUG_TIME) {
                 echo \AsyncWeb\Date\Timer1::show();
                 echo "BLOCK __construct before template loading " . ($debug_iter++) . " $name $tid" . "\n";
             }
-            if (!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH . "/" . $n . ".html")) {
+            $f = Block::$TEMPLATES_PATH . "/" . $n . ".html";
+            
+            if (!\AsyncWeb\IO\File::exists($f)) {
                 $nparent = Block::normalizeTemplatePath(get_parent_class($this));
                 if (!\AsyncWeb\IO\File::exists($f = Block::$TEMPLATES_PATH . "/" . $nparent . ".html")) {
                     //echo "Template ".$n." not found!\n";
+                    header("HTTP/1.0 404 Not Found");
                     throw new \Exception("Template " . $n . " not found!");
                 } else {
                     $this->template = file_get_contents($f, true);
@@ -463,12 +500,7 @@ class Block {
             echo "BLOCK get " . ($debug_iter++) . " " . $this->name . " " . $this->tid . "\n";
         }
         $dataToRender = array();
-        if (isset($this->data[''])) $dataToRender = $this->data[''];
-        if (isset($this->data[$namespace])){
-            foreach($this->data[$namespace] as $k=>$v){
-                $dataToRender[$k] = $v;
-            }
-        }
+        if (isset($this->data[$namespace])) $dataToRender = $this->data[$namespace];
         if (isset(static ::$DICTIONARY[\AsyncWeb\System\Language::$DEFAULT_LANGUAGE])) {
             foreach (static ::$DICTIONARY[\AsyncWeb\System\Language::$DEFAULT_LANGUAGE] as $k => $v) {
                 $dataToRender[$k] = $v;
