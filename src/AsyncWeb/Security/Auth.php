@@ -184,19 +184,25 @@ class Auth {
     public static function controllerIsRegistered($id) {
         return isset(Auth::$controllers[$id]);
     }
+    public static $SHOW_AUTH_LEGEND = true;
     public static function loginForm() {
         $ret = '';
         foreach (Auth::$groups as $k=>$services) {
-			$Content = "";
-			foreach($services as $service){
-				$Content .= \AsyncWeb\Text\Template::loadTemplate("Security_LoginForm",array("Legend"=>\AsyncWeb\System\Language::get($service->SERVICE_ID()),"Content"=>$service->loginForm()));
-			}
-			
-			$ret.= \AsyncWeb\Text\Template::loadTemplate("Security_LoginGroup",array("Legend"=>\AsyncWeb\System\Language::get($k),"Content"=>$Content));
-        }
-        if ($ret) {
-            //$ret='<fieldset><legend>'.\AsyncWeb\System\Language::get("Log in using").'</legend>'.$ret.'</fieldset>';
-            
+            $Content = "";
+            foreach($services as $service){
+                if(self::$SHOW_AUTH_LEGEND){
+                    $legend = \AsyncWeb\System\Language::get($service->SERVICE_ID());
+                }else{
+                    $legend = "";
+                }
+                $Content .= \AsyncWeb\Text\Template::loadTemplate("Security_LoginForm",array("Legend"=>$legend,"Content"=>$service->loginForm()));
+            }
+            if(self::$SHOW_AUTH_LEGEND){
+                $legend = \AsyncWeb\System\Language::get($k);
+            }else{
+                $legend = "";
+            }
+            $ret.= \AsyncWeb\Text\Template::loadTemplate("Security_LoginGroup",array("Legend"=>$legend,"Content"=>$Content));
         }
         return $ret;
     }
