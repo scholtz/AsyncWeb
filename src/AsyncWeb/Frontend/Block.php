@@ -500,7 +500,14 @@ class Block {
             echo "BLOCK get " . ($debug_iter++) . " " . $this->name . " " . $this->tid . "\n";
         }
         $dataToRender = array();
-        if (isset($this->data[$namespace])) $dataToRender = $this->data[$namespace];
+
+        if (isset($this->data[''])) $dataToRender = $this->data[''];
+        if (isset($this->data[$namespace])){
+            foreach($this->data[$namespace] as $k=>$v){
+                $dataToRender[$k] = $v;
+            }
+        }
+        
         if (isset(static ::$DICTIONARY[\AsyncWeb\System\Language::$DEFAULT_LANGUAGE])) {
             foreach (static ::$DICTIONARY[\AsyncWeb\System\Language::$DEFAULT_LANGUAGE] as $k => $v) {
                 $dataToRender[$k] = $v;
