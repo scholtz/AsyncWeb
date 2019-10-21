@@ -12,6 +12,7 @@ class Form extends \AsyncWeb\Frontend\Block {
     }
     protected function initTemplateForm() {
         $ret = "";
+        $this->preInit();
         if ($this->type == "ApiForm") {
             $form = new \AsyncWeb\View\ApiForm($this->formSettings);
         } else {
@@ -19,7 +20,12 @@ class Form extends \AsyncWeb\Frontend\Block {
         }
         $ret.= $form->show($this->showType);
         $this->template = $ret;
+        $this->postInit();
     }
     public function init() {
+    }
+    public function preInit(){
+    }
+    public function postInit(){
     }
 }
