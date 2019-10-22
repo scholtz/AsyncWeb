@@ -228,7 +228,9 @@ class Page {
         }else{
             $content = gzuncompress($row[$col]);
         }
-        
+        if(strpos($content,"file://") === 0){
+            $content = file_get_contents(substr($content,7));
+        }
         if(substr($content,0,5) == "HTTP/"){
             MyCurl::divideHeaders($content,$headers,true);
         }
