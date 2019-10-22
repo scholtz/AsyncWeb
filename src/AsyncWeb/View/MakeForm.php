@@ -864,7 +864,8 @@ class MakeForm {
                 }
                 if (is_numeric($colname) && !isset($item["data"]["col"])) continue;
                 if (isset($item["data"]["type"])) $item["data"]["datatype"] = $item["data"]["type"];
-                if (isset($item["data"]["col"])) $colname = $item["data"]["col"];
+		$datatype = $item["data"]["datatype"];
+		if (isset($item["data"]["col"])) $colname = $item["data"]["col"];
                 $name = $colname;
                 $n = $formName . "_" . $name;
                 if (isset($item["data"]["var"])) $n = $item["data"]["var"];
