@@ -33,17 +33,33 @@ class BasicAuthRegistration extends \AsyncWeb\DefaultBlocks\Form {
         $passH = hash('sha256', $pass);
         $passH = hash('sha256', $cohash . $passH);
         DB::u("users", $row["row"]["id2"], array("login" => $login, "password" => $passH, "cohash" => $cohash, "active" => "1", "active_until" => "0"));
-        $title = "Mr.";
-        if ($row["row"]["gender"] == "f") $title = "Mrs.";
+        $pretitle = "Mr.";
+        if ($row["row"]["gender"] == "f") $pretitle = "Mrs.";
+        $title = "";
         if ($row["row"]["firstname"]) $title.= " " . $row["row"]["firstname"];
         if ($row["row"]["lastname"]) $title.= " " . $row["row"]["lastname"];
-        $email = "Dear $title 
+        
+        $email = "";
+        if(\AsyncWeb\Text\Template::exists("Email_Registration",false)){
+            $email = \AsyncWeb\Text\Template::loadTemplate("Email_Registration",[
+                "HOST"=>$_SERVER["HTTP_HOST"],
+                "Pretitle"=>$pretitle,
+                "Title"=>$title,
+                "Login"=>$login,
+                "Pass"=>$pass,
+            ]);
+        }
+
+        if(!$email){
+            $email = "Dear $pretitle$title 
 		
 Please find your credentials to " . $_SERVER["HTTP_HOST"] . " below:
 
 Username: $login
 Password: $pass";
-        if (!Email::send($row["row"]["email"], "Registration", $email)) {
+        }
+
+        if (!Email::send($row["row"]["email"], Language::get("Registration"), $email)) {
             \AsyncWeb\Text\Msg::err(Language::get("Error occured while sending the email."));
         }
         return;
