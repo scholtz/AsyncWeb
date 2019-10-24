@@ -46,7 +46,7 @@ class Template {
         return File::exists("../templates/emailtemplate.html");
     }
     public static function loadTemplate($name, array $data, $engine = false, $dbg = false,$allowBlock = true) {
-        $path = self::exists($name);
+        $path = self::exists($name,$allowBlock);
         if (!$path) {
             throw new \Exception(\AsyncWeb\System\Language::get("Template %template% not found", array("%template%" => $file)));
         }
