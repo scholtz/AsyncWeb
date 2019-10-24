@@ -101,11 +101,23 @@ class Email {
 			
 			
 			try {
-				$message = \AsyncWeb\Text\Template::loadTemplate($t="Email_".strtoupper(substr(Language::getLang(),0,2))."_".$theme, $themevariables , false, $dbg);
+
+				if(\AsyncWeb\Text\Template::exists($t = "Email_".$theme)){
+
+				}else if(\AsyncWeb\Text\Template::exists($t="Email_".strtoupper(substr(Language::getLang(),0,2))."_".$theme)){
+
+				}else{
+				    $row = DB::gr("emailstyles", array("name" => $theme));
+				    if ($row) {
+					$t = Language::get($row["text"]);
+				    }
+				}
+             
+				$message = \AsyncWeb\Text\Template::loadTemplate($t, $themevariables , false, $dbg);
 				if ($dbg) {
 					echo "THEME OK:$t\n";
 					echo strlen($message) . "\n";
-				} 
+				}
 			}
 			catch(\Exception $exc) {
 				if ($dbg) {
