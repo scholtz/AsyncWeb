@@ -2,6 +2,9 @@
 namespace AsyncWeb\IO;
 class File {
     public static function exists($file, $dbg = false) {
+        if (file_exists($file)) {
+            return $file;
+        }
         $paths = explode(PATH_SEPARATOR, get_include_path());
         foreach ($paths as $path) {
             $real = realpath($path);
