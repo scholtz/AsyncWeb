@@ -929,7 +929,7 @@ class MysqliServer extends \AsyncWeb\DB\DBServer {
                             if ($op == "null") {
                                 $where1.= "($colsep$col$colsep is null or `$col` = '')";
                                 $is_op = false;
-                                continue;
+                                break;
                             }
                             if (@$value["value"] !== null && $op == "in") {
                                 $value1 = $value["value"];
