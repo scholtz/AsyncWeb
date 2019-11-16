@@ -165,6 +165,15 @@ class Page {
         if($append){
             foreach($append as $k=>$v){
                 $save[$k] = $v;
+                if(!isset($config["keys"])){
+                    $config["keys"] = [];
+                }
+                if(!in_array($k,$config["keys"])){
+                    $config["keys"][] = $k;
+                }
+                if(is_int($v)){
+                    $config["cols"][$k]["type"] = int;
+                }
             }
         }
         
