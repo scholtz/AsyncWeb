@@ -23,6 +23,12 @@ class Texts {
     }
     public static function clear($text) {
         setlocale(LC_CTYPE, 'sk_SK.utf8');
+        
+        if(class_exists("\\Hoa\\Ustring\\Ustring")){
+            $w = new \Hoa\Ustring\Ustring($text);
+            $text = "".$w->toAscii();
+        }
+
         $text = Transliterate::convert($text);
         $url = strtolower(@iconv("utf-8", "ascii//TRANSLIT//IGNORE", $text));
         $url = str_replace('+', "_plus_", $url);
